@@ -151,8 +151,7 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
    end Convert_Lat_Long_DEG_To_North_East_M;
 
    procedure Convert_Lat_Long_DEG_To_North_East_FT
-     (
-      Latitude_DEG  : in Long_float;
+     (Latitude_DEG  : in Long_float;
       Longitude_DEG : in Long_float;
       North_FT     : out Long_float;
       East_FT      : out Long_float)
@@ -186,8 +185,7 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
    -- ///////     FROM NORTH/EAST TO LAT/LONG
 
    procedure Convert_North_East_M_To_Lat_Long_RAD
-     (
-      North_M      : in Long_float;
+     (North_M      : in Long_float;
       East_M       : in Long_float;
       Latitude_RAD  : out Long_float;
       Longitude_RAD : out Long_float)
@@ -200,8 +198,7 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
    end Convert_North_East_M_To_Lat_Long_RAD;
    
    procedure Convert_North_East_M_To_Lat_Long_DEG
-     (
-      North_M       : in  Long_float;
+     (North_M       : in  Long_float;
       East_M        : in  Long_float;
       Latitude_DEG  : out Long_float;
       Longitude_DEG : out Long_float)
@@ -218,8 +215,7 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
    end  Convert_North_East_M_To_Lat_Long_DEG;
 
    procedure Convert_North_East_FT_To_Lat_Long_RAD
-     (
-      North_FT      : in Long_float;
+     (North_FT      : in Long_float;
       East_FT       : in Long_float;
       Latitude_RAD  : out Long_float;
       Longitude_RAD : out Long_float)
@@ -256,8 +252,7 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
    -- ///////     LINEAR DISTANCES
 
    procedure Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD
-     (
-      Latitude_1_RAD    : in  Long_float;
+     (Latitude_1_RAD    : in  Long_float;
       Longitude_1_RAD   : in  Long_float;
       Latitude_2_RAD    : in  Long_float;
       Longitude_2_RAD   : in  Long_float;
@@ -289,25 +284,24 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
    end Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD;
 
    procedure Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG
-     (
-      Latitude_1_DEG    : in  Long_float;
+     (Latitude_1_DEG    : in  Long_float;
       Longitude_1_DEG   : in  Long_float;
       Latitude_2_DEG    : in  Long_float;
       Longitude_2_DEG   : in  Long_float;
       Linear_Distance_M : out Long_Float)
    is
-      Latitude_1_RAD  : Long_float;
-      Longitude_1_RAD : Long_float;
-      Latitude_2_RAD  : Long_float;
-      Longitude_2_RAD : Long_float;
+      Latitude_1_RAD  : constant Long_float := Latitude_1_DEG  * Degrees_to_Radians;
+      Longitude_1_RAD : constant Long_float := Longitude_1_DEG * Degrees_to_Radians;
+      Latitude_2_RAD  : constant Long_float := Latitude_2_DEG  * Degrees_to_Radians;
+      Longitude_2_RAD : constant Long_float := Longitude_2_DEG * Degrees_to_Radians;
    
    begin
    
       Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD(Latitude_1_RAD    => Latitude_1_RAD,
-                                                             Longitude_1_RAD   => Longitude_1_RAD ,
+                                                             Longitude_1_RAD   => Longitude_1_RAD,
                                                              Latitude_2_RAD    => Latitude_2_RAD,
                                                              Longitude_2_RAD   => Longitude_2_RAD,
-                                                             Linear_Distance_M => Linear_Distance_M)
+                                                             Linear_Distance_M => Linear_Distance_M);
    end Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG;
                                              
 

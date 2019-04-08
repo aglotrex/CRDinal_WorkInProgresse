@@ -48,7 +48,7 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       Latitude_RAD  : out Long_float;
       Longitude_RAD : out Long_float) with 
      pre => (Radius_Meridional_M > 0.0) 
-     and  (Radius_Small_Circle_Latitude_M > 0.0) ;
+     and    (Radius_Small_Circle_Latitude_M > 0.0) ;
    
    
    procedure Convert_North_East_M_To_Lat_Long_DEG
@@ -112,16 +112,15 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
    -- const Long_float m_dEccentricitySquared{6.694379990096503e-003};
    Eccentricity_Squared : constant Long_float := Long_Float(6.694379990096503*(10.0**(-3.0)));
    
-   
-
-private
-   
-      Latitude_Initial_RAD           : Long_float  := 0.0;
+ protected  
+         Latitude_Initial_RAD           : Long_float  := 0.0;
    Longitude_Initial_RAD          : Long_float  := 0.0;
    Radius_Meridional_M            : Long_float  := 0.0;
    Radius_Transverse_M            : Long_float  := 0.0;
    Radius_Small_Circle_Latitude_M : Long_float  := 0.0;
    B_Initilized                   : Boolean := False;
+   
+
 
 
    
