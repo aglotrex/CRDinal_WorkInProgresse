@@ -1,31 +1,30 @@
-with UxAS.Common.Utilities.Unit_Conversions;    use UxAS.Common.Utilities.Unit_Conversions;
---  with ADA.Numerics.Elementary_Functions;         use ADA.Numerics.Elementary_Functions;
+with UxAS.Common.Utilities.Unit_Conversions; use UxAS.Common.Utilities.Unit_Conversions;
+--  with ADA.Numerics.Elementary_Functions;  use ADA.Numerics.Elementary_Functions;
 with Ada.Numerics.Long_Elementary_Functions; use  Ada.Numerics.Long_Elementary_Functions;
 
 package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
    
    
    
-   procedure Initialize( This : in out Unit_Conversions;
-                         D_Latitude_Init_RAD  : in Long_float;
-                         D_Longitude_Init_RAD : in Long_float)
+   procedure Initialize(Latitude_Init_RAD  : in Long_float;
+                        Longitude_Init_RAD : in Long_float)
    is 
    begin
-      if This.B_Initilized then
+      if B_Initilized then
          
          -- m_dLatitudeInitial_rad  = dLatitudeInit_rad;
          -- m_dLongitudeInitial_rad = dLongitudeInit_rad;
-         This.D_Latitude_Initial_RAD  := D_Latitude_Init_RAD;
-         THis.D_Longitude_Initial_RAD := D_Longitude_Init_RAD;
+         Latitude_Initial_RAD  := Latitude_Init_RAD;
+         Longitude_Initial_RAD := Longitude_Init_RAD;
         
          
          declare
             -- double dDenominatorMeridional = std::pow((1.0 - (m_dEccentricitySquared * std::pow(std::sin(dLatitudeInit_rad), 2.0))), (3.0 / 2.0));
             -- double dDenominatorTransverse = pow((1.0 - (m_dEccentricitySquared * std::pow(std::sin(dLatitudeInit_rad), 2.0))), 0.5);
-            Denominator_Meridional : constant Long_float := (1.0 -(D_Eccentricity_Squared 
-                                                             * (Sin(D_Latitude_Init_RAD)**Long_Float(2.0))))**(3.0/2.0);
-            Denominator_Transverse :constant  Long_float := (1.0 -(D_Eccentricity_Squared 
-                                                             * (Sin(D_Latitude_Init_RAD)**2.0)))**(0.5);
+            Denominator_Meridional : constant Long_float := (1.0 -(Eccentricity_Squared 
+                                                             * (Sin(Latitude_Init_RAD)**Long_Float(2.0))))**(3.0/2.0);
+            Denominator_Transverse :constant  Long_float := (1.0 -(Eccentricity_Squared 
+                                                             * (Sin(Latitude_Init_RAD)**2.0)))**(0.5);
           
          begin
             -- assert(dDenominatorMeridional > 0.0);
@@ -35,30 +34,29 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
             
             
             -- Long_float dDenominatorTransverse = pow((1.0 - (m_dEccentricitySquared * std::pow(std::sin(dLatitudeInit_rad), 2.0))), 0.5);
-            This.D_Radius_Meridional_M := (if Denominator_Meridional <= 0.0 
-                                           then 0.0 
-                                           else D_Radius_Equatorial_M * ( 1.0 - D_Eccentricity_Squared) / Denominator_Meridional);
+            Radius_Meridional_M := (if Denominator_Meridional <= 0.0 
+                                    then 0.0 
+                                    else Radius_Equatorial_M * ( 1.0 - Eccentricity_Squared) / Denominator_Meridional);
             
             --  m_dRadiusTransverse_m = (dDenominatorTransverse <= 0.0) ? (0.0) : (m_dRadiusEquatorial_m / dDenominatorTransverse);
-            This.D_Radius_Transverse_M := (if Denominator_Transverse <= 0.0 
-                                           then 0.0 
-                                           else D_Radius_Equatorial_M / Denominator_Transverse);
+            Radius_Transverse_M := (if Denominator_Transverse <= 0.0 
+                                    then 0.0 
+                                    else Radius_Equatorial_M / Denominator_Transverse);
             
             --  m_dRadiusSmallCircleLatitude_m = m_dRadiusTransverse_m * cos(dLatitudeInit_rad);
-            This.D_Radius_Small_Circle_Latitude_M := (This.D_Radius_Transverse_M 
-                                                      * Cos(X => D_Latitude_Init_RAD));
+            Radius_Small_Circle_Latitude_M := (Radius_Transverse_M 
+                                               * Cos(X => Latitude_Init_RAD));
             
             
-            This.B_Initilized := True; 
+            B_Initilized := True; 
          end;
          
       end if;
    end Initialize;
    
    
-   procedure Re_Initialize( This : in out Unit_Conversions;
-                            D_Latitude_Init_RAD  : in Long_float;
-                            D_Longitude_Init_RAD : in Long_float)
+   procedure Re_Initialize(Latitude_Init_RAD  : in Long_float;
+                           Longitude_Init_RAD : in Long_float)
    is null;
    --  begin
       
@@ -66,265 +64,251 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
    --  //    Initialize(dLatitudeInit_rad,dLongitudeInit_rad);
    --  //#error "ERROR: CUnitConversions::ReInitialize::   reiitialize is no longer allowed!!!" 
       
-   --        THis.B_Initilized := False;
-   --        This.Initialize(D_Latitude_Init_RAD => D_Latitude_Init_RAD,
-   --                        D_Longitude_Init_RAD =>D_Longitude_Init_RAD);
+   --        B_Initilized := False;
+   --        Initialize(Latitude_Init_RAD => Latitude_Init_RAD,
+   --                        Longitude_Init_RAD =>Longitude_Init_RAD);
    --  end Re_Initialize;
             
         
       
    -- ////////////////////////////////////////////////////////////////////////////
    -- ///////    FROM LAT/LONG TO NORTH/EAST
+ 
    
-   procedure Convert_Lag_Long_RAD_To_North_East_M
-     (This : in out Unit_Conversions;
-      D_Latitude_RAD  : in Long_float;
-      D_Longitude_RAD : in Long_float;
-      D_North_M      : out Long_float;
-      D_East_M       : out Long_float)
+   
+   procedure Convert_Lat_Long_RAD_To_North_East_M
+     (Latitude_RAD  : in Long_float;
+      Longitude_RAD : in Long_float;
+      North_M      : out Long_float;
+      East_M       : out Long_float)
    is
    begin
       
       --    if (!m_bInitialized){Initialize(dLatitude_rad, dLongitude_rad);  }
-      if not this.B_Initilized then
-         Initialize(This,D_Latitude_RAD,D_Longitude_RAD);
+      if not B_Initilized then
+         Initialize(Latitude_RAD,Longitude_RAD);
       end if;
       
       -- dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
       -- dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-      D_North_M := This.D_Radius_Meridional_M * (D_Latitude_RAD - This.D_Latitude_Initial_RAD);
-      D_East_M  := This.D_Radius_Small_Circle_Latitude_M * (D_Longitude_RAD - This.D_Longitude_Initial_RAD);
-   end Convert_Lag_Long_RAD_To_North_East_M;
+      North_M := Radius_Meridional_M * (Latitude_RAD - Latitude_Initial_RAD);
+      East_M  := Radius_Small_Circle_Latitude_M * (Longitude_RAD - Longitude_Initial_RAD);
+   end Convert_Lat_Long_RAD_To_North_East_M;
    
-   procedure Convert_Lag_Long_RAD_To_North_East_FT
-     (This : in out Unit_Conversions;
-      D_Latitude_RAD  : in Long_float;
-      D_Longitude_RAD : in Long_float;
-      D_North_FT     : out Long_float;
-      D_East_FT      : out Long_float)
+   procedure Convert_Lat_Long_RAD_To_North_East_FT
+     (Latitude_RAD  : in Long_float;
+      Longitude_RAD : in Long_float;
+      North_FT     : out Long_float;
+      East_FT      : out Long_float)
    is 
+      North_M : Long_float; 
+      East_M  : Long_float;
    begin
       
       --  if (!m_bInitialized){Initialize(dLatitude_rad, dLongitude_rad);  }
-      if not this.B_Initilized then
-         Initialize(This,D_Latitude_RAD,D_Longitude_RAD);
+      if not B_Initilized then
+         Initialize(Latitude_RAD,Longitude_RAD);
       end if;
-      declare 
          
-         -- double dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
-         -- double dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-         D_North_M : constant Long_float := This.D_Radius_Meridional_M * (D_Latitude_RAD - This.D_Latitude_Initial_RAD);
-         D_East_M  : constant Long_float := This.D_Radius_Small_Circle_Latitude_M * (D_Longitude_RAD - This.D_Longitude_Initial_RAD);
+      -- double dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
+      -- double dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
+      Convert_Lat_Long_RAD_To_North_East_M(Latitude_RAD, Longitude_RAD ,
+                                           North_M , East_M);
       
-      begin 
-         -- dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
-         -- dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-         D_North_FT := D_North_M * D_Meter_to_Feet;
-         D_East_FT  := D_East_M  * D_Meter_to_Feet;
-         
-      end;
-   end Convert_Lag_Long_RAD_To_North_East_FT;
-   
-   procedure Convert_Lag_Long_DEG_To_North_East_M
-     (This : in out Unit_Conversions;
-      D_Latitude_DEG  : in Long_float;
-      D_Longitude_DEG : in Long_float;
-      D_North_M      : out Long_float;
-      D_East_M       : out Long_float)
-   is 
-      -- double dLatitude_rad = dLatitude_deg * n_Const::c_Convert::dDegreesToRadians();
-      -- double dLongitude_rad = dLongitude_deg * n_Const::c_Convert::dDegreesToRadians();
-
-      D_Latitude_RAD  : constant Long_float := D_Latitude_DEG * D_Degre_to_Radian;
-      D_Longitude_RAD : constant Long_float := D_Longitude_DEG * D_Degre_to_Radian;
-   begin
-      
-      --  if (!m_bInitialized){Initialize(dLatitude_rad, dLongitude_rad);  }
-      if not this.B_Initilized then
-         Initialize(This,D_Latitude_RAD,D_Longitude_RAD);
-      end if;
       -- dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
       -- dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-      D_North_M  := This.D_Radius_Meridional_M * (D_Latitude_RAD - This.D_Latitude_Initial_RAD);
-      D_East_M   := This.D_Radius_Small_Circle_Latitude_M * (D_Longitude_RAD - This.D_Longitude_Initial_RAD);
+      North_FT := North_M * Meter_to_Feet;
+      East_FT  := East_M  * Meter_to_Feet;
+         
    
+   end Convert_Lat_Long_RAD_To_North_East_FT;
    
-   end Convert_Lag_Long_DEG_To_North_East_M;
-
-   procedure Convert_Lag_Long_DEG_To_North_East_FT
-     (This : in out Unit_Conversions;
-      D_Latitude_DEG  : in Long_float;
-      D_Longitude_DEG : in Long_float;
-      D_North_FT     : out Long_float;
-      D_East_FT      : out Long_float)
+   procedure Convert_Lat_Long_DEG_To_North_East_M
+     (
+      Latitude_DEG  : in Long_float;
+      Longitude_DEG : in Long_float;
+      North_M      : out Long_float;
+      East_M       : out Long_float)
    is 
       -- double dLatitude_rad = dLatitude_deg * n_Const::c_Convert::dDegreesToRadians();
       -- double dLongitude_rad = dLongitude_deg * n_Const::c_Convert::dDegreesToRadians();
-      D_Latitude_RAD  : constant Long_float := D_Latitude_DEG * D_Degre_to_Radian;
-      D_Longitude_RAD : constant Long_float := D_Longitude_DEG * D_Degre_to_Radian;
+
+      Latitude_RAD  : constant Long_float := Latitude_DEG * Degrees_to_Radians;
+      Longitude_RAD : constant Long_float := Longitude_DEG * Degrees_to_Radians;
+   begin
+      
+      --  if (!m_bInitialized){Initialize(dLatitude_rad, dLongitude_rad);  }
+      if not B_Initilized then
+         Initialize(Latitude_RAD,Longitude_RAD);
+      end if;
+      
+      -- double dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
+      -- double dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
+      Convert_Lat_Long_RAD_To_North_East_M(Latitude_RAD, Longitude_RAD ,
+                                           North_M , East_M);
+   
+   
+   end Convert_Lat_Long_DEG_To_North_East_M;
+
+   procedure Convert_Lat_Long_DEG_To_North_East_FT
+     (
+      Latitude_DEG  : in Long_float;
+      Longitude_DEG : in Long_float;
+      North_FT     : out Long_float;
+      East_FT      : out Long_float)
+   is 
+      -- double dLatitude_rad = dLatitude_deg * n_Const::c_Convert::dDegreesToRadians();
+      -- double dLongitude_rad = dLongitude_deg * n_Const::c_Convert::dDegreesToRadians();
+      Latitude_RAD  : constant Long_float := Latitude_DEG * Degrees_to_Radians;
+      Longitude_RAD : constant Long_float := Longitude_DEG * Degrees_to_Radians;
+      
+      North_M : Long_float; 
+      East_M  : Long_float;
    begin
       --  if (!m_bInitialized){Initialize(dLatitude_rad, dLongitude_rad);  }
-      if not this.B_Initilized then
-         Initialize(This,D_Latitude_RAD,D_Longitude_RAD);
+      if not B_Initilized then
+         Initialize(Latitude_RAD,Longitude_RAD);
       end if;
-      declare 
-         -- double dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
-         -- double dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-      
-         D_North_M : constant Long_float := This.D_Radius_Meridional_M * (D_Latitude_RAD - This.D_Latitude_Initial_RAD);
-         D_East_M  : constant Long_float := This.D_Radius_Small_Circle_Latitude_M * (D_Longitude_RAD - This.D_Longitude_Initial_RAD);
-      begin 
-        
-         -- dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
-         -- dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-         D_North_FT := D_North_M * D_Meter_to_Feet;
-         D_East_FT  := D_East_M  * D_Meter_to_Feet;
-      end;
-   end Convert_Lag_Long_DEG_To_North_East_FT;
+      -- double dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
+      -- double dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
+      Convert_Lat_Long_RAD_To_North_East_M(Latitude_RAD, Longitude_RAD ,
+                                           North_M , East_M);
+      -- dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
+      -- dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
+      North_FT := North_M * Meter_to_Feet;
+      East_FT  := East_M  * Meter_to_Feet;
+   
+   end Convert_Lat_Long_DEG_To_North_East_FT;
 
 
    
    -- ////////////////////////////////////////////////////////////////////////////
    -- ///////     FROM NORTH/EAST TO LAT/LONG
 
-   procedure Convert_North_East_M_To_Lag_Long_RAD
-     (This : in Unit_Conversions;
-      D_North_M      : in Long_float;
-      D_East_M       : in Long_float;
-      D_Latitude_RAD  : out Long_float;
-      D_Longitude_RAD : out Long_float)
+   procedure Convert_North_East_M_To_Lat_Long_RAD
+     (
+      North_M      : in Long_float;
+      East_M       : in Long_float;
+      Latitude_RAD  : out Long_float;
+      Longitude_RAD : out Long_float)
    is
    begin
-      D_Latitude_RAD  := (if (This.D_Radius_Meridional_M <= 0.0) then 0.0 else
-                            ((D_North_M / This.D_Radius_Meridional_M) + This.D_Latitude_Initial_RAD));
-      D_Longitude_RAD := (if (This.D_Radius_Small_Circle_Latitude_M <= 0.0) then 0.0 else
-                            ((D_East_M / This.D_Radius_Small_Circle_Latitude_M) + This.D_Longitude_Initial_RAD));
-   end Convert_North_East_M_To_Lag_Long_RAD;
+      Latitude_RAD  := (if (Radius_Meridional_M <= 0.0) then 0.0 else
+                          ((North_M / Radius_Meridional_M) + Latitude_Initial_RAD));
+      Longitude_RAD := (if (Radius_Small_Circle_Latitude_M <= 0.0) then 0.0 else
+                          ((East_M / Radius_Small_Circle_Latitude_M) + Longitude_Initial_RAD));
+   end Convert_North_East_M_To_Lat_Long_RAD;
    
-   procedure Convert_North_East_M_To_Lag_Long_DEG
-     (This : in Unit_Conversions;
-      D_North_M      : in Long_float;
-      D_East_M       : in Long_float;
-      D_Latitude_DEG  : out Long_float;
-      D_Longitude_DEG : out Long_float)
+   procedure Convert_North_East_M_To_Lat_Long_DEG
+     (
+      North_M       : in  Long_float;
+      East_M        : in  Long_float;
+      Latitude_DEG  : out Long_float;
+      Longitude_DEG : out Long_float)
    is 
+      Latitude_RAD  : Long_Float;
+      Longitude_RAD : Long_Float;
    begin
    
-      D_Latitude_DEG  := (if (This.D_Radius_Meridional_M <= 0.0) then 0.0 else
-                            (((D_North_M / This.D_Radius_Meridional_M) + This.D_Latitude_Initial_RAD)
-                             * D_Radian_to_Degre));
-      D_Longitude_DEG := (if (This.D_Radius_Small_Circle_Latitude_M <= 0.0) then 0.0 else
-                            (((D_East_M / This.D_Radius_Small_Circle_Latitude_M) + This.D_Longitude_Initial_RAD)
-                             * D_Radian_to_Degre));
-   end  Convert_North_East_M_To_Lag_Long_DEG;
-
-   procedure Convert_North_East_FT_To_Lag_Long_RAD
-     (This : in Unit_Conversions;
-      D_North_FT      : in Long_float;
-      D_East_FT       : in Long_float;
-      D_Latitude_RAD  : out Long_float;
-      D_Longitude_RAD : out Long_float)
-   is
-      D_North_M : constant Long_float := D_North_FT * D_Feet_to_Meter;
-      D_East_M  : constant Long_float := D_East_FT  * D_Feet_to_Meter;
-   begin
-      D_Latitude_RAD  := (if (This.D_Radius_Meridional_M <= 0.0) then 0.0 else
-                            ((D_North_M / This.D_Radius_Meridional_M) + This.D_Latitude_Initial_RAD));
-      D_Longitude_RAD := (if (This.D_Radius_Small_Circle_Latitude_M <= 0.0) then 0.0 else
-                            ((D_East_M / This.D_Radius_Small_Circle_Latitude_M) + This.D_Longitude_Initial_RAD));
-   end Convert_North_East_FT_To_Lag_Long_RAD;
-
-   procedure Convert_North_East_FT_To_Lag_Long_DEG
-     (This : in Unit_Conversions;
-      D_North_FT      : in Long_float;
-      D_East_FT       : in Long_float;
-      D_Latitude_DEG  : out Long_float;
-      D_Longitude_DEG : out Long_float)
-   is
-      D_North_M : constant Long_float := D_North_FT * D_Feet_to_Meter;
-      D_East_M  : constant Long_float := D_East_FT  * D_Feet_to_Meter;
-   begin
-      
-      D_Latitude_DEG  := (if (This.D_Radius_Meridional_M <= 0.0) then 0.0 else
-                            (((D_North_M / This.D_Radius_Meridional_M) + This.D_Latitude_Initial_RAD)
-                             * D_Radian_to_Degre));
+      Convert_North_East_M_To_Lat_Long_RAD(North_M,East_M,
+                                           Latitude_RAD,Longitude_RAD);
    
-      D_Longitude_DEG := (if (This.D_Radius_Small_Circle_Latitude_M <= 0.0) then 0.0 else
-                            (((D_East_M / This.D_Radius_Small_Circle_Latitude_M) + This.D_Longitude_Initial_RAD)
-                             * D_Radian_to_Degre));
-   end Convert_North_East_FT_To_Lag_Long_DEG;
+      Latitude_DEG  := Latitude_RAD  * Radians_To_Degrees;
+      Longitude_DEG := Longitude_RAD * Radians_To_Degrees;
+   end  Convert_North_East_M_To_Lat_Long_DEG;
+
+   procedure Convert_North_East_FT_To_Lat_Long_RAD
+     (
+      North_FT      : in Long_float;
+      East_FT       : in Long_float;
+      Latitude_RAD  : out Long_float;
+      Longitude_RAD : out Long_float)
+   is
+      North_M : constant Long_float := North_FT * Feet_to_Meter;
+      East_M  : constant Long_float := East_FT  * Feet_to_Meter;
+   begin
+  
+      Convert_North_East_M_To_Lat_Long_RAD(North_M,East_M,
+                                           Latitude_RAD,Longitude_RAD);
+   end Convert_North_East_FT_To_Lat_Long_RAD;
+
+   procedure Convert_North_East_FT_To_Lat_Long_DEG
+     (North_FT      : in  Long_float;
+      East_FT       : in  Long_float;
+      Latitude_DEG  : out Long_float;
+      Longitude_DEG : out Long_float)
+   is
+      North_M : constant Long_float := North_FT * Feet_to_Meter;
+      East_M  : constant Long_float := East_FT  * Feet_to_Meter;
+      Latitude_RAD  : Long_Float;
+      Longitude_RAD : Long_Float;
+   begin
+   
+      Convert_North_East_M_To_Lat_Long_RAD(North_M,East_M,
+                                           Latitude_RAD,Longitude_RAD);
+   
+      Latitude_DEG  := Latitude_RAD  * Radians_To_Degrees;
+      Longitude_DEG := Longitude_RAD * Radians_To_Degrees;
+   end Convert_North_East_FT_To_Lat_Long_DEG;
 
 
    -- ////////////////////////////////////////////////////////////////////////////
    -- ///////     LINEAR DISTANCES
 
-   procedure D_Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD
-     (This : in out Unit_Conversions;
-      D_Latitude_1_RAD    : in  Long_float;
-      D_Longitude_1_RAD   : in  Long_float;
-      D_Latitude_2_RAD    : in  Long_float;
-      D_Longitude_2_RAD   : in  Long_float;
-      D_Linear_Distance_M : out Long_Float)
+   procedure Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD
+     (
+      Latitude_1_RAD    : in  Long_float;
+      Longitude_1_RAD   : in  Long_float;
+      Latitude_2_RAD    : in  Long_float;
+      Longitude_2_RAD   : in  Long_float;
+      Linear_Distance_M : out Long_Float)
    is
-      D_North_1_M : Long_float;
-      D_East_1_M  : Long_float;
-      D_North_2_M : Long_float;
-      D_East_2_M  : Long_float;
+      North_1_M : Long_float;
+      East_1_M  : Long_float;
+      North_2_M : Long_float;
+      East_2_M  : Long_float;
    
    begin
       -- ConvertLatLong_radToNorthEast_m(dLatitude1_rad, dLongitude1_rad, dNorth1_m, dEast1_m);
-      Convert_Lag_Long_RAD_To_North_East_M(This,
-                                           D_Latitude_1_RAD,
-                                           D_Longitude_1_RAD,
-                                           D_North_1_M,
-                                           D_East_1_M);
+      Convert_Lat_Long_RAD_To_North_East_M(Latitude_1_RAD,
+                                           Longitude_1_RAD,
+                                           North_1_M,
+                                           East_1_M);
    
       -- ConvertLatLong_radToNorthEast_m(dLatitude2_rad, dLongitude2_rad, dNorth2_m, dEast2_m);
-      Convert_Lag_Long_RAD_To_North_East_M(This,
-                                           D_Latitude_2_RAD,
-                                           D_Longitude_2_RAD,
-                                           D_North_2_M,
-                                           D_East_2_M);
+      Convert_Lat_Long_RAD_To_North_East_M(
+                                           Latitude_2_RAD,
+                                           Longitude_2_RAD,
+                                           North_2_M,
+                                           East_2_M);
       
       -- double dReturn = std::pow((std::pow((dNorth2_m - dNorth1_m), 2.0) + std::pow((dEast2_m - dEast1_m), 2.0)), 0.5);
-      D_Linear_Distance_M := (((D_North_2_M - D_North_1_M) ** 2.0) + (( D_East_2_M * D_East_1_M) **2.0))**0.5;
+      Linear_Distance_M := (((North_2_M - North_1_M) ** 2.0) + (( East_2_M * East_1_M) **2.0))**0.5;
 
       
-   end D_Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD;
+   end Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD;
 
-   procedure D_Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG
-     (This : in out Unit_Conversions;
-      D_Latitude_1_DEG    : in  Long_float;
-      D_Longitude_1_DEG   : in  Long_float;
-      D_Latitude_2_DEG    : in  Long_float;
-      D_Longitude_2_DEG   : in  Long_float;
-      D_Linear_Distance_M : out Long_Float)
+   procedure Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG
+     (
+      Latitude_1_DEG    : in  Long_float;
+      Longitude_1_DEG   : in  Long_float;
+      Latitude_2_DEG    : in  Long_float;
+      Longitude_2_DEG   : in  Long_float;
+      Linear_Distance_M : out Long_Float)
    is
-      D_North_1_M : Long_float;
-      D_East_1_M  : Long_float;
-      D_North_2_M : Long_float;
-      D_East_2_M  : Long_float;
+      Latitude_1_RAD  : Long_float;
+      Longitude_1_RAD : Long_float;
+      Latitude_2_RAD  : Long_float;
+      Longitude_2_RAD : Long_float;
    
    begin
-      -- ConvertLatLong_radToNorthEast_m(dLatitude1_rad, dLongitude1_rad, dNorth1_m, dEast1_m);
-      Convert_Lag_Long_DEG_To_North_East_M(This,
-                                           D_Latitude_1_DEG,
-                                           D_Longitude_1_DEG,
-                                           D_North_1_M,
-                                           D_East_1_M);
    
-      -- ConvertLatLong_radToNorthEast_m(dLatitude2_rad, dLongitude2_rad, dNorth2_m, dEast2_m);
-      Convert_Lag_Long_DEG_To_North_East_M(This,
-                                           D_Latitude_2_DEG,
-                                           D_Longitude_2_DEG,
-                                           D_North_2_M,
-                                           D_East_2_M);
-      
-      --   double dReturn = std::pow((std::pow((dNorth2_m - dNorth1_m), 2.0) + std::pow((dEast2_m - dEast1_m), 2.0)), 0.5);
-      D_Linear_Distance_M := (((D_North_2_M - D_North_1_M) ** Long_Float(2.0))
-                              + (( D_East_2_M * D_East_1_M) ** Long_Float(2.0)))
-        **  Long_Float(0.5);
-   end D_Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG;
+      Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD(Latitude_1_RAD    => Latitude_1_RAD,
+                                                             Longitude_1_RAD   => Longitude_1_RAD ,
+                                                             Latitude_2_RAD    => Latitude_2_RAD,
+                                                             Longitude_2_RAD   => Longitude_2_RAD,
+                                                             Linear_Distance_M => Linear_Distance_M)
+   end Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG;
                                              
 
 end Uxas.Common.Utilities.Unit_Conversions;
