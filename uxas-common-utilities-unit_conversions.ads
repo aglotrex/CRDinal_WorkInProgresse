@@ -38,7 +38,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       East_FT      : out Long_float);
   
    
-   
+   tu a eu mal pendant ?
+   je suis comtemps d'avoir pus me ratrapper
    -- ////////////////////////////////////////////////////////////////////////////
    -- ///////     FROM NORTH/EAST TO LAT/LONG
    
@@ -47,6 +48,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       East_M       : in Long_float;
       Latitude_RAD  : out Long_float;
       Longitude_RAD : out Long_float) with 
+     Global => (Radius_Meridional_M , Latitude_Initial_RAD
+                ,Radius_Small_Circle_Latitude_M,Longitude_Initial_RAD),
      pre => (Radius_Meridional_M > 0.0) 
      and    (Radius_Small_Circle_Latitude_M > 0.0) ;
    
@@ -56,6 +59,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       East_M       : in Long_float;
       Latitude_DEG  : out Long_float;
       Longitude_DEG : out Long_float) with 
+     Global => (Radius_Meridional_M , Latitude_Initial_RAD
+                ,Radius_Small_Circle_Latitude_M,Longitude_Initial_RAD),
      pre => Radius_Meridional_M > 0.0 
      and  Radius_Small_Circle_Latitude_M >0.0 ;
 
@@ -64,6 +69,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       East_FT       : in Long_float;
       Latitude_DEG  : out Long_float;
       Longitude_DEG : out Long_float) with 
+     Global => (Radius_Meridional_M , Latitude_Initial_RAD
+                ,Radius_Small_Circle_Latitude_M,Longitude_Initial_RAD),
      pre => Radius_Meridional_M > 0.0 
      and  Radius_Small_Circle_Latitude_M > 0.0 ;
    
@@ -73,6 +80,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       East_FT       : in Long_float;
       Latitude_RAD  : out Long_float;
       Longitude_RAD : out Long_float) with 
+     Global => (Radius_Meridional_M , Latitude_Initial_RAD
+                ,Radius_Small_Circle_Latitude_M,Longitude_Initial_RAD),
      pre => Radius_Meridional_M > 0.0 
      and  Radius_Small_Circle_Latitude_M >0.0 ;
    
@@ -108,18 +117,19 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
    -- const Long_float m_dRadiusEquatorial_m{6378135.0};
    Radius_Equatorial_M  : constant Long_float := 6378135.0; 
    -- const Long_float m_dFlattening{3.352810664724998e-003};
-   Flattening           : constant Long_float := Long_Float(3.352810664724998*(10.0**(-3.0)));
+   Flattening           : constant Long_float := Long_Float(0.003352810664724998);
    -- const Long_float m_dEccentricitySquared{6.694379990096503e-003};
-   Eccentricity_Squared : constant Long_float := Long_Float(6.694379990096503*(10.0**(-3.0)));
+   Eccentricity_Squared : constant Long_float := Long_Float(0.006694379990096503);
    
- protected  
-         Latitude_Initial_RAD           : Long_float  := 0.0;
+     
+   Latitude_Initial_RAD           : Long_float  := 0.0;
    Longitude_Initial_RAD          : Long_float  := 0.0;
    Radius_Meridional_M            : Long_float  := 0.0;
    Radius_Transverse_M            : Long_float  := 0.0;
    Radius_Small_Circle_Latitude_M : Long_float  := 0.0;
-   B_Initilized                   : Boolean := False;
+   B_Initilized                   : Boolean  := False;
    
+
 
 
 

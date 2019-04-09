@@ -2,7 +2,7 @@ with UxAS.Common.Utilities.Unit_Conversions; use UxAS.Common.Utilities.Unit_Conv
 --  with ADA.Numerics.Elementary_Functions;  use ADA.Numerics.Elementary_Functions;
 with Ada.Numerics.Long_Elementary_Functions; use  Ada.Numerics.Long_Elementary_Functions;
 
-package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
+package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
    
    
    
@@ -21,27 +21,31 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
          declare
             -- double dDenominatorMeridional = std::pow((1.0 - (m_dEccentricitySquared * std::pow(std::sin(dLatitudeInit_rad), 2.0))), (3.0 / 2.0));
             -- double dDenominatorTransverse = pow((1.0 - (m_dEccentricitySquared * std::pow(std::sin(dLatitudeInit_rad), 2.0))), 0.5);
-            Denominator_Meridional : constant Long_float := (1.0 -(Eccentricity_Squared 
-                                                             * (Sin(Latitude_Init_RAD)**Long_Float(2.0))))**(3.0/2.0);
-            Denominator_Transverse :constant  Long_float := (1.0 -(Eccentricity_Squared 
-                                                             * (Sin(Latitude_Init_RAD)**2.0)))**(0.5);
-          
+            Sin_Sqrt_Latitude : constant Long_Float := Sin(Latitude_Init_RAD)* Sin(Latitude_Init_RAD);
+            Pragma Assert(0.0 <= Sin_Sqrt_Latitude and Sin_Sqrt_Latitude <= 1.0);
+            pragma Assert( Eccentricity_Squared < 0.5);
+            
+            Temp : constant Long_Float := Eccentricity_Squared * Sin_Sqrt_Latitude;
+            pragma Assert(0.0 <= temp and temp < 0.5);
+            
+            Temp2 : constant Long_Float :=  1.0 - Temp;
+             pragma Assert(0.5 < Temp2 and Temp2 <= 1.0);
+            
+            Denominator_Meridional : constant Long_float := Temp2**(3.0/2.0);
+            Denominator_Transverse : constant Long_float := Temp2**(0.5);
+           
          begin
             -- assert(dDenominatorMeridional > 0.0);
             -- assert(dDenominatorTransverse > 0.0);
-            pragma Assert(Denominator_Meridional > 0.0);
-            pragma Assert(Denominator_Transverse > 0.0);
+           pragma Assert(Denominator_Meridional > 0.0);
+           pragma Assert(Denominator_Transverse > 0.0);
             
             
             -- Long_float dDenominatorTransverse = pow((1.0 - (m_dEccentricitySquared * std::pow(std::sin(dLatitudeInit_rad), 2.0))), 0.5);
-            Radius_Meridional_M := (if Denominator_Meridional <= 0.0 
-                                    then 0.0 
-                                    else Radius_Equatorial_M * ( 1.0 - Eccentricity_Squared) / Denominator_Meridional);
+            Radius_Meridional_M := Radius_Equatorial_M * ( 1.0 - Eccentricity_Squared) / Denominator_Meridional;
             
             --  m_dRadiusTransverse_m = (dDenominatorTransverse <= 0.0) ? (0.0) : (m_dRadiusEquatorial_m / dDenominatorTransverse);
-            Radius_Transverse_M := (if Denominator_Transverse <= 0.0 
-                                    then 0.0 
-                                    else Radius_Equatorial_M / Denominator_Transverse);
+            Radius_Transverse_M := Radius_Equatorial_M / Denominator_Transverse;
             
             --  m_dRadiusSmallCircleLatitude_m = m_dRadiusTransverse_m * cos(dLatitudeInit_rad);
             Radius_Small_Circle_Latitude_M := (Radius_Transverse_M 
@@ -119,7 +123,7 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
       -- dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
       North_FT := North_M * Meter_to_Feet;
       East_FT  := East_M  * Meter_to_Feet;
-         
+    
    
    end Convert_Lat_Long_RAD_To_North_East_FT;
    
@@ -191,10 +195,8 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
       Longitude_RAD : out Long_float)
    is
    begin
-      Latitude_RAD  := (if (Radius_Meridional_M <= 0.0) then 0.0 else
-                          ((North_M / Radius_Meridional_M) + Latitude_Initial_RAD));
-      Longitude_RAD := (if (Radius_Small_Circle_Latitude_M <= 0.0) then 0.0 else
-                          ((East_M / Radius_Small_Circle_Latitude_M) + Longitude_Initial_RAD));
+      Latitude_RAD  := (North_M / Radius_Meridional_M) + Latitude_Initial_RAD;
+      Longitude_RAD :=(East_M / Radius_Small_Circle_Latitude_M) + Longitude_Initial_RAD;
    end Convert_North_East_M_To_Lat_Long_RAD;
    
    procedure Convert_North_East_M_To_Lat_Long_DEG
@@ -278,7 +280,7 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => Off is
                                            East_2_M);
       
       -- double dReturn = std::pow((std::pow((dNorth2_m - dNorth1_m), 2.0) + std::pow((dEast2_m - dEast1_m), 2.0)), 0.5);
-      Linear_Distance_M := (((North_2_M - North_1_M) ** 2.0) + (( East_2_M * East_1_M) **2.0))**0.5;
+      Linear_Distance_M := (Long_Float'((North_2_M - North_1_M) ** 2) + (( East_2_M * East_1_M) **2))**0.5;
 
       
    end Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD;

@@ -998,6 +998,11 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          I : Int64_Pending_Auto_Req_Matrix :=
            Int64_Pending_Auto_Req_Matrix.First(Container => THis.Pending_Auto_Req);
       begin
+
+         --  // check pending route requests
+         -- auto i = m_pendingRoute.begin();
+         -- while (i != m_pendingRoute.end())
+
          while Int64_Pending_Route_Matrix.Has_Element(Container => This.Pending_Route ,
                                                       Position  => C);
          loop
@@ -1005,15 +1010,15 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
                -- bool isFulfilled = true;
                Is_Fulfilled : Boolean := True;
 
-               -- i->second()
-               Liste_Route : Int64_Set :=
-                 Int64_Pending_Route_Matrix.Element(Container => THis.Pending_Route,
-                                                    Position  => C);
-
                -- i->first()
                Route_Id : Int64 :=
                  Int64_Pending_Route_Matrix.Key(Container => This.Pending_Route,
                                                 Position  => C);
+
+               -- i->second()
+               Liste_Route : Int64_Set :=
+                 Int64_Pending_Route_Matrix.Element(Container => THis.Pending_Route,
+                                                    Position  => C);
             begin
 
                For Id_Request in Liste_Route loop
@@ -1040,6 +1045,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          end loop;
 
 
+         -- // check pending automation requests
+         -- auto k = m_pendingAutoReq.begin();
+         -- while (k != m_pendingAutoReq.end())
          while Int64_Pending_Auto_Req_Matrix.Has_Element(Container => THis.Pending_Auto_Req,
                                                          Position  => I)
          loop
@@ -1052,38 +1060,36 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
 
                -- k->second()
                All_Response_ID : Int64_Set := Int64_Pending_Auto_Req_Matrix.Element(Container => This.Pending_Auto_Req,
-                                                                                Position  => I);
+                                                                                    Position  => I);
             begin
 
-               For Response_ID : Int64 in Responses_Req loop
-                  if Int64_Route_Plan_Responses_Maps.Find(Container => THis.Route_Plan_Responses,
-                                                          Key       => Response_ID)
+               For Response_ID : constant Int64 in  All_Response_ID loop
+
+                  if Int64_Route_Plan_Maps.Find(Container => THis.Route_Plan,
+                                                Key       => Response_ID)
                   then
+                     Is_Fulfilled := False;
+                     Break;
+                  end if;
+               end loop;
 
 
+               -- k++;
+               Int64_Pending_Auto_Req_Matrix.Next(Container => THis.Pending_Auto_Req,
+                                                  Position  => I);
 
+               --   if (isFulfilled)
 
+               if Is_Fulfilled then
 
+                  -- SendMatrix(k->first);
+                  This.Send_Matrix(Req_Id);
 
-
-
-
-
-
-            end Check_All_Route_Plans;
-
-
-
-
-
-
-
-
-
-
-
-
-
+                  -- // finished with this automation request, discard
+                  -- m_uniqueAutomationRequests.erase(k->first);
+                  -- k = m_pendingAutoReq.erase(k);
+                  Int64_Unique_Automation_Request_Maps.Delete(Container => This.Unique_Automation_Request,
+                                                              Key       => Req_Id);
 
 
 
@@ -1097,6 +1103,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
 
 
 
+               end Check_All_Route_Plans;
 
 
 
@@ -1104,4 +1111,30 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
 
 
 
-         end UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            end UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;

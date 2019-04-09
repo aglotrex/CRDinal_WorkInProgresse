@@ -18,14 +18,14 @@ package Convert with SPARK_Mode is
    -- /*! \brief convert from feet to meters  */
    FeetToMeters : constant Long_Float := 0.3048;
    
-      -- /*! \brief convert from degrees to radians  */
+   -- /*! \brief convert from degrees to radians  */
    DegreesToRadians : constant Long_Float := 0.01745329251994;
 
    -- /*! \brief convert from degrees to radians  */
    function To_Radians(degrees : Long_Float) return Long_Float is (degrees * Convert.DegreesToRadians);
 
 
-  -- /*! \brief convert from radians to degrees  */
+   -- /*! \brief convert from radians to degrees  */
    RadiansToDegrees : constant Long_Float := 57.29577951308232;
 
    -- /*! \brief convert from radians to degrees  */
@@ -80,39 +80,75 @@ package Convert with SPARK_Mode is
                     rel_Operator : En_Relational_Operators;
                     Epsilon   : Float := (10.0**(-9))) return Boolean;
    
-   function Normalize_Angle_RAD( Angle_RAD : Long_Float;
-                                 Angle_Reference : Long_Float := - Pi ) return Long_Float with 
-     Pre =>  - Two_Pi <=  Angle_Reference       and Angle_Reference             <= 0.0 ,
-     Post => Angle_Reference <=  Normalize_Angle_RAD'Result and Normalize_Angle_RAD'Result  <= Angle_Reference + Two_Pi;
-   
-   function Normalize_Angle_Deg( Angle_RAD : Long_Float;
-                                 Angle_Reference : Long_Float := - 180.0 ) return Long_Float with
-     Pre =>  -360.0 <= Angle_Reference and Angle_Reference <= 0.0,
-     Post => Angle_Reference <=  Normalize_Angle_Deg'Result and Normalize_Angle_Deg'Result  <= Angle_Reference + 360.0;
-   
-   function Normalize_Angle_RAD( Angle_RAD : Float;
-                                 Angle_Reference : Float :=Float(- Pi) ) return Float with
-     Pre =>  - Float(Two_Pi) <=  Angle_Reference       and Angle_Reference             <= 0.0 ,
-     Post => Angle_Reference <=  Normalize_Angle_RAD'Result and Normalize_Angle_RAD'Result  <= Angle_Reference + Float(Two_Pi);
-   
-   function Normalize_Angle_Deg( Angle_RAD : Float;
-                                 Angle_Reference : Float := - 180.0 ) return Float with
-     Pre =>  -360.0 <= Angle_Reference and Angle_Reference <= 0.0,
-     Post => Angle_Reference <=  Normalize_Angle_Deg'Result and Normalize_Angle_Deg'Result  <= Angle_Reference + 360.0;
-   
    
    function iRound(Number : Long_Float) return Integer is (Integer(Number + 0.5));
    
    --static void dRound(double dNumber,const double dDecimalPlace)
    function dRound(Number, Decimal_Place  : Long_Float) return Long_Float
-   is (Long_Float'Floor((Number/Decimal_Place) + 0.5) * Decimal_Place);
+   is (if Decimal_Place = 0.0 then 
+          Long_Float'Floor(Number + 0.5)
+       else
+          Long_Float'Floor((Number/Decimal_Place) + 0.5) * Decimal_Place);
    
    -- static void vRound(double& rdNumber,const double dDecimalPlace)
    procedure vRound(Number : in out Long_Float; Decimel_Place : in Long_Float);
      
-   
+   function Normalize_Angle ( Angle           : Long_Float;
+                              Angle_Reference : Long_Float;
+                              Full_Turn_Unit  : Long_Float) return Long_Float with 
+     Pre =>  - Full_Turn_Unit < Angle_Reference and Angle_Reference <= 0.0 
+     and Full_Turn_Unit > 0.0,
+     Post => Normalize_Angle'Result  >=  Angle_Reference
+     and     Normalize_Angle'Result  <  Angle_Reference + Full_Turn_Unit;
+     
+private 
+   procedure modulo(Dividend, Divisor : in Long_Float ;
+                    Quotient ,result : out Long_Float) with
+     Pre  => Divisor /= 0.0,
+     Post => (if ( Divisor < 0.0) then
+                  (Divisor < result and result <= 0.0)
+                  else 
+                (0.0 <= result and result <Divisor)) 
+     and   (Divisor * Quotient) + result = Dividend; 
+   procedure modulo(Dividend, Divisor : in Float ;
+                    Quotient ,result : out Float) with
+     Pre  => Divisor /= 0.0,
+     Post => (if ( Divisor < 0.0) then
+                  (Divisor < result and result <= 0.0)
+                  else 
+                (0.0 <= result and result <Divisor)) 
+     and   (Divisor * Quotient) + result = Dividend;
       
-      
+   function Normalize_Angle_RAD( Angle_RAD       : Long_Float;
+                                 Angle_Reference : Long_Float := - Pi ) return Long_Float
+   is (Normalize_Angle(Angle           => Angle_RAD,
+                       Angle_Reference => Angle_Reference,
+                       Full_Turn_Unit  => Two_Pi))
+     with
+       Pre =>  - Two_Pi < Angle_Reference and Angle_Reference <= 0.0 ;
    
+   function Normalize_Angle_DEG( Angle_DEG       : Long_Float;
+                                 Angle_Reference : Long_Float := - 180.0 ) return Long_Float
+   is (Normalize_Angle(Angle           => Angle_DEG,
+                       Angle_Reference => Angle_Reference,
+                       Full_Turn_Unit  => 360.0)) 
+     with
+       Pre =>  - 360.0 < Angle_Reference and Angle_Reference <= 0.0;
+
+   function Normalize_Angle_RAD( Angle_RAD       : Float;
+                                 Angle_Reference : Float := Float(- Pi)) return Float
+   is (Float( Normalize_Angle(Angle           => Long_Float(Angle_RAD),
+                              Angle_Reference => Long_Float(Angle_Reference),
+                              Full_Turn_Unit  => Two_Pi)))
+     with 
+       Pre => Float(  - Two_Pi) < Angle_Reference and Angle_Reference <= 0.0;
+   
+   function Normalize_Angle_DEG( Angle_DEG       : Float;
+                                 Angle_Reference : Float := -180.0) return Float
+   is (Float( Normalize_Angle(Angle           => Long_Float(Angle_DEG),
+                              Angle_Reference => Long_Float(Angle_Reference),
+                              Full_Turn_Unit  => 360.0)))
+     with
+       Pre =>  - 360.0 < Angle_Reference and Angle_Reference <= 0.0;
 
 end Convert;

@@ -1,8 +1,30 @@
-with Ada.Numerics.Generic_Elementary_Functions;
-with Ada.Numerics.Long_Complex_Elementary_Functions; use  Ada.Numerics.Long_Complex_Elementary_Functions;
 
-package body convert is
+package body convert with SPARK_Mode is
 
+   procedure modulo(Dividend, Divisor : in  Long_Float ;
+                    Quotient, Result  : out Long_Float) is
+    
+   begin
+      if (0.0 <= Dividend and Dividend < Divisor) then
+         Quotient := 0.0 ;
+      else
+         Quotient := Long_Float'Floor(Dividend / Divisor);
+      end if;
+      result := Dividend - (Divisor * Quotient);
+   end modulo;
+   
+   procedure modulo(Dividend, Divisor : in  Float ;
+                    Quotient, Result  : out Float) is
+   
+   begin
+      if (0.0 <= Dividend and Dividend < Divisor) then
+         Quotient := 0.0 ;
+      else
+         Quotient := Float'Floor(Dividend / Divisor);
+      end if;
+      result := Dividend - (Divisor * Quotient);
+   end modulo;
+   
    function Compare(Argument1 : Long_Float;
                     Argument2 : Long_Float;
                     rel_Operator : En_Relational_Operators;
@@ -64,114 +86,52 @@ package body convert is
       end case;
    end Compare;
    
-   function Normalize_Angle_RAD( Angle_RAD : Long_Float;
-                                 Angle_Reference : Long_Float := - Pi ) return Long_Float is
-      
-      -- double dModAngle = std::fmod(dAngleRad,dTwoPi());
-      Mod_Angle : Long_Float := Angle_RAD mod Two_Pi;
-   begin
-      
-      -- if( bCompareDouble(dModAngle, dAngleReference, enLess) )
-      if Compare( Mod_Angle , Angle_Reference , enLess) then
-         
-         --  dModAngle += dTwoPi();
-         Mod_Angle := Mod_Angle + Two_Pi;
-         
-         
-         --  else if( bCompareDouble(dModAngle, (dAngleReference+dTwoPi()), enGreaterEqual) )   
-      elsif Compare( Mod_Angle , Angle_Reference + Two_Pi , enGreaterEqual) then
-         
-         
-         -- dModAngle -= dTwoPi();
-         Mod_Angle := Mod_Angle - Two_Pi;
-         
-      end if;
-      
-      return Mod_Angle;
-      
-   end Normalize_Angle_RAD;
-   
-   function Normalize_Angle_Deg( Angle_RAD : Long_Float;
-                                 Angle_Reference : Long_Float := - 180.0 ) return Long_Float is
-      
-      -- double dModAngle = std::fmod(dAngleRad,dTwoPi());
-      Mod_Angle : Long_Float := Angle_RAD mod Long_Float(360.0);
-   begin
-      
-      -- if( bCompareDouble(dModAngle, dAngleReference, enLess) )
-      if Compare( Mod_Angle , Angle_Reference , enLess) then
-         
-         --  dModAngle += dTwoPi();
-         Mod_Angle := Mod_Angle + 360.0;
-         
-         
-         --  else if( bCompareDouble(dModAngle, (dAngleReference+dTwoPi()), enGreaterEqual) )   
-      elsif Compare( Mod_Angle , Angle_Reference + 360.0 , enGreaterEqual) then
-         
-         
-         -- dModAngle -= dTwoPi();
-         Mod_Angle := Mod_Angle - 360.0;
-         
-      end if;
-      
-      return Mod_Angle;
-      
-   end Normalize_Angle_Deg;
-   
+   function Normalize_Angle ( Angle           : Long_Float;
+                              Angle_Reference : Long_Float;
+                              Full_Turn_Unit  : Long_Float) return Long_Float is
      
-   function Normalize_Angle_RAD( Angle_RAD : Float;
-                                 Angle_Reference : Float := Float( - Pi) ) return Float is
+      Mod_Angle : Long_Float;
+      N         : Long_Float;
+   begin 
+      pragma Assert (Full_Turn_Unit > 0.0);
+      -- double dModAngle = modulo (dAngleRad,/Full_Turn/);
+      modulo (Dividend => Angle,
+              Divisor  => Full_Turn_Unit,
+              Quotient => N,
+              Result   => Mod_Angle);
       
-      -- double dModAngle = std::fmod(dAngleRad,dTwoPi());
-      Mod_Angle : Float := Angle_RAD mod Float(Two_Pi);
-   begin
+      pragma Assert( 0.0 <= Mod_Angle and Mod_Angle < Full_Turn_Unit);
       
+      -- assert( dAngleReference <= 0.0 && dAngleReference >= /Full_Turn/ );
       -- if( bCompareDouble(dModAngle, dAngleReference, enLess) )
-      if Compare( Mod_Angle , Angle_Reference , enLess) then
+      -- {
+      --    dModAngle += /Full_Turn/;
+      -- }
+      ---- unreachable code 
+      --   0.0 <= Mod_Angle 
+      --  Angle_Reference <= 0.0
+      --   => NOT  Mod_Angle < Angle-Reference
          
-         --  dModAngle += dTwoPi();
-         Mod_Angle := Mod_Angle + Float(Two_Pi);
-         
-         
-         --  else if( bCompareDouble(dModAngle, (dAngleReference+dTwoPi()), enGreaterEqual) )   
-      elsif Compare( Mod_Angle , Angle_Reference + Float(Two_Pi) , enGreaterEqual) then
-         
-         
-         -- dModAngle -= dTwoPi();
-         Mod_Angle := Mod_Angle - Float(Two_Pi);
-         
+      --  else if( bCompareDouble(dModAngle, (dAngleReference+ /Full_Turn/ ), enGreaterEqual) )   
+      if Angle_Reference + Full_Turn_Unit <= Mod_Angle then
+         pragma Assert( Angle_Reference + Full_Turn_Unit <= Mod_Angle 
+                        and Mod_Angle < Full_Turn_Unit  );
+         Mod_Angle := Mod_Angle - Full_Turn_Unit;
+         pragma Assert( Angle_Reference <= Mod_Angle 
+                        and Mod_Angle < Full_Turn_Unit - Full_Turn_Unit );
+      else
+         pragma Assert(not ((Angle_Reference + Full_Turn_Unit) <= Mod_Angle));
+         pragma Assert( 0.0 <= Mod_Angle 
+                        and Mod_Angle < (Angle_Reference + Full_Turn_Unit));
       end if;
       
+      pragma Assert( Angle_Reference <= Mod_Angle 
+                     and Mod_Angle < (Angle_Reference + Full_Turn_Unit) );
       return Mod_Angle;
+   end Normalize_Angle;
       
-   end Normalize_Angle_RAD;
-   
-   function Normalize_Angle_Deg( Angle_RAD : Float;
-                                 Angle_Reference : Float := - 180.0 ) return Float is
       
-      -- double dModAngle = std::fmod(dAngleRad,dTwoPi());
-      Mod_Angle : Float := Angle_RAD mod 360.0;
-   begin
-      
-      -- if( bCompareDouble(dModAngle, dAngleReference, enLess) )
-      if Compare( Mod_Angle , Angle_Reference , enLess) then
-         
-         --  dModAngle += dTwoPi();
-         Mod_Angle := Mod_Angle + 360.0;
-         
-         
-         --  else if( bCompareDouble(dModAngle, (dAngleReference+dTwoPi()), enGreaterEqual) )   
-      elsif Compare( Mod_Angle , Angle_Reference + 360.0 , enGreaterEqual) then
-         
-         
-         -- dModAngle -= dTwoPi();
-         Mod_Angle := Mod_Angle - 360.0;
-         
-      end if;
-      
-      return Mod_Angle;
-      
-   end Normalize_Angle_Deg;
+    
    
    -- static void vRound(double& rdNumber,const double dDecimalPlace)
    procedure vRound(Number : in out Long_Float; 
