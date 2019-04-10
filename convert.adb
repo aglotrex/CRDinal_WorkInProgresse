@@ -8,22 +8,34 @@ package body convert with SPARK_Mode is
       if (0.0 <= Dividend and Dividend < Divisor) then
          Quotient := 0.0 ;
       else
-         Quotient := Long_Float'Floor(Dividend / Divisor);
+         Quotient := Dividend/Divisor;
+         Quotient_Floor := Long_Float'Floor  (MultiplIcator);
+         Quotient_Ceiling := Long_Float'Ceiling(MultiplIcator);
+         
       end if;
       result := Dividend - (Divisor * Quotient);
+      
+     
    end modulo;
    
-   procedure modulo(Dividend, Divisor : in  Float ;
-                    Quotient, Result  : out Float) is
+   procedure modulo_Loop(Dividend, Divisor : in  Long_Float ;
+                         Quotient, Result  : out Long_Float) is
    
+      Is_Neg_Dividend : constant Boolean := Dividend < 0.0;
    begin
-      if (0.0 <= Dividend and Dividend < Divisor) then
-         Quotient := 0.0 ;
-      else
-         Quotient := Float'Floor(Dividend / Divisor);
-      end if;
-      result := Dividend - (Divisor * Quotient);
-   end modulo;
+      Quotient := 0.0;
+      Result := abs(Dividend);
+      while Result >= Divisor loop
+         Result := Result - Divisor;
+         Quotient := Quotient + 1.0;
+       --  pragma Loop_Invariant(Dividend = Result + (Quotient* Divisor));
+      end loop;
+      
+      pragma Assert(0.0 <= result and result < Divisor );
+      
+      Quotient := (if Is_Neg_Dividend then (- Quotient) else Quotient);
+      Result   := (if Is_Neg_Dividend then (- Result  ) else Result  );
+   end modulo_Loop;
    
    function Compare(Argument1 : Long_Float;
                     Argument2 : Long_Float;
@@ -88,10 +100,11 @@ package body convert with SPARK_Mode is
    
    function Normalize_Angle ( Angle           : Long_Float;
                               Angle_Reference : Long_Float;
-                              Full_Turn_Unit  : Long_Float) return Long_Float is
-     
+                              Full_Turn_Unit :Long_Float ) return Long_Float is
+      --  Full_Turn_Unit : Long_Float := Two_Pi;
       Mod_Angle : Long_Float;
       N         : Long_Float;
+      Result    : Long_Float; 
    begin 
       pragma Assert (Full_Turn_Unit > 0.0);
       -- double dModAngle = modulo (dAngleRad,/Full_Turn/);
@@ -99,8 +112,6 @@ package body convert with SPARK_Mode is
               Divisor  => Full_Turn_Unit,
               Quotient => N,
               Result   => Mod_Angle);
-      
-      pragma Assert( 0.0 <= Mod_Angle and Mod_Angle < Full_Turn_Unit);
       
       -- assert( dAngleReference <= 0.0 && dAngleReference >= /Full_Turn/ );
       -- if( bCompareDouble(dModAngle, dAngleReference, enLess) )
@@ -113,21 +124,23 @@ package body convert with SPARK_Mode is
       --   => NOT  Mod_Angle < Angle-Reference
          
       --  else if( bCompareDouble(dModAngle, (dAngleReference+ /Full_Turn/ ), enGreaterEqual) )   
-      if Angle_Reference + Full_Turn_Unit <= Mod_Angle then
-         pragma Assert( Angle_Reference + Full_Turn_Unit <= Mod_Angle 
-                        and Mod_Angle < Full_Turn_Unit  );
-         Mod_Angle := Mod_Angle - Full_Turn_Unit;
-         pragma Assert( Angle_Reference <= Mod_Angle 
-                        and Mod_Angle < Full_Turn_Unit - Full_Turn_Unit );
+      
+      if Angle_Reference <= Mod_Angle  - Full_Turn_Unit then
+         
+         Result := Mod_Angle - Full_Turn_Unit;
+ 
+         pragma Assert(Angle_Reference <= Result);
+         pragma Assert(Result < Angle_Reference + Full_Turn_Unit );
       else
-         pragma Assert(not ((Angle_Reference + Full_Turn_Unit) <= Mod_Angle));
-         pragma Assert( 0.0 <= Mod_Angle 
-                        and Mod_Angle < (Angle_Reference + Full_Turn_Unit));
+         Result := Mod_Angle;
+         pragma Assert(Angle_Reference  > Result - Full_Turn_Unit);
+         pragma Assert( Mod_Angle <= Full_Turn_Unit);
+                      
       end if;
       
-      pragma Assert( Angle_Reference <= Mod_Angle 
-                     and Mod_Angle < (Angle_Reference + Full_Turn_Unit) );
-      return Mod_Angle;
+      pragma Assert( Angle_Reference <= Result
+                     and Result -  Full_Turn_Unit  < Angle_Reference );
+      return Result;
    end Normalize_Angle;
       
       

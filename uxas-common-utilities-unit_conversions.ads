@@ -3,7 +3,7 @@ with ADA.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
 
 package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
 
- 
+   
   
    --type Unit_Conversions_Ref is  access all Unit_Conversions'Class;
    
@@ -37,9 +37,7 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       North_FT     : out Long_float;
       East_FT      : out Long_float);
   
-   
-   tu a eu mal pendant ?
-   je suis comtemps d'avoir pus me ratrapper
+
    -- ////////////////////////////////////////////////////////////////////////////
    -- ///////     FROM NORTH/EAST TO LAT/LONG
    
@@ -106,11 +104,7 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       Longitude_2_DEG   : in  Long_float;
       Linear_Distance_M : out Long_Float);
    
-   Meter_to_Feet : constant Long_float := 3.280839895;
-   Feet_to_Meter : constant Long_float := 0.3048;
-   
-   Degrees_to_Radians    : constant Long_float := 0.01745329251994;
-   Radians_To_Degrees : constant Long_float := 57.29577951308232;
+
    
    --  // WGS-84 parameters
   
@@ -120,19 +114,15 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
    Flattening           : constant Long_float := Long_Float(0.003352810664724998);
    -- const Long_float m_dEccentricitySquared{6.694379990096503e-003};
    Eccentricity_Squared : constant Long_float := Long_Float(0.006694379990096503);
+
+
+   Latitude_Initial_RAD           : Long_float  := 0.0;   --  double CUnitConversions::m_dLatitudeInitial_rad{0.0};
+   Longitude_Initial_RAD          : Long_float  := 0.0;   --  double CUnitConversions::m_dLongitudeInitial_rad{0.0};
+   Radius_Meridional_M            : Long_float  := 0.0;   --  double CUnitConversions::m_dRadiusMeridional_m{0.0};
+   Radius_Transverse_M            : Long_float  := 0.0;   --  double CUnitConversions::m_dRadiusTransverse_m{0.0};
+   Radius_Small_Circle_Latitude_M : Long_float  := 0.0;   --  double CUnitConversions::m_dRadiusSmallCircleLatitude_m{0.0};
+   B_Initilized                   : Boolean  := False;    --  bool   CUnitConversions::m_bInitialized{false};
    
-     
-   Latitude_Initial_RAD           : Long_float  := 0.0;
-   Longitude_Initial_RAD          : Long_float  := 0.0;
-   Radius_Meridional_M            : Long_float  := 0.0;
-   Radius_Transverse_M            : Long_float  := 0.0;
-   Radius_Small_Circle_Latitude_M : Long_float  := 0.0;
-   B_Initilized                   : Boolean  := False;
-   
 
-
-
-
-   
 
 end Uxas.Common.Utilities.Unit_Conversions;

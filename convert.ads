@@ -7,29 +7,29 @@ package Convert with SPARK_Mode is
    Meters_Per_Second_To_Miles_Per_Hour : constant Long_Float := 2.23694;
    
    -- /*! \brief convert from MetersPerSecond to MilesPerHour  */
-   MetersPerSecondToKnots : constant Long_Float := 1.94384;
+   Meters_Per_Second_To_Knots : constant Long_Float := 1.94384;
         
    -- /*! \brief convert from MetersPerSecond to MilesPerHour  */
-   KnotsToMetersPerSecond : constant Long_Float := 0.514444;
+   Knots_To_Meters_Per_Second : constant Long_Float := 0.514444;
 
    -- /*! \brief convert from meters to feet  */
-   MetersToFeet : constant Long_Float := 3.280839895;
+   Meters_To_Feet : constant Long_Float := 3.280839895;
 
    -- /*! \brief convert from feet to meters  */
-   FeetToMeters : constant Long_Float := 0.3048;
+   Feet_To_Meters : constant Long_Float := 0.3048;
    
    -- /*! \brief convert from degrees to radians  */
-   DegreesToRadians : constant Long_Float := 0.01745329251994;
+   Degrees_To_Radians : constant Long_Float := 0.01745329251994;
 
    -- /*! \brief convert from degrees to radians  */
-   function To_Radians(degrees : Long_Float) return Long_Float is (degrees * Convert.DegreesToRadians);
+   function To_Radians(degrees : Long_Float) return Long_Float is (degrees * Convert.Degrees_To_Radians);
 
 
    -- /*! \brief convert from radians to degrees  */
-   RadiansToDegrees : constant Long_Float := 57.29577951308232;
+   Radians_To_Degrees : constant Long_Float := 57.29577951308232;
 
    -- /*! \brief convert from radians to degrees  */
-   function To_Degrees(Radians : Long_Float) return Long_Float is (Radians * Convert.RadiansToDegrees);
+   function To_Degrees(Radians : Long_Float) return Long_Float is (Radians * Convert.Radians_To_Degrees);
        
 
  
@@ -93,40 +93,42 @@ package Convert with SPARK_Mode is
    -- static void vRound(double& rdNumber,const double dDecimalPlace)
    procedure vRound(Number : in out Long_Float; Decimel_Place : in Long_Float);
      
-   function Normalize_Angle ( Angle           : Long_Float;
-                              Angle_Reference : Long_Float;
-                              Full_Turn_Unit  : Long_Float) return Long_Float with 
-     Pre =>  - Full_Turn_Unit < Angle_Reference and Angle_Reference <= 0.0 
-     and Full_Turn_Unit > 0.0,
-     Post => Normalize_Angle'Result  >=  Angle_Reference
-     and     Normalize_Angle'Result  <  Angle_Reference + Full_Turn_Unit;
+ 
      
 private 
    procedure modulo(Dividend, Divisor : in Long_Float ;
                     Quotient ,result : out Long_Float) with
-     Pre  => Divisor /= 0.0,
-     Post => (if ( Divisor < 0.0) then
-                  (Divisor < result and result <= 0.0)
-                  else 
-                (0.0 <= result and result <Divisor)) 
-     and   (Divisor * Quotient) + result = Dividend; 
-   procedure modulo(Dividend, Divisor : in Float ;
-                    Quotient ,result : out Float) with
-     Pre  => Divisor /= 0.0,
-     Post => (if ( Divisor < 0.0) then
-                  (Divisor < result and result <= 0.0)
-                  else 
-                (0.0 <= result and result <Divisor)) 
-     and   (Divisor * Quotient) + result = Dividend;
-      
-   function Normalize_Angle_RAD( Angle_RAD       : Long_Float;
-                                 Angle_Reference : Long_Float := - Pi ) return Long_Float
+     Pre  => Divisor > 0.0,
+     Post => (0.0 <= result and result < Divisor);
+   --and   (Divisor * Quotient) + result = Dividend ; 
+   procedure modulo_Loop(Dividend, Divisor : in  Long_Float ;
+                    Quotient, Result  : out Long_Float);
+   
+   function Normalize_Angle ( Angle           : Long_Float;
+                              Angle_Reference : Long_Float;
+                              Full_Turn_Unit  : Long_Float ) return Long_Float with 
+     Pre =>  - Full_Turn_Unit < Angle_Reference and Angle_Reference <= 0.0
+     and  Full_Turn_Unit > 0.0,
+     Post => Normalize_Angle'Result  >=  Angle_Reference
+     and     Normalize_Angle'Result  - Full_Turn_Unit <=  Angle_Reference ;
+       
+   
+   function Normalize_Angle_RAD ( Angle_RAD       : Long_Float;
+                                  Angle_Reference : Long_Float := - Pi) return Long_Float 
    is (Normalize_Angle(Angle           => Angle_RAD,
                        Angle_Reference => Angle_Reference,
-                       Full_Turn_Unit  => Two_Pi))
-     with
-       Pre =>  - Two_Pi < Angle_Reference and Angle_Reference <= 0.0 ;
+                         Full_Turn_Unit => Two_Pi))
+       with 
+         Pre =>  - Two_Pi < Angle_Reference and Angle_Reference <= 0.0;
    
+   function Normalize_Angle_RAD( Angle_RAD       : Float;
+                                 Angle_Reference : Float := Float(- Pi)) return Float
+   is (Float( Normalize_Angle(Angle           => Long_Float(Angle_RAD),
+                                  Angle_Reference => Long_Float(Angle_Reference),
+                                 Full_Turn_Unit => Two_Pi)))
+     with 
+       Pre => Float(  - Two_Pi) < Angle_Reference and Angle_Reference <= 0.0;
+    
    function Normalize_Angle_DEG( Angle_DEG       : Long_Float;
                                  Angle_Reference : Long_Float := - 180.0 ) return Long_Float
    is (Normalize_Angle(Angle           => Angle_DEG,
@@ -134,15 +136,6 @@ private
                        Full_Turn_Unit  => 360.0)) 
      with
        Pre =>  - 360.0 < Angle_Reference and Angle_Reference <= 0.0;
-
-   function Normalize_Angle_RAD( Angle_RAD       : Float;
-                                 Angle_Reference : Float := Float(- Pi)) return Float
-   is (Float( Normalize_Angle(Angle           => Long_Float(Angle_RAD),
-                              Angle_Reference => Long_Float(Angle_Reference),
-                              Full_Turn_Unit  => Two_Pi)))
-     with 
-       Pre => Float(  - Two_Pi) < Angle_Reference and Angle_Reference <= 0.0;
-   
    function Normalize_Angle_DEG( Angle_DEG       : Float;
                                  Angle_Reference : Float := -180.0) return Float
    is (Float( Normalize_Angle(Angle           => Long_Float(Angle_DEG),

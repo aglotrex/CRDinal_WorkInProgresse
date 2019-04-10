@@ -1,6 +1,6 @@
 with UxAS.Common.Utilities.Unit_Conversions; use UxAS.Common.Utilities.Unit_Conversions;
---  with ADA.Numerics.Elementary_Functions;  use ADA.Numerics.Elementary_Functions;
 with Ada.Numerics.Long_Elementary_Functions; use  Ada.Numerics.Long_Elementary_Functions;
+with Convert;                                use Convert;
 
 package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
    
@@ -29,19 +29,18 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
             pragma Assert(0.0 <= temp and temp < 0.5);
             
             Temp2 : constant Long_Float :=  1.0 - Temp;
-             pragma Assert(0.5 < Temp2 and Temp2 <= 1.0);
+            pragma Assert(0.5 < Temp2 and Temp2 <= 1.0);
             
-            Denominator_Meridional : constant Long_float := Temp2**(3.0/2.0);
-            Denominator_Transverse : constant Long_float := Temp2**(0.5);
-           
+            Denominator_Meridional : Long_float := Temp2**(3.0/2.0);
+            Denominator_Transverse : Long_float := Temp2**(0.5);
+         
          begin
             -- assert(dDenominatorMeridional > 0.0);
             -- assert(dDenominatorTransverse > 0.0);
-           pragma Assert(Denominator_Meridional > 0.0);
-           pragma Assert(Denominator_Transverse > 0.0);
+            if (Denominator_Meridional = 0.0) then Denominator_Meridional := Long_Float'Succ(0.0); end if;
+            if (Denominator_Transverse = 0.0) then Denominator_Transverse := Long_Float'Succ(0.0); end if;
             
-            
-            -- Long_float dDenominatorTransverse = pow((1.0 - (m_dEccentricitySquared * std::pow(std::sin(dLatitudeInit_rad), 2.0))), 0.5);
+            -- m_dRadiusMeridional_m = (dDenominatorMeridional <= 0.0) ? (0.0) : (m_dRadiusEquatorial_m * (1.0 - m_dEccentricitySquared) / dDenominatorMeridional);
             Radius_Meridional_M := Radius_Equatorial_M * ( 1.0 - Eccentricity_Squared) / Denominator_Meridional;
             
             --  m_dRadiusTransverse_m = (dDenominatorTransverse <= 0.0) ? (0.0) : (m_dRadiusEquatorial_m / dDenominatorTransverse);
@@ -97,6 +96,8 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
       -- dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
       North_M := Radius_Meridional_M * (Latitude_RAD - Latitude_Initial_RAD);
       East_M  := Radius_Small_Circle_Latitude_M * (Longitude_RAD - Longitude_Initial_RAD);
+      
+      
    end Convert_Lat_Long_RAD_To_North_East_M;
    
    procedure Convert_Lat_Long_RAD_To_North_East_FT
@@ -109,20 +110,14 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
       East_M  : Long_float;
    begin
       
-      --  if (!m_bInitialized){Initialize(dLatitude_rad, dLongitude_rad);  }
-      if not B_Initilized then
-         Initialize(Latitude_RAD,Longitude_RAD);
-      end if;
-         
-      -- double dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
-      -- double dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-      Convert_Lat_Long_RAD_To_North_East_M(Latitude_RAD, Longitude_RAD ,
-                                           North_M , East_M);
+     
+      Convert_Lat_Long_RAD_To_North_East_M(Latitude_RAD  => Latitude_RAD,
+                                           Longitude_RAD => Longitude_RAD,
+                                           North_M       => North_M,
+                                           East_M        => East_M);
       
-      -- dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
-      -- dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-      North_FT := North_M * Meter_to_Feet;
-      East_FT  := East_M  * Meter_to_Feet;
+      North_FT := North_M * Meters_To_Feet;
+      East_FT  := East_M  * Meters_To_Feet;
     
    
    end Convert_Lat_Long_RAD_To_North_East_FT;
@@ -137,19 +132,13 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
       -- double dLatitude_rad = dLatitude_deg * n_Const::c_Convert::dDegreesToRadians();
       -- double dLongitude_rad = dLongitude_deg * n_Const::c_Convert::dDegreesToRadians();
 
-      Latitude_RAD  : constant Long_float := Latitude_DEG * Degrees_to_Radians;
-      Longitude_RAD : constant Long_float := Longitude_DEG * Degrees_to_Radians;
+      Latitude_RAD  : constant Long_float := Latitude_DEG * Degrees_To_Radians;
+      Longitude_RAD : constant Long_float := Longitude_DEG * Degrees_To_Radians;
    begin
-      
-      --  if (!m_bInitialized){Initialize(dLatitude_rad, dLongitude_rad);  }
-      if not B_Initilized then
-         Initialize(Latitude_RAD,Longitude_RAD);
-      end if;
-      
-      -- double dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
-      -- double dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-      Convert_Lat_Long_RAD_To_North_East_M(Latitude_RAD, Longitude_RAD ,
-                                           North_M , East_M);
+      Convert_Lat_Long_RAD_To_North_East_M(Latitude_RAD  => Latitude_RAD,
+                                           Longitude_RAD => Longitude_RAD,
+                                           North_M       => North_M,
+                                           East_M        => East_M);
    
    
    end Convert_Lat_Long_DEG_To_North_East_M;
@@ -162,24 +151,19 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
    is 
       -- double dLatitude_rad = dLatitude_deg * n_Const::c_Convert::dDegreesToRadians();
       -- double dLongitude_rad = dLongitude_deg * n_Const::c_Convert::dDegreesToRadians();
-      Latitude_RAD  : constant Long_float := Latitude_DEG * Degrees_to_Radians;
-      Longitude_RAD : constant Long_float := Longitude_DEG * Degrees_to_Radians;
+      Latitude_RAD  : constant Long_float := Latitude_DEG * Degrees_To_Radians;
+      Longitude_RAD : constant Long_float := Longitude_DEG * Degrees_To_Radians;
       
       North_M : Long_float; 
       East_M  : Long_float;
    begin
-      --  if (!m_bInitialized){Initialize(dLatitude_rad, dLongitude_rad);  }
-      if not B_Initilized then
-         Initialize(Latitude_RAD,Longitude_RAD);
-      end if;
-      -- double dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
-      -- double dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-      Convert_Lat_Long_RAD_To_North_East_M(Latitude_RAD, Longitude_RAD ,
-                                           North_M , East_M);
-      -- dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
-      -- dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-      North_FT := North_M * Meter_to_Feet;
-      East_FT  := East_M  * Meter_to_Feet;
+      Convert_Lat_Long_RAD_To_North_East_M(Latitude_RAD  => Latitude_RAD,
+                                           Longitude_RAD => Longitude_RAD,
+                                           North_M       => North_M,
+                                           East_M        => East_M);
+      
+      North_FT := North_M * Meters_To_Feet;
+      East_FT  := East_M  * Meters_To_Feet;
    
    end Convert_Lat_Long_DEG_To_North_East_FT;
 
@@ -222,8 +206,8 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
       Latitude_RAD  : out Long_float;
       Longitude_RAD : out Long_float)
    is
-      North_M : constant Long_float := North_FT * Feet_to_Meter;
-      East_M  : constant Long_float := East_FT  * Feet_to_Meter;
+      North_M : constant Long_float := North_FT * Feet_To_Meters;
+      East_M  : constant Long_float := East_FT  * Feet_To_Meters;
    begin
   
       Convert_North_East_M_To_Lat_Long_RAD(North_M,East_M,
@@ -236,8 +220,8 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
       Latitude_DEG  : out Long_float;
       Longitude_DEG : out Long_float)
    is
-      North_M : constant Long_float := North_FT * Feet_to_Meter;
-      East_M  : constant Long_float := East_FT  * Feet_to_Meter;
+      North_M : constant Long_float := North_FT * Feet_To_Meters;
+      East_M  : constant Long_float := East_FT  * Feet_To_Meters;
       Latitude_RAD  : Long_Float;
       Longitude_RAD : Long_Float;
    begin
@@ -292,10 +276,10 @@ package body Uxas.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
       Longitude_2_DEG   : in  Long_float;
       Linear_Distance_M : out Long_Float)
    is
-      Latitude_1_RAD  : constant Long_float := Latitude_1_DEG  * Degrees_to_Radians;
-      Longitude_1_RAD : constant Long_float := Longitude_1_DEG * Degrees_to_Radians;
-      Latitude_2_RAD  : constant Long_float := Latitude_2_DEG  * Degrees_to_Radians;
-      Longitude_2_RAD : constant Long_float := Longitude_2_DEG * Degrees_to_Radians;
+      Latitude_1_RAD  : constant Long_float := Latitude_1_DEG  * Degrees_To_Radians;
+      Longitude_1_RAD : constant Long_float := Longitude_1_DEG * Degrees_To_Radians;
+      Latitude_2_RAD  : constant Long_float := Latitude_2_DEG  * Degrees_To_Radians;
+      Longitude_2_RAD : constant Long_float := Longitude_2_DEG * Degrees_To_Radians;
    
    begin
    
