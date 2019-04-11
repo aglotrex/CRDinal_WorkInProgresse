@@ -1,66 +1,50 @@
 
-package body convert with SPARK_Mode is
+package body Convert with SPARK_Mode is
 
-   procedure modulo(Dividend, Divisor : in  Long_Float ;
-                    Quotient, Result  : out Long_Float) is
-    
+   procedure Modulo (Dividend, Divisor : in  Long_Float ;
+                     Quotient, Result  : out Long_Float) is
+      Quotient_Floor   : Long_Float;
+      Quotient_Ceiling : Long_Float;
    begin
-      if (0.0 <= Dividend and Dividend < Divisor) then
-         Quotient := 0.0 ;
+      if 0.0 <= Dividend and Dividend < Divisor then
+         Quotient_Floor := 0.0 ;
       else
          Quotient := Dividend/Divisor;
-         Quotient_Floor := Long_Float'Floor  (MultiplIcator);
-         Quotient_Ceiling := Long_Float'Ceiling(MultiplIcator);
+         Quotient_Floor   := Long_Float'Floor  (Quotient);
+         Quotient_Ceiling := Long_Float'Ceiling(Quotient);
          
       end if;
-      result := Dividend - (Divisor * Quotient);
+      Result := Dividend - (Divisor * Quotient_Floor);
+      Quotient := Quotient_Floor;
       
      
-   end modulo;
+   end Modulo;
    
-   procedure modulo_Loop(Dividend, Divisor : in  Long_Float ;
-                         Quotient, Result  : out Long_Float) is
    
-      Is_Neg_Dividend : constant Boolean := Dividend < 0.0;
-   begin
-      Quotient := 0.0;
-      Result := abs(Dividend);
-      while Result >= Divisor loop
-         Result := Result - Divisor;
-         Quotient := Quotient + 1.0;
-       --  pragma Loop_Invariant(Dividend = Result + (Quotient* Divisor));
-      end loop;
-      
-      pragma Assert(0.0 <= result and result < Divisor );
-      
-      Quotient := (if Is_Neg_Dividend then (- Quotient) else Quotient);
-      Result   := (if Is_Neg_Dividend then (- Result  ) else Result  );
-   end modulo_Loop;
-   
-   function Compare(Argument1 : Long_Float;
-                    Argument2 : Long_Float;
-                    rel_Operator : En_Relational_Operators;
-                    Epsilon   : Long_Float :=(10.0**(-9)) ) return Boolean
+   function Compare (Argument1    : Long_Float;
+                     Argument2    : Long_Float; 
+                     Rel_Operator : En_Relational_Operators;
+                     Epsilon      : Long_Float :=(10.0**(-9)) ) return Boolean
    is
    begin
       
          
-      case rel_Operator is 
+      case Rel_Operator is 
          -- bReturn = (dArgument1 > dArgument2);
-         when  enGreater      =>  return Argument1 > Argument2;
+         when  EnGreater      =>  return Argument1 > Argument2;
                
             --  bReturn = (bCompareDouble(dArgument1, dArgument2, enGreater) || bCompareDouble(dArgument1, dArgument2, enEqual, dEpsilon));
-         when enGreaterEqual =>  return(Compare(Argument1,Argument2,enGreater)
+         when EnGreaterEqual =>  return(Compare(Argument1,Argument2,EnGreater)
                                         or 
-                                          Compare(Argument1,Argument2,enEqual,Epsilon));
+                                          Compare(Argument1,Argument2,EnEqual,Epsilon));
                
             -- bReturn = (dArgument1 < dArgument2);   
-         when enLess         => return (Argument1 < Argument2);
+         when EnLess         => return (Argument1 < Argument2);
                
             -- bReturn = (bCompareDouble(dArgument1, dArgument2, enLess) || bCompareDouble(dArgument1, dArgument2, enEqual, dEpsilon));
-         when enLessEqual    => return (Compare(Argument1,Argument2,enLess)
+         when EnLessEqual    => return (Compare(Argument1,Argument2,EnLess)
                                         or 
-                                          Compare(Argument1,Argument2,enEqual,Epsilon));
+                                          Compare(Argument1,Argument2,EnEqual,Epsilon));
                
             --  bReturn = (std::fabs(dArgument1 - dArgument2) <= dEpsilon);
          when others        => return (abs(Argument1 - Argument2) <= Epsilon);
@@ -70,28 +54,28 @@ package body convert with SPARK_Mode is
    
    function Compare(Argument1 : Float;
                     Argument2 : Float;
-                    rel_Operator : En_Relational_Operators;
+                    Rel_Operator : En_Relational_Operators;
                     Epsilon   : Float := (10.0**(-9))) return Boolean
    
    is
    begin
          
-      case rel_Operator is 
+      case Rel_Operator is 
          -- bReturn = (dArgument1 > dArgument2);
-         when  enGreater      =>  return Argument1 > Argument2;
+         when  EnGreater      =>  return Argument1 > Argument2;
                
             --  bReturn = (bCompareDouble(dArgument1, dArgument2, enGreater) || bCompareDouble(dArgument1, dArgument2, enEqual, dEpsilon));
-         when enGreaterEqual =>  return(Compare(Argument1,Argument2,enGreater)
+         when EnGreaterEqual =>  return(Compare(Argument1,Argument2,EnGreater)
                                         or 
-                                          Compare(Argument1,Argument2,enEqual,Epsilon));
+                                          Compare(Argument1,Argument2,EnEqual,Epsilon));
                
             -- bReturn = (dArgument1 < dArgument2);   
-         when enLess         => return (Argument1 < Argument2);
+         when EnLess         => return (Argument1 < Argument2);
                
             -- bReturn = (bCompareDouble(dArgument1, dArgument2, enLess) || bCompareDouble(dArgument1, dArgument2, enEqual, dEpsilon));
-         when enLessEqual    => return (Compare(Argument1,Argument2,enLess)
+         when EnLessEqual    => return (Compare(Argument1,Argument2,EnLess)
                                         or 
-                                          Compare(Argument1,Argument2,enEqual,Epsilon));
+                                          Compare(Argument1,Argument2,EnEqual,Epsilon));
                
             --  bReturn = (std::fabs(dArgument1 - dArgument2) <= dEpsilon);
          when others        => return (abs(Argument1 - Argument2) <= Epsilon);
@@ -108,7 +92,7 @@ package body convert with SPARK_Mode is
    begin 
       pragma Assert (Full_Turn_Unit > 0.0);
       -- double dModAngle = modulo (dAngleRad,/Full_Turn/);
-      modulo (Dividend => Angle,
+      Modulo (Dividend => Angle,
               Divisor  => Full_Turn_Unit,
               Quotient => N,
               Result   => Mod_Angle);
@@ -147,14 +131,14 @@ package body convert with SPARK_Mode is
     
    
    -- static void vRound(double& rdNumber,const double dDecimalPlace)
-   procedure vRound(Number : in out Long_Float; 
+   procedure VRound(Number : in out Long_Float; 
                     Decimel_Place : in Long_Float)is 
    begin
-      Number := dRound(Number        => Number,
+      Number := DRound(Number        => Number,
                        Decimal_Place => Decimel_Place);
-   end vRound;
+   end VRound;
         
                       
       
 
-end convert;
+end Convert;
