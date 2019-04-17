@@ -81,17 +81,19 @@ private
      (This   : in out Route_Aggregator_Service;
       Result : out Boolean);
 
-   overriding
-   procedure Process_Received_Serialized_LMCP_Message
-     (This             : in out Route_Aggregator_Service;
-      Received_Message : not null Any_Addressed_Attributed_Message;
-      Result           : out Boolean);
 
    overriding
    procedure Process_Received_LMCP_Message
      (This             : in out Route_Aggregator_Service;
       Received_Message : not null Any_LMCP_Message;
       Result           : out Boolean);
+
+      overriding
+   procedure Process_Received_Serialized_LMCP_Message
+     (This             : in out Route_Aggregator_Service;
+      Received_Message : not null Any_Addressed_Attributed_Message;
+      Result           : out Boolean);
+
 
    -- void HandleRouteRequest(std::shared_ptr<uxas::messages::route::RouteRequest>);
    procedure Handle_Route_Request(This         : in out Route_Aggregator_Service;
