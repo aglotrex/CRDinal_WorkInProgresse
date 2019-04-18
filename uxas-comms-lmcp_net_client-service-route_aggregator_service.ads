@@ -74,7 +74,7 @@ private
    overriding
    procedure Configure(This     : in out Route_Aggregator_Service;
                        XML_Node : DoM.Core.Element;
-                       Result  : out Boolean)
+                       Result  : out Boolean);
 
    overriding
    procedure Initialize
@@ -95,33 +95,14 @@ private
       Result           : out Boolean);
 
 
-   -- void HandleRouteRequest(std::shared_ptr<uxas::messages::route::RouteRequest>);
-   procedure Handle_Route_Request(This         : in out Route_Aggregator_Service;
-                                  Route_Request : RouteRequest_Acc);
-
-   -- void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
-   procedure Euclidean_Plan(This             : in out Route_Aggregator_Service;
-                            Route_Plan_Request : RoutePlanRequest);
 
 
-   --  void CheckAllTaskOptionsReceived();
-   procedure Check_All_Task_Option_Received(This : in out Route_Aggregator_Service);
 
-   -- void CheckAllRoutePlans();
-   procedure Check_All_Route_Plans(This : in out Route_Aggregator_Service);
 
-   -- void BuildMatrixRequests(int64_t, const std::shared_ptr<uxas::messages::task::UniqueAutomationRequest>&);
-   procedure Build_Matrix_Requests(This : in out Route_Aggregator_Service;
-                                   reqID : Int64;
-                                   areq  : UniqueAutomationRequest_Acc);
 
-   -- void SendRouteResponse(int64_t);
-   procedure Send_Route_Reponse ( This : in out Route_Aggregator_Service;
-                                  routeKey : Int64);
 
-   -- void SendMatrix(int64_t);
-   procedure Send_Matrix( This : in out Route_Aggregator_Service;
-                          autoKey : Int64);
+
+
 
 
 
@@ -287,10 +268,6 @@ private
 
       -- std::unordered_map<int64_t, std::shared_ptr<uxas::messages::task::TaskPlanOptions> > m_taskOptions;
       Task_Plan_Options : Task_Plan_Options_Map;
-
-      hauteur de bureau
-        largeur avant bras +main
-          longeur grosse main
 
       -- int64_t m_routeId{1000000}
       Route_Id : Int64 := 1000000;
