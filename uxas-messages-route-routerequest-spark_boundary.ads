@@ -1,6 +1,5 @@
 with Common_Formal_Containers; use Common_Formal_Containers;
-with Avtas.Lmcp.Object.SPARK_Boundary; use Avtas.Lmcp.Object.SPARK_Boundary;
-
+with Uxas.Messages.Route.RouteConstraints; use Uxas.Messages.Route.RouteConstraints; 
 
 
 package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
@@ -33,9 +32,28 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      (This : My_RouteRequest) return Int64
      with Global => null;
    
-   function Get_RouteRequests_Ids
-     (Request : My_RouteRequest) return Int64_Vect
+   function Get_RouteRequests
+     (Request : My_RouteRequest) return Vect_RouteConstraints_Acc_Acc
      with Global => null;
+   
+   
+   procedure Add_RouteConstraints 
+     (This : My_RouteRequest;
+      Route_Constraints : RouteConstraints_Acc)
+     with Global => null,
+     Post => 
+       Get_RouteRequests (This).Last_Element = Route_Constraints
+     and Get_RouteRequests (This).Length = Get_RouteRequests(This'Old).Length +1
+     and (for all L in Integer
+          => (if ( L /= Get_RouteRequests (This).Last_Index) then
+            Get_RouteRequests (This).Element(L) = Get_RouteRequests (This).Element(L)))
+     
+     and Get_AssociatedTaskID (This) =
+     Get_AssociatedTaskID (This)'Old 
+     and Get_Vehicle_ID (This) 
+     = Get_Vehicle_ID (This)'Old
+     and Get_OperatingRegion (This)
+     = Get_OperatingRegion (This)'Old;
      
      
    function Same_Requests (X, Y : My_RouteRequest) return Boolean is
@@ -46,8 +64,8 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
           Get_Vehicle_ID (Y)
       and Get_OperatingRegion (X) =
           Get_OperatingRegion (Y)
-      and Get_RouteRequests_Ids (X) = 
-          Get_RouteRequests_Ids (Y));
+      and Get_RouteRequests (X) = 
+          Get_RouteRequests (Y));
    pragma Annotate (GNATprove, Inline_For_Proof, Same_Requests);
      
      
@@ -67,8 +85,8 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      = Get_Vehicle_ID (This)'Old
      and Get_OperatingRegion (This)
      = Get_OperatingRegion (This)'Old
-     and Get_RouteRequests_Ids (This)
-     = Get_RouteRequests_Ids (This)'Old;
+     and Get_RouteRequests (This)
+     = Get_RouteRequests (This)'Old;
    
    procedure Set_AssociatedTaskID 
      (This : in out My_RouteRequest;
@@ -81,8 +99,8 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      = Get_Vehicle_ID (This)'Old
      and Get_OperatingRegion (This)
      = Get_OperatingRegion (This)'Old
-     and Get_RouteRequests_Ids (This)
-     = Get_RouteRequests_Ids (This)'Old;
+     and Get_RouteRequests (This)
+     = Get_RouteRequests (This)'Old;
    
    procedure Set_OperatingRegion
      (This : in out My_RouteRequest;
@@ -95,8 +113,9 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      = Get_AssociatedTaskID (This)'Old 
      and Get_Vehicle_ID (This) 
      = Get_Vehicle_ID (This)'Old
-     and Get_RouteRequests_Ids (This)
-     = Get_RouteRequests_Ids (This)'Old;
+     and Get_RouteRequests (This)
+     = Get_RouteRequests (This)'Old;
+   
    function Unwrap (This : My_RouteRequest) return RouteRequest;
    
    function Wrap (This : RouteRequest) return My_RouteRequest;

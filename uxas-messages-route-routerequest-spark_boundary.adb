@@ -20,23 +20,22 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
    end Get_Vehicle_ID;
    
    
-   -----------------------------
-   --  Get_RouteRequests_Ids  --
-   -----------------------------
+   -------------------------
+   --  Get_RouteRequests  --
+   -------------------------
       
-   function Get_RouteRequests_Ids
-     (Request : My_RouteRequest) return Int64_Vect
+   function Get_RouteRequests
+     (Request : My_RouteRequest) return Vect_RouteConstraints_Acc_Acc
    is
       L : constant UxAS.Messages.Route.RouteRequest.Vect_RouteConstraints_Acc_Acc := 
         Request.Content.GetRouteRequests;
    begin
-      return R : Int64_Vect do 
+      return R : Vect_RouteConstraints_Acc_Acc do
          for E of L.all loop
-            Int64_Vects.Append (Container => R,
-                                New_Item  => E.getRouteID);
+            R.Append(New_Item  => E);
          end loop;
       end return;
-   end Get_RouteRequests_Ids;
+   end Get_RouteRequests;
    
    ---------------------
    --  Set_RequestID  --
@@ -75,6 +74,14 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
    begin
       This.Content.SetOperatingRegion(OperatingRegion);
    end Set_OperatingRegion;
+   
+   procedure Add_RouteConstraints 
+     (This : My_RouteRequest;
+      Route_Constraints : RouteConstraints_Acc)
+   is 
+   begin
+      This.Content.RouteRequests.Append(Route_Constraints);
+   end Add_RouteConstraints;
    
    
          
