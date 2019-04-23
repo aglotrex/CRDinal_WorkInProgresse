@@ -1,3 +1,5 @@
+with UxAS.Messages.Route.RouteConstraints.Spark_Boundary; use UxAS.Messages.Route.RouteConstraints.Spark_Boundary;
+
 package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => Off is
 
  
@@ -25,14 +27,16 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
    -------------------------
       
    function Get_RouteRequests
-     (Request : My_RouteRequest) return Vect_RouteConstraints_Acc_Acc
+     (Request : My_RouteRequest) return Vect_My_RouteConstraints_Acc
    is
       L : constant UxAS.Messages.Route.RouteRequest.Vect_RouteConstraints_Acc_Acc := 
         Request.Content.GetRouteRequests;
    begin
-      return R : Vect_RouteConstraints_Acc_Acc do
+      return R : Vect_My_RouteConstraints_Acc do
          for E of L.all loop
-            R.Append(New_Item  => E);
+            ApPend
+              (Source   => R,
+               New_Item => Wrap(This => E));
          end loop;
       end return;
    end Get_RouteRequests;
@@ -77,7 +81,7 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
    
    procedure Add_RouteConstraints 
      (This : My_RouteRequest;
-      Route_Constraints : RouteConstraints_Acc)
+      Route_Constraints : My_RouteConstraints)
    is 
    begin
       This.Content.RouteRequests.Append(Route_Constraints);

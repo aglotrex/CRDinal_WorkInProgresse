@@ -1,23 +1,26 @@
 with Uxas.Messages.Route.RouteConstraints; use Uxas.Messages.Route.RouteConstraints;
-with Common_Formal_Containers; use Common_Formal_Containers;
+with Afrl.Cmasi.Location3D.Spark_Boundary; use Afrl.Cmasi.Location3D.Spark_Boundary;
+
+
 package UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode is
    
    
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
-   use all type Int64_Vect;
+  
    
    type My_RouteConstraints is private;
-   
+
+  
    function Get_RouteID 
      (This : My_RouteConstraints) return Int64
      with Global => null;
    
    
    function Get_StartLocation
-     (This : My_RouteConstraints) return Location3D_Any
+     (This : My_RouteConstraints) return My_Location3D
      with Global => null;
    
-  function Get_StartHeading
+   function Get_StartHeading
      (This : My_RouteConstraints) return Real32
      with Global => null;
    
@@ -27,7 +30,7 @@ package UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode is
    
    
    function Get_EndLocation
-     (This : My_RouteConstraints) return Location3D_Any
+     (This : My_RouteConstraints) return My_Location3D
      with Global => null;
    
    function Get_EndHeading
@@ -73,7 +76,7 @@ package UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode is
    
    procedure Set_StartLocation
      (This : in out My_RouteConstraints;
-      StartLocation : in Location3D_Any)
+      StartLocation : in My_Location3D)
      with Global => null,
      Post =>  Get_StartLocation (This) = StartLocation
      and Get_RouteID (This) =
@@ -128,7 +131,7 @@ package UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode is
    
    procedure Set_EndLocation
      (This : in out My_RouteConstraints;
-      EndLocation : in Location3D_Any)
+      EndLocation : in My_Location3D)
      with Global => null,
      Post => Get_EndLocation (This) = EndLocation
      and Get_RouteID (This) =
@@ -164,7 +167,7 @@ package UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode is
    
    procedure Set_UseEndHeading
      (This : in out My_RouteConstraints;
-      UseEndHeading : out Boolean)
+      UseEndHeading : in Boolean)
      with Global => null,
      Post => Get_UseEndHeading (This) = UseEndHeading
      and Get_RouteID (This) =
@@ -198,12 +201,12 @@ private
    
    
    function Get_StartLocation
-     (This : My_RouteConstraints) return Location3D_Any is
-     (This.Content.GetStartLocation);
+     (This : My_RouteConstraints) return My_Location3D is
+     (Wrap(This => Location3D(This.Content.GetStartLocation)));
    
    function Get_StartHeading
      (This : My_RouteConstraints) return Real32 is
-     (This.Content.getStartHeading);
+     (This.Content.GetStartHeading);
    
    function Get_UseStartHeading
      (This : My_RouteConstraints) return Boolean is
@@ -211,12 +214,12 @@ private
    
    
    function Get_EndLocation
-     (This : My_RouteConstraints) return Location3D_Any is
-     (This.Content.GetEndLocation);
+     (This : My_RouteConstraints) return My_Location3D is
+     (Wrap(This => Location3D(This.Content.getEndLocation)));
    
    function Get_EndHeading
      (This : My_RouteConstraints) return Real32 is
-     (This.Content.getEndHeading);
+     (This.Content.GetEndHeading);
    
    function Get_UseEndHeading
      (This : My_RouteConstraints) return Boolean is
@@ -227,5 +230,5 @@ private
 
    function Wrap (This : RouteConstraints) return My_RouteConstraints is
      (Content => This);
-
+   
 end UxAS.Messages.Route.RouteConstraints.Spark_Boundary ;
