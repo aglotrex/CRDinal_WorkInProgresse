@@ -24,10 +24,10 @@ package body UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode
    
    procedure Set_StartLocation
      (This : in out My_RouteConstraints;
-      StartLocation : in My_Location3D)
+      StartLocation : in My_Location3D_Any)
    is 
    begin
-      THis.Content.SetStartLocation(Location3D_Any (UnWrap (StartLocation)));
+      THis.Content.SetStartLocation(UnWrap (StartLocation));
    end Set_StartLocation;
    
    ------------------------
@@ -60,10 +60,10 @@ package body UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode
    
    procedure Set_EndLocation
      (This : in out My_RouteConstraints;
-      EndLocation : in My_Location3D)
+      EndLocation : in My_Location3D_Any)
    is
    begin
-      This.Content.SetEndLocation(Location3D_Any(UnWrap (EndLocation)));
+      This.Content.SetEndLocation(UnWrap (EndLocation));
    end Set_EndLocation;
    
    ----------------------

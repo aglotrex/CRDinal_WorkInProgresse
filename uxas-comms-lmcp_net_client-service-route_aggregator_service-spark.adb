@@ -13,11 +13,164 @@ is
       procedure Send_Route_Reponse ( This : in out Route_Aggregator_Service;
                                      RouteKey : Int64);
       
+      -- void SendRouteResponse(int64_t);
+      procedure Send_Route_Reponse ( This : in out Route_Aggregator_Service;
+                                     RouteKey : Int64)
+      is 
+         Response : RouteResponse := new RouteResponse;
+         RouteList : RoutePlanResponse_Lists := new RoutePlanResponse_List;
+      begin
+         
+         Response.SetResponseID(RouteKey);
+         for R_Id in Element(This.Pending_Route,
+                             RouteKey) loop
+           
+            if Contains(This.Route_Plan_Responses,
+                        R_Id) then
+               declare
+                  Plan : RoutePlanResponse := Element(This.Route_Plan_Responses,
+                                                      R_Id);
+               begin
+                  
+                  RouteList.Append(Plan); -- clone here
+                  
+                  for L : RoutePlan in Plan.GetRouteResponses loop
+                     Remove ( This.Route_Plan,
+                              L.RouteID);
+                  end loop;
+                  
+                  Remove(This.Route_Plan_Responses,
+                         Plan);
+               end;
+            end if;
+         end loop;
+         
+         
+         // Todo
+      end Send_Route_Reponse;
+      
+         
+              
+      
+      
       
       -- void SendMatrix(int64_t);
       procedure Send_Matrix( This : in out Route_Aggregator_Service;
                              AutoKey : Int64);
+      
+      procedure Send_Matrix( This : in out Route_Aggregator_Service;
+                             AutoKey : Int64)
+ 
+        
+         
+      is
+         P_Reponse : AssignmentCostMatrix_Acc := new AssignmentCostMatrix_Acc;
+         Matrix : AssignmentCostMatrix := P_Reponse.all;
+         Areq   : My_UniqueAutomationRequest := 
+           Wrap( Int64_Unique_Automation_Request_Maps.Element(This.Unique_Automation_Request,
+                 AutoKey));
+         Route_Not_Found : Strings;
+         
+         Service_Status : Afrl.Cmasi.ServiceStatus := new Afrl.Cmasi.ServiceStatus;
+         Key_Pair : new Afrl.Cmasi.KeyValuePair;
+         
+
+         
+      begin
+         for R_Id in Int64_Pending_Auto_Req_Matrix.Element(Container => This.Pending_Auto_Req,
+                                                           Key       => AutoKey) loop 
+            if Int64_Pair_Int64_Route_Plan_Maps.Contains(This.Route_Plan,
+                                                         R_ID);
+            then
+               declare
+                  Plan : Pair_Int64_Route_Plan := Int64_Pair_Int64_Route_Plan_Maps.Element(This.Route_Plan,
+                                                                                           R_ID);
+               begin
+                  if Int64_Aggregator_Task_Option_Pair_Maps.Contains(Container => This.Route_Task_Pairing,
+                                                                     Key       => R_ID);
+                  then
+                     declare
+                        Task_Pair :AggregatorTaskOptionPair := Int64_Aggregator_Task_Option_Pair_Maps.Element( This.Route_Task_Pairing,
+                                                                                                               R_Id);
+                        Task_Option_Cost : TaskOptionCost;
+                     begin
+                        if (Plan.Returned_Route_Plan.GetRouteCost < 0)
+                        then
+                           Route_Not_Found := "V[" & Task_Pair.VehicleId & "](" & Task_Pair.PrevTaskId &  ","
+                             & Task_Pair.PrevTaskOption & ")-(" & Task_Pair.TaskId & "," & Task_Pair.TaskOption & ")";
+                        end if;
+                        
+                        
+                        Task_Option_Cost.SetDestinationTaskID(Task_Pair.TaskId);
+                        Task_Option_Cost.SetDestinationTaskOption(Task_Pair.TaskOption);
+                        Task_Option_Cost.SetIntialTaskID(Task_Pair.PrevTaskId);
+                        Task_Option_Cost.SetIntialTaskOption(Task_Pair.PrevTaskOption);
+                        Task_Option_Cost.SetTimeToGo(Plan.Returned_Route_Plan.GetRouteCost);
+                        Task_Option_Cost.SetVehicleID(Task_Pair.VehicleId);
+                        Matrix.GetCostMatrix.Append(New_Item => Task_Option_Cost);
+                        Remove(This.Route_Task_Pairing,
+                               Task_Pair);
+                     end;
+                  end if;
+                  
+                  Remove(This.Route_Plan_Responses,
+                         Plan.Reponse_ID);
+                  Remove(This.Route_Plan,
+                         Plan);
+               end;
+            end if;
+         end loop;
+         
+         Send_Shared_LMCP_Object_Broadcast_Message(This => This,
+                                                   Msg  => Matrix);
+         
+         
+         Clear(This.Task_Plan_Options);
+         
+         if Route_Not_Found'Length = 0 then
+            
+            Service_Status.SetStatusType(Afrl.Cmasi.Enumerations.Information);
+            Key_Pair.SetKey("RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId)");
+            
+            Key_Pair.SetValue(Route_Not_Found);
+            Append(Service_Status.GetInfo,
+                   Key_Pair);
+            Key_Pair := null;
+            Send_LMCP_Object_Broadcast_Message(This => ,
+                                               Msg  => Service_Status);
+            Put("RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId) :: " & Route_Not_Found);
+         
+         else
+            Service_Status.SetStatusType(Afrl.Cmasi.Enumerations.Information);
+            Key_Pair.SetKey("AssignmentMatrix - full");
+            Append(Service_Status.GetInfo,
+                   Key_Pair);
+            Key_Pair := null;
+            
+            
+            Send_LMCP_Object_Broadcast_Message(This => ,
+                                               Msg  => Service_Status);
+         end if;
+      end Send_Matrix;
+      
+         
+     
+         
+         
+            
+         
    begin
+            
+            
+            
+            
+            
+            
+            
+                    
+                   
+      
+               
 
       --  // check pending route requests
       -- auto i = m_pendingRoute.begin();
@@ -351,7 +504,7 @@ is
          for K in Route_Plan_Request.GetRouteRequests'Range loop
             declare
                -- uxas::messages::route::RouteConstraints* routeRequest = request->getRouteRequests().at(k);
-               Route_Request : RouteConstraints := Route_Plan_Request.GetRouteRequests.Element(K);
+               Route_Request : My_RouteConstraints := Wrap(Route_Plan_Request.GetRouteRequests.Element(K));
 
                Route_ID : Int64 := Route_Request.GetRouteID;
 

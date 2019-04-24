@@ -17,7 +17,7 @@ package UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode is
    
    
    function Get_StartLocation
-     (This : My_RouteConstraints) return My_Location3D
+     (This : My_RouteConstraints) return My_Location3D_Any
      with Global => null;
    
    function Get_StartHeading
@@ -30,7 +30,7 @@ package UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode is
    
    
    function Get_EndLocation
-     (This : My_RouteConstraints) return My_Location3D
+     (This : My_RouteConstraints) return My_Location3D_Any
      with Global => null;
    
    function Get_EndHeading
@@ -76,7 +76,7 @@ package UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode is
    
    procedure Set_StartLocation
      (This : in out My_RouteConstraints;
-      StartLocation : in My_Location3D)
+      StartLocation : in My_Location3D_Any)
      with Global => null,
      Post =>  Get_StartLocation (This) = StartLocation
      and Get_RouteID (This) =
@@ -131,7 +131,7 @@ package UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode is
    
    procedure Set_EndLocation
      (This : in out My_RouteConstraints;
-      EndLocation : in My_Location3D)
+      EndLocation : in My_Location3D_Any)
      with Global => null,
      Post => Get_EndLocation (This) = EndLocation
      and Get_RouteID (This) =
@@ -201,8 +201,8 @@ private
    
    
    function Get_StartLocation
-     (This : My_RouteConstraints) return My_Location3D is
-     (Wrap(This => Location3D(This.Content.GetStartLocation)));
+     (This : My_RouteConstraints) return My_Location3D_Any is
+     (Wrap(This => This.Content.GetStartLocation));
    
    function Get_StartHeading
      (This : My_RouteConstraints) return Real32 is
@@ -214,8 +214,8 @@ private
    
    
    function Get_EndLocation
-     (This : My_RouteConstraints) return My_Location3D is
-     (Wrap(This => Location3D(This.Content.getEndLocation)));
+     (This : My_RouteConstraints) return My_Location3D_Any is
+     (Wrap(This =>  This.Content.getEndLocation));
    
    function Get_EndHeading
      (This : My_RouteConstraints) return Real32 is

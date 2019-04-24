@@ -33,10 +33,9 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
         Request.Content.GetRouteRequests;
    begin
       return R : Vect_My_RouteConstraints_Acc do
+         R := new Vect_My_RouteConstraints.Vector;
          for E of L.all loop
-            ApPend
-              (Source   => R,
-               New_Item => Wrap(This => E));
+            R.Append(New_Item => Wrap(This => E.all));
          end loop;
       end return;
    end Get_RouteRequests;
@@ -80,11 +79,14 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
    end Set_OperatingRegion;
    
    procedure Add_RouteConstraints 
-     (This : My_RouteRequest;
-      Route_Constraints : My_RouteConstraints)
+     (This : in out My_RouteRequest;
+      Route_Constraints : in My_RouteConstraints)
    is 
+      Pointer : RouteConstraints_Acc;
    begin
-      This.Content.RouteRequests.Append(Route_Constraints);
+      Pointer.all := Unwrap(Route_Constraints);
+      This.Content.RouteRequests.Append
+        (New_Item => Pointer);
    end Add_RouteConstraints;
    
    

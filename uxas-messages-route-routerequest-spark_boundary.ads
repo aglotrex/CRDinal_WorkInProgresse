@@ -1,23 +1,30 @@
+with Ada.Containers; use Ada.Containers;
+with Ada.Containers.Vectors;
+
+
 with Common_Formal_Containers; use Common_Formal_Containers;
 with Uxas.Messages.Route.RouteConstraints; use Uxas.Messages.Route.RouteConstraints; 
 with UxAS.Messages.Route.RouteConstraints.Spark_Boundary; use UxAS.Messages.Route.RouteConstraints.Spark_Boundary;
+ 
 
 package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
-   --  This package introduces a wrapper around UniqueAutomationRequest.
-   --  UniqueAutomationRequest is a private type, so it can be used in SPARK.
+   --  This package introduces a wrapper around RouteRequest.
+   --  RouteRequest is a private type, so it can be used in SPARK.
    --  This wrapper is only used to introduce contracts on the type and
    --  its accessors.
 
    use all type Int64_Vect;
    
-      
+  
    package Vect_My_RouteConstraints is new Ada.Containers.Vectors
      (Index_Type   => Natural,
       Element_Type => My_RouteConstraints);
-   type Vect_My_RouteConstraints_Acc is access all Vect_RouteConstraints_Acc.Vector;
-use Vect_My_RouteConstraints;
+   
+    type Vect_My_RouteConstraints_Acc is access all Vect_My_RouteConstraints.Vector;
+
+   use Vect_My_RouteConstraints;
    
    
    
@@ -48,19 +55,16 @@ use Vect_My_RouteConstraints;
    
    
    procedure Add_RouteConstraints 
-     (This : My_RouteRequest;
-      Route_Constraints : My_RouteConstraints)
+     (This : in out My_RouteRequest;
+      Route_Constraints : in My_RouteConstraints)
      with Global => null,
      Post => 
-       Get_RouteRequests (This'Old)'Length =  Get_RouteRequests (This)'Length+1
-     and Vect_My_RouteConstraints.Last_Element
-       (Container => Get_RouteRequests (This)) = Route_Constraints
-       and (for all L in Natural
-            => (if ( L /= Get_RouteRequests (This).Last_Index) then
-                  Vect_My_RouteConstraints.Element
-                    (Get_RouteRequests(This),L ) =
-                      Vect_My_RouteConstraints.Element
-                  (Get_RouteRequests(This),L )))
+       Get_RouteRequests (This'Old).Length =  Get_RouteRequests (This).Length+1
+     and Get_RouteRequests (This).Last_Element = Route_Constraints
+     and (for all L in Natural
+          => (if ( L /= Get_RouteRequests (This).Last_Index) then
+                  Get_RouteRequests(This).Element(Index => L ) =
+                  Get_RouteRequests(This'Old).Element(Index => L )))
      
      and Get_AssociatedTaskID (This) =
      Get_AssociatedTaskID (This)'Old 
@@ -81,7 +85,7 @@ use Vect_My_RouteConstraints;
       and Get_RouteRequests (X) = 
           Get_RouteRequests (Y)
       and (for all L in Integer
-           => (Get_RouteRequests (This'Old) = Get_RouteRequests (This))));
+           => (Get_RouteRequests (X).Element(L) = Get_RouteRequests (Y).Element(L))));
    --  pragma Annotate (GNATprove, Inline_For_Proof, Same_Requests);
      
      
