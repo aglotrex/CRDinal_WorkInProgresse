@@ -1,116 +1,266 @@
 with UxAS.Messages.Route.RoutePlan;
 
 with Uxas.Messages.Route.RouteResponse; use Uxas.Messages.Route.RouteResponse;
-
-
+with Ada.Numerics.Long_Elementary_Functions; use  Ada.Numerics.Long_Elementary_Functions;
+with Ada.Text_IO; use Ada.Text_IO;
 
 with UxAS.Messages.Lmcptask.AssignmentCostMatrix; use UxAS.Messages.Lmcptask.AssignmentCostMatrix;
 with UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary; use UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary;
 with UxAS.Messages.Lmcptask.TaskOptionCost; use UxAS.Messages.Lmcptask.TaskOptionCost; 
 
+with Afrl.Cmasi.Enumerations; use Afrl.Cmasi.Enumerations;
 
 with Afrl.Cmasi.ServiceStatus; use Afrl.Cmasi.ServiceStatus;
 with Afrl.Cmasi.KeyValuePair;  use Afrl.Cmasi.KeyValuePair;
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
+with Afrl.Cmasi.Location3D.Spark_Boundary; use Afrl.Cmasi.Location3D.Spark_Boundary;
+
+with UxAS.Common.Utilities.Unit_Conversions; use UxAS.Common.Utilities.Unit_Conversions; 
+
+with UxAS.Messages.Route.RouteConstraints.Spark_Boundary; use UxAS.Messages.Route.RouteConstraints.Spark_Boundary;
+
 
 package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
    
    
- 
-            
-   procedure Send_Matrix( This : in out Route_Aggregator_Service;
-                          AutoKey : Int64)
-       
-              
-               
+   -- void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
+   procedure Euclidean_Plan(This             : in out Route_Aggregator_Service;
+                            Route_Plan_Request : RoutePlanRequest)
+     
    is
-      
-      Matrix    :  AssignmentCostMatrix_Acc := new AssignmentCostMatrix;
-      Areq   : My_UniqueAutomationRequest := 
-        Wrap( Int64_Unique_Automation_Request_Maps.Element ( This.Unique_Automation_Request,
-              AutoKey).Content);
-      Route_Not_Found : Unbounded_String;
-               
-      Service_Status : ServiceStatus;
-      Key_Pair : KeyValuePair;
-               
-      
-               
+      -- uxas::common::utilities::CUnitConversions flatEarth;
+      -- int64_t regionId = request->getOperatingRegion();
+      -- int64_t vehicleId = request->getVehicleID();
+      -- int64_t taskId = request->getAssociatedTaskID();
+      Region_ID   : Int64 := Route_Plan_Request.GetOperatingRegion;
+      Vehicles_ID : Int64 := Route_Plan_Request.GetVehicleID;
+      Task_ID     : Int64 := Route_Plan_Request.GetAssociatedTaskID;
+   
+      -- double speed = 1.0; // default if no speed available
+      Speed  : Long_Float := 1.0;
+   
+      --  auto response = std::shared_ptr<uxas::messages::route::RoutePlanResponse>(new uxas::messages::route::RoutePlanResponse);
+      Response : RoutePlanResponse_Acc;
    begin
-      for R_Id of Int64_Pending_Auto_Req_Matrix.Element(Container => This.Pending_Auto_Req,
-                                                        Key       => AutoKey) loop 
-         if Int64_Pair_Int64_Route_Plan_Maps.Contains(This.Route_Plan,
-                                                      R_ID)
-         then
-            declare
-               Plan : Pair_Int64_Route_Plan := Int64_Pair_Int64_Route_Plan_Maps.Element(This.Route_Plan,
-                                                                                        R_ID);
-            begin
-               if Int64_Aggregator_Task_Option_Pair_Maps.Contains(Container => This.Route_Task_Pairing,
-                                                                  Key       => R_ID)
-               then
-                  declare
-                     Task_Pair :AggregatorTaskOptionPair := Int64_Aggregator_Task_Option_Pair_Maps.Element( This.Route_Task_Pairing,
-                                                                                                            R_Id);
-                     Task_Option_Cost : TaskOptionCost_Acc := new TaskOptionCost;
-                  begin
-                     if (Plan.Returned_Route_Plan.GetRouteCost < 0)
-                     then
-                        Route_Not_Found := "V[" & Task_Pair.VehicleId & "](" & Task_Pair.PrevTaskId &  ","
-                          & Task_Pair.PrevTaskOption & ")-(" & Task_Pair.TaskId & "," & Task_Pair.TaskOption & ")";
-                     end if;
-                              
-                              
-                     Task_Option_Cost.SetDestinationTaskID(Task_Pair.TaskId);
-                     Task_Option_Cost.SetDestinationTaskOption(Task_Pair.TaskOption);
-                     Task_Option_Cost.SetIntialTaskID(Task_Pair.PrevTaskId);
-                     Task_Option_Cost.SetIntialTaskOption(Task_Pair.PrevTaskOption);
-                     Task_Option_Cost.SetTimeToGo(Plan.Returned_Route_Plan.GetRouteCost);
-                     Task_Option_Cost.SetVehicleID(Task_Pair.VehicleId);
-                     Matrix.GetCostMatrix.Append(New_Item => Task_Option_Cost);
-                     Int64_Aggregator_Task_Option_Pair_Maps.Delete(This.Route_Task_Pairing,
-                                                                   Task_Pair);
-                  end;
-               end if;
-                        
-               Int64_Route_Plan_Responses_Maps.Delete(This.Route_Plan_Responses,
-                                                       Plan.Reponse_ID);
-               Int64_Pair_Int64_Route_Plan_Maps.Delete(This.Route_Plan,
-                                                        R_ID);
-            end;
+      --  if (m_entityConfigurations.find(vehicleId) != m_entityConfigurations.end())
+      if Int64_Entity_Configuration_Maps.Contains(Container => This.Entity_Configuration,
+                                                  Key       => Vehicles_ID)
+      then
+   
+         --   double speed = m_entityConfigurations[vehicleId]->getNominalSpeed();
+         Speed := Long_Float(Int64_Entity_Configuration_Maps.Element(Container => This.Entity_Configuration,
+                                                                     Key       => Vehicles_ID).Content.GetNominalSpeed);
+   
+         -- if (speed < 1e-2)
+         if (Speed < 0.02) then
+            --  speed = 1.0; // default to 1 if too small for division
+            Speed := 1.0;
          end if;
-      end loop;
-               
-      This.Send_Shared_LMCP_Object_Broadcast_Message(Object_Any(Matrix));
-      
-      Int64_Task_Plan_Options_Maps.Clear(This.Task_Plan_Options);
-               
-               
-      if Route_Not_Found'Length = 0 then
-                  
-         Service_Status.SetStatusType(Afrl.Cmasi.Enumerations.Information);
-         Key_Pair.SetKey("RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId)");
-                  
-         Key_Pair.SetValue(Route_Not_Found);
-         Append(Service_Status.GetInfo,
-                Key_Pair);
-         Key_Pair := null;
-         THis.Send_LMCP_Object_Broadcast_Message(Service_Status);
-         Put("RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId) :: " & Route_Not_Found);
-               
-      else
-         Service_Status.SetStatusType(Afrl.Cmasi.Enumerations.Information);
-         Key_Pair.SetKey("AssignmentMatrix - full");
-         Append(Service_Status.GetInfo,
-                Key_Pair);
-         Key_Pair := null;
-                  
-                  
-         This.Send_LMCP_Object_Broadcast_Message(Service_Status);
       end if;
-   end Send_Matrix;
+   
+      Response.SetAssociatedTaskID(Task_ID);
+      Response.SetOperatingRegion(Region_ID);
+      Response.SetVehicleID(Vehicles_ID);
+      Response.SetResponseID(Route_Plan_Request.GetRequestID);
+   
+      -- for (size_t k = 0; k < request->getRouteRequests().size(); k++)
+      for K of Route_Plan_Request.GetRouteRequests.all loop
+         declare
+            -- uxas::messages::route::RouteConstraints* routeRequest = request->getRouteRequests().at(k);
+            Route_Request : My_RouteConstraints := Wrap(K.all);
+   
+            Route_ID : Int64 := Get_RouteID(Route_Request);
+   
+   
+            -- Start_Point : Visibility.Point;
+            -- End_Point : Visibility.Point;
+            Start_North  : Long_Float;
+            Start_East   : Long_Float;
+            End_North    : Long_Float;
+            End_East     : Long_Float;
+   
+            -- uxas::messages::route::RoutePlan* plan = new uxas::messages::route::RoutePlan;
+            Plan : RoutePlan_Acc := new RoutePlan;
+   
+            Line_Dist : Long_Float;
+            Pair_Response_Route :  Pair_Int64_Route_Plan;
+   
+   
+         begin
+            Plan.SetRouteID(Route_ID);
+   
+            -- flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getStartLocation()->getLatitude(), routeRequest->getStartLocation()->getLongitude(), north, east);
+            Convert_Lat_Long_DEG_To_North_East_M
+              (Latitude_DEG  => Long_Float(Get_Latitude  (Get_StartLocation(Route_Request))),
+               Longitude_DEG => Long_Float(Get_Longitude (Get_StartLocation(Route_Request))),
+               North_M       => Start_North,
+               East_M        => Start_East);
+            -- Start_Point.set_X(Start_East);
+            -- Start_Point.set_Y(Start_North);
+   
+   
+   
+            -- flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getEndLocation()->getLatitude(), routeRequest->getEndLocation()->getLongitude(), north, east);
+            Convert_Lat_Long_DEG_To_North_East_M
+              (Latitude_DEG  => Long_Float(Get_Latitude  (Get_EndLocation(Route_Request))),
+               Longitude_DEG => Long_Float(Get_Longitude (Get_EndLocation(Route_Request))),
+               North_M       => End_North,
+               East_M        => End_East);
+            -- End_Point.Set_X(End_East );
+            -- End_Point.Set_Y(End_North);
+   
+            -- -- double linedist = VisiLibity::distance(startPt, endPt);
+            -- Line_Dist := Distance(Start_Point , End_Point);
+            Line_Dist := Sqrt( ((End_North - Start_North)**2.0) + ((End_East - Start_East)**2.0));
+   
+            Plan.SetRouteCost( Int64( Line_Dist / Speed * 1000.0));
+   
+            --  m_routePlans[routeId] = std::make_pair(request->getRequestID(), std::shared_ptr<uxas::messages::route::RoutePlan>(plan));
+            Int64_Pair_Int64_Route_Plan_Maps.Insert
+              (Container => This.Route_Plan,
+               Key       => Route_ID,
+               New_Item  =>  Pair_Int64_Route_Plan'(Reponse_ID          => Route_Plan_Request.GetRequestID ,
+                                                    Returned_Route_Plan => Plan ));
+   
+         end;
+      end loop;
+      -- m_routePlanResponses[response->getResponseID()] = response;
+      Int64_Route_Plan_Responses_Maps.Insert(Container => This.Route_Plan_Responses,
+                                             Key       => Response.GetResponseID,
+                                             New_Item  => Route_Plan_Responses_Holder'(
+                                               Content => RoutePlanResponse_Any(Response)));
+   
+   end Euclidean_Plan;
+            
+   --     procedure Send_Matrix( This : in out Route_Aggregator_Service;
+   --                            AutoKey : Int64)
+   --         
+   --  
+   --                 
+   --     is
+   --        --   auto matrix = std::shared_ptr<uxas::messages::task::AssignmentCostMatrix>(new uxas::messages::task::AssignmentCostMatrix);
+   --        Matrix :  AssignmentCostMatrix_Acc := new AssignmentCostMatrix;
+   --        
+   --        --   auto& areq = m_uniqueAutomationRequests[autoKey];
+   --        Areq   : constant UniqueAutomationRequest'Class := 
+   --          Int64_Unique_Automation_Request_Maps.Element(Container => This.Unique_Automation_Request,
+   --                                                       Key       => AutoKey).Content.all;
+   --        Route_Not_Found : Unbounded_String := To_Unbounded_String("");
+   --                 
+   --        Service_Status : ServiceStatus_Acc;
+   --        
+   --        
+   --        -- auto keyValuePair = new afrl::cmasi::KeyValuePair;
+   --        Key_Pair_Acc : KeyValuePair_Acc;
+   --                 
+   --        
+   --                 
+   --     begin
+   --        
+   --        
+   --        --   for (auto& rId : m_pendingAutoReq[autoKey])
+   --        for R_Id of Int64_Pending_Auto_Req_Matrix.Element(Container => This.Pending_Auto_Req,
+   --                                                          Key       => AutoKey) loop 
+   --           
+   --           --  auto plan = m_routePlans.find(rId);
+   --           --  if (plan != m_routePlans.end())
+   --           if Int64_Pair_Int64_Route_Plan_Maps.Contains(This.Route_Plan,
+   --                                                        R_ID)
+   --           then
+   --              declare
+   --                 --  auto taskpair = m_routeTaskPairing.find(rId);
+   --                 Plan : Pair_Int64_Route_Plan := Int64_Pair_Int64_Route_Plan_Maps.Element(This.Route_Plan,
+   --                                                                                          R_ID);
+   --              begin
+   --                
+   --                 -- if (taskpair != m_routeTaskPairing.end())
+   --                 if Int64_Aggregator_Task_Option_Pair_Maps.Contains(Container => This.Route_Task_Pairing,
+   --                                                                    Key       => R_ID)
+   --                 then
+   --                    declare
+   --                       Task_Pair :AggregatorTaskOptionPair := Int64_Aggregator_Task_Option_Pair_Maps.Element( This.Route_Task_Pairing,
+   --                                                                                                              R_Id);
+   --                            
+   --                       -- auto toc = new uxas::messages::task::TaskOptionCost;                                                                                      
+   --                       Task_Option_Cost : TaskOptionCost_Acc := new TaskOptionCost;
+   --                    begin
+   --                       
+   --                       -- if (plan->second.second->getRouteCost() < 0)
+   --                       if (Plan.Returned_Route_Plan.GetRouteCost < 0)
+   --                       then
+   --                          Route_Not_Found := To_Unbounded_String("V[" & Task_Pair.VehicleId'Image & "](" & Task_Pair.PrevTaskId'Image  &  ","
+   --                                                                 & Task_Pair.PrevTaskOption'Image  & ")-(" & Task_Pair.TaskId'Image  & "," & Task_Pair.TaskOption'Image  & ")") ;
+   --                       end if;
+   --                                
+   --                                
+   --                       Task_Option_Cost.SetDestinationTaskID(Task_Pair.TaskId);
+   --                       Task_Option_Cost.SetDestinationTaskOption(Task_Pair.TaskOption);
+   --                       Task_Option_Cost.SetIntialTaskID(Task_Pair.PrevTaskId);
+   --                       Task_Option_Cost.SetIntialTaskOption(Task_Pair.PrevTaskOption);
+   --                       Task_Option_Cost.SetTimeToGo(Plan.Returned_Route_Plan.GetRouteCost);
+   --                       Task_Option_Cost.SetVehicleID(Task_Pair.VehicleId);
+   --                      
+   --                       --  matrix->getCostMatrix().push_back(toc);
+   --                       Matrix.GetCostMatrix.Append(New_Item => Task_Option_Cost);
+   --                       
+   --                       -- m_routeTaskPairing.erase(taskpair); 
+   --                       Int64_Aggregator_Task_Option_Pair_Maps.Delete(This.Route_Task_Pairing,
+   --                                                                     R_Id);
+   --                    end;
+   --                 end if;
+   --                 --  // Clear out Memory
+   --                 --  M_RoutePlanResponses.Erase(Plan->Second.First);
+   --                 --  M_RoutePlans.Erase(Plan);
+   --                          
+   --                 Int64_Route_Plan_Responses_Maps.Delete(This.Route_Plan_Responses,
+   --                                                        Plan.Reponse_ID);
+   --                 Int64_Pair_Int64_Route_Plan_Maps.Delete(This.Route_Plan,
+   --                                                         R_ID);
+   --              end;
+   --           end if;
+   --        end loop;
+   --        
+   --        --  // Send The Total Cost Matrix
+   --        --  Std::Shared_Ptr<Avtas::Lmcp::Object> PResponse = Std::Static_Pointer_Cast<Avtas::Lmcp::Object>(Matrix);
+   --        --  SendSharedLmcpObjectBroadcastMessage(PResponse);
+   --        This.Send_Shared_LMCP_Object_Broadcast_Message(Object_Any(Matrix));
+   --        
+   --        
+   --        
+   --        --  // clear out old options
+   --        --  M_TaskOptions.Clear();
+   --        Int64_Task_Plan_Options_Maps.Clear(This.Task_Plan_Options);
+   --                 
+   --        
+   --        
+   --        Service_Status.SetStatusType(Afrl.Cmasi.Enumerations.Information);
+   --        --  if (!routesNotFound.str().empty())
+   --        if Length(Route_Not_Found) > 0 then
+   --                    
+   --           
+   --           Key_Pair_Acc.SetKey(To_Unbounded_String("RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId)"));
+   --                    
+   --           Key_Pair_Acc.SetValue(Route_Not_Found);
+   --           Service_Status.GetInfo.Append(Key_Pair_Acc);
+   --           
+   --          
+   --           Put(To_String("RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId) :: " & Route_Not_Found));
+   --                 
+   --        else
+   --          
+   --           Key_Pair_Acc.SetKey(To_Unbounded_String("AssignmentMatrix - full"));
+   --           
+   --           Service_Status.GetInfo.Append(Key_Pair_Acc);
+   --           
+   --        end if;
+   --        
+   --        --  sendSharedLmcpObjectBroadcastMessage(serviceStatus);
+   --        THis.Send_LMCP_Object_Broadcast_Message(Object_Any(Service_Status));
+   --        
+   --        
+   --     end Send_Matrix;
    
    --     -- void SendRouteResponse(int64_t);
    --     procedure Send_Route_Reponse ( This : in out Route_Aggregator_Service;
@@ -497,113 +647,6 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    --        end Handle_Route_Request;
    --  
    --  
-   --        -- void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
-   --        procedure Euclidean_Plan(This             : in out Route_Aggregator_Service;
-   --                                 Route_Plan_Request : RoutePlanRequest)
-   --        is
-   --           -- uxas::common::utilities::CUnitConversions flatEarth;
-   --           -- int64_t regionId = request->getOperatingRegion();
-   --           -- int64_t vehicleId = request->getVehicleID();
-   --           -- int64_t taskId = request->getAssociatedTaskID();
-   --           Flat_Earth : Unit_Conversions;
-   --           Region_ID   : Int64 := Route_Plan_Request.GetOperatingRegion;
-   --           Vehicles_ID : Int64 := Route_Plan_Request.GetVehicleID;
-   --           Task_ID     : Int64 := Route_Plan_Request.GetAssociatedTaskID;
-   --  
-   --           -- double speed = 1.0; // default if no speed available
-   --           Speed  : Long_Float := 1.0;
-   --  
-   --           --  auto response = std::shared_ptr<uxas::messages::route::RoutePlanResponse>(new uxas::messages::route::RoutePlanResponse);
-   --           Response : RoutePlanResponse;
-   --        begin
-   --           --  if (m_entityConfigurations.find(vehicleId) != m_entityConfigurations.end())
-   --           if Int64_Entity_Configuration_Maps.Contains(Container => This.Entity_Configuration,
-   --                                                       Key       => Vehicles_ID);
-   --           then
-   --  
-   --              --   double speed = m_entityConfigurations[vehicleId]->getNominalSpeed();
-   --              Speed :=Int64_Entity_Configuration_Maps.Element(Container => This.Entity_Configuration,
-   --                                                              Position  => Vehicles_ID).Content.GetNominalSpeed;
-   --  
-   --              -- if (speed < 1e-2)
-   --              if (Speed < 0.02) then
-   --                 --  speed = 1.0; // default to 1 if too small for division
-   --                 Speed := 1.0;
-   --              end if;
-   --           end if;
-   --  
-   --           Response.SetAssociatedTaskID(Task_ID);
-   --           Response.SetOperatingRegion(Region_ID);
-   --           Response.SetVehicleID(Vehicles_ID);
-   --           Response.SetResponseID(Route_Plan_Request.GetRequestID);
-   --  
-   --           -- for (size_t k = 0; k < request->getRouteRequests().size(); k++)
-   --           for K in Route_Plan_Request.GetRouteRequests'Range loop
-   --              declare
-   --                 -- uxas::messages::route::RouteConstraints* routeRequest = request->getRouteRequests().at(k);
-   --                 Route_Request : My_RouteConstraints := Wrap(Route_Plan_Request.GetRouteRequests.Element(K));
-   --  
-   --                 Route_ID : Int64 := Route_Request.GetRouteID;
-   --  
-   --  
-   --                 -- Start_Point : Visibility.Point;
-   --                 -- End_Point : Visibility.Point;
-   --                 Start_North  : Long_Float;
-   --                 Start_East   : Long_Float;
-   --                 End_North    : Long_Float;
-   --                 End_East     : Long_Float;
-   --  
-   --                 -- uxas::messages::route::RoutePlan* plan = new uxas::messages::route::RoutePlan;
-   --                 Plan : RoutePlan;
-   --  
-   --                 Line_Dist : Long_Float;
-   --                 Pair_Response_Route :  Pair_Int64_Route_Plan;
-   --  
-   --  
-   --              begin
-   --                 Plan.SetRouteID(Route_ID);
-   --  
-   --                 -- flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getStartLocation()->getLatitude(), routeRequest->getStartLocation()->getLongitude(), north, east);
-   --                 Flat_Earth.Convert_Lag_Long_DEG_To_North_East_M
-   --                   (D_Latitude_DEG  => Route_Request.GetStartLocation.GetLatitude,
-   --                    D_Longitude_DEG => Route_Request.GetStartLocation.GetLatitude,
-   --                    D_North_M       => Start_North,
-   --                    D_East_M        => Start_East);
-   --                 -- Start_Point.set_X(Start_East);
-   --                 -- Start_Point.set_Y(Start_North);
-   --  
-   --  
-   --  
-   --                 -- flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getEndLocation()->getLatitude(), routeRequest->getEndLocation()->getLongitude(), north, east);
-   --                 Flat_Earth.Convert_Lag_Long_DEG_To_North_East_M
-   --                   (D_Latitude_DEG  =>Route_Request.GetEndLocation.GetLatitude,
-   --                    D_Longitude_DEG => Route_Request.GetEndLocation.GetLatitude,
-   --                    D_North_M       => End_North,
-   --                    D_East_M        => End_East);
-   --                 -- End_Point.Set_X(End_East );
-   --                 -- End_Point.Set_Y(End_North);
-   --  
-   --                 -- -- double linedist = VisiLibity::distance(startPt, endPt);
-   --                 -- Line_Dist := Distance(Start_Point , End_Point);
-   --                 Line_Dist := Sqrt( ((End_North - Start_North)**2.0) + ((End_East - Start_East)**2.0));
-   --  
-   --                 Plan.SetRouteCost( Line_Dist / Speed * 1000);
-   --  
-   --                 --  m_routePlans[routeId] = std::make_pair(request->getRequestID(), std::shared_ptr<uxas::messages::route::RoutePlan>(plan));
-   --                 Int64_Pair_Int64_Route_Plan_Maps.Insert
-   --                   (Container => This.Route_Plan,
-   --                    Key       => Route_ID,
-   --                    New_Item  =>  Pair_Int64_Route_Plan'(Reponse_ID          => Route_Plan_Request.GetRequestID ,
-   --                                                         Returned_Route_Plan => Plan ));
-   --  
-   --              end;
-   --           end loop;
-   --           -- m_routePlanResponses[response->getResponseID()] = response;
-   --           Int64_Route_Plan_Responses_Maps.Insert
-   --             (Container => Tis.Route_Plan_Responses,
-   --              Key       => Response.GetResponseID,
-   --              New_Item  => Response);
-   --  
-   --        end Euclidean_Plan;
+
 
 end UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK;

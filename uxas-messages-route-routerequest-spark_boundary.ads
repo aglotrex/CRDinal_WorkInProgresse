@@ -1,7 +1,6 @@
 with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Vectors;
 
-
 with Common_Formal_Containers; use Common_Formal_Containers;
 with Uxas.Messages.Route.RouteConstraints; use Uxas.Messages.Route.RouteConstraints; 
 with UxAS.Messages.Route.RouteConstraints.Spark_Boundary; use UxAS.Messages.Route.RouteConstraints.Spark_Boundary;
@@ -21,13 +20,11 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
    package Vect_My_RouteConstraints is new Ada.Containers.Vectors
      (Index_Type   => Natural,
       Element_Type => My_RouteConstraints);
-   
-    type Vect_My_RouteConstraints_Acc is access all Vect_My_RouteConstraints.Vector;
-
    use Vect_My_RouteConstraints;
+  
    
-   
-   
+   type Vect_My_RouteConstraints_Acc is access all Vect_My_RouteConstraints.Vector;
+
    
    type My_RouteRequest is private;
 
@@ -64,7 +61,7 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      and (for all L in Natural
           => (if ( L /= Get_RouteRequests (This).Last_Index) then
                   Get_RouteRequests(This).Element(Index => L ) =
-                  Get_RouteRequests(This'Old).Element(Index => L )))
+                Get_RouteRequests(This'Old).Element(Index => L )))
      
      and Get_AssociatedTaskID (This) =
      Get_AssociatedTaskID (This)'Old 

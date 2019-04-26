@@ -9,9 +9,9 @@ with UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service; use UxAS.Comms
 private
 package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
 
-   --  Void SendMatrix(Int64_T);
-   procedure Send_Matrix( This : in out Route_Aggregator_Service;
-                          AutoKey : Int64);
+   --     --  Void SendMatrix(Int64_T);
+   --     procedure Send_Matrix( This : in out Route_Aggregator_Service;
+   --                            AutoKey : Int64);
 
 
    --    -- void SendRouteResponse(int64_t);
@@ -30,11 +30,11 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    --                                    Route_Request : RouteRequest_Acc);
    --
    --
-   --
-   --
-   --     -- void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
-   --     procedure Euclidean_Plan(This             : in out Route_Aggregator_Service;
-   --                              Route_Plan_Request : RoutePlanRequest);
+
+
+   -- void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
+   procedure Euclidean_Plan(This             : in out Route_Aggregator_Service;
+                            Route_Plan_Request : RoutePlanRequest);
 
 
 end  UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK ;
