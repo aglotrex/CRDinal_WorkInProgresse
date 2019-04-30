@@ -1,59 +1,55 @@
 
-
-
 package body UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode => Off is
 
-   
-   
    -------------------
    --  Set_RouteID  --
    -------------------
-   
-   procedure Set_RouteID 
+
+   procedure Set_RouteID
      (This : in out My_RouteConstraints;
       RouteID : in Int64)
    is 
    begin
-      This.Content.SetRouteID(RouteID);
+      This.Content.setRouteID (RouteID);
    end Set_RouteID;
-   
+
    -------------------------
    --  Set_StartLocation  --
    -------------------------
-       
-   
+
+
    procedure Set_StartLocation
      (This : in out My_RouteConstraints;
       StartLocation : in My_Location3D_Any)
-   is 
+   is
    begin
-      THis.Content.SetStartLocation(UnWrap (StartLocation));
+      This.Content.setStartLocation (Unwrap (StartLocation));
    end Set_StartLocation;
-   
+
    ------------------------
    --  Set_StartHeading  --
    ------------------------
-   
+
    procedure Set_StartHeading
      (This : in out My_RouteConstraints;
       StartHeading : in Real32)
-   is 
+   is
    begin
-      This.Content.setStartHeading(StartHeading);
+      This.Content.setStartHeading (StartHeading);
    end Set_StartHeading;
-   
+
    ---------------------------
    --  Set_UseStartHeading  --
    ---------------------------
-   
+
    procedure Set_UseStartHeading
-     (This : in out My_RouteConstraints ;
+     (This : in out My_RouteConstraints;
       UseStartHeading : in Boolean)
-   is 
+   is
    begin
-      This.Content.setUseStartHeading(UseStartHeading);
+      This.Content.setUseStartHeading (UseStartHeading);
    end Set_UseStartHeading;
-   
+
    -----------------------
    --  Set_EndLocation  --
    -----------------------
@@ -63,33 +59,33 @@ package body UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode
       EndLocation : in My_Location3D_Any)
    is
    begin
-      This.Content.SetEndLocation(UnWrap (EndLocation));
+      This.Content.setEndLocation (Unwrap (EndLocation));
    end Set_EndLocation;
-   
+
    ----------------------
    --  Set_EndHeading  --
    ----------------------
-   
+
    procedure Set_EndHeading
      (This : in out My_RouteConstraints;
       EndHeading : in Real32)
-   is 
+   is
    begin
-      This.Content.setEndHeading(EndHeading);
+      This.Content.setEndHeading (EndHeading);
    end Set_EndHeading;
-   
+
    -------------------------
    --  Set_UseEndHeading  --
    -------------------------
-   
+
    procedure Set_UseEndHeading
      (This : in out My_RouteConstraints;
       UseEndHeading : in Boolean)
    is
    begin
-      This.Content.SetUseEndHeading(UseEndHeading);
+      This.Content.setUseEndHeading (UseEndHeading);
    end Set_UseEndHeading;
-   
-   
-   
+
+
+
 end UxAS.Messages.Route.RouteConstraints.Spark_Boundary;

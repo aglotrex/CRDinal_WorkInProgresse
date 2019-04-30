@@ -333,7 +333,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
 
    begin
 
-      Spark.HaNdle_Route_Request(This => Route_Aggregator_Service,
+      Spark.Handle_Route_Request(This => Route_Aggregator_Service,
                                  Route_Request => Route_Request);
    end Handle_Route_Request_Msg;
 

@@ -188,7 +188,7 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
       Longitude_RAD : out Long_Float)
    is
       North_M : constant Long_Float := North_FT * Feet_To_Meters;
-      East_M  : constant  := East_FT  * Feet_To_Meters;
+      East_M  : constant Long_Float := East_FT  * Feet_To_Meters;
    begin
 
       Convert_North_East_M_To_Lat_Long_RAD (North_M, East_M,

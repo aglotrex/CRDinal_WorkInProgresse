@@ -27,15 +27,15 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
    -------------------------
       
    function Get_RouteRequests
-     (Request : My_RouteRequest) return Vect_My_RouteConstraints_Acc
+     (Request : My_RouteRequest) return Vect_My_RouteConstraints
    is
       L : constant UxAS.Messages.Route.RouteRequest.Vect_RouteConstraints_Acc_Acc := 
         Request.Content.GetRouteRequests;
    begin
-      return R : Vect_My_RouteConstraints_Acc do
-         R := new Vect_My_RouteConstraints.Vector;
+      return R : Vect_My_RouteConstraints do
          for E of L.all loop
-            R.Append(New_Item => Wrap(This => E.all));
+            Vect_My_RouteConstraints_P.Append(Container => R,
+                                              New_Item  => Wrap(This => E.all));
          end loop;
       end return;
    end Get_RouteRequests;
