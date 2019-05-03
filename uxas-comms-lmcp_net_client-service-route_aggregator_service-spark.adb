@@ -1,40 +1,36 @@
-with UxAS.Messages.Route.RoutePlan;
-
-with Uxas.Messages.Route.RouteResponse; use Uxas.Messages.Route.RouteResponse;
 with Ada.Numerics.Long_Elementary_Functions; use  Ada.Numerics.Long_Elementary_Functions;
-with Afrl.Cmasi.AutomationRequest; use Afrl.Cmasi.AutomationRequest;
-
+with Common_Formal_Containers; use Common_Formal_Containers;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Containers; use Ada.Containers;
 with Ada.Text_IO; use Ada.Text_IO;
 
+with Ada.Containers.Formal_Vectors;
+with Ada.Containers.Formal_Hashed_Maps;
+with Ada.Containers.Formal_Ordered_Sets;
+with Ada.Containers.Bounded_Vectors;
+
+with Uxas.Messages.Lmcptask.TaskOption;     use Uxas.Messages.Lmcptask.TaskOption;
+with Uxas.Messages.Lmcptask.PlanningState;  use Uxas.Messages.Lmcptask.PlanningState;
+with UxAS.Messages.Lmcptask.TaskOptionCost; use UxAS.Messages.Lmcptask.TaskOptionCost;
 with UxAS.Messages.Lmcptask.AssignmentCostMatrix; use UxAS.Messages.Lmcptask.AssignmentCostMatrix;
 with UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary; use UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary;
-with UxAS.Messages.Lmcptask.TaskOptionCost; use UxAS.Messages.Lmcptask.TaskOptionCost; 
 
-with Afrl.Cmasi.Enumerations; use Afrl.Cmasi.Enumerations;
-
-with Afrl.Cmasi.ServiceStatus; use Afrl.Cmasi.ServiceStatus;
-with Afrl.Cmasi.KeyValuePair;  use Afrl.Cmasi.KeyValuePair;
-
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-
-with Afrl.Cmasi.Location3D.Spark_Boundary; use Afrl.Cmasi.Location3D.Spark_Boundary;
-
-with UxAS.Common.Utilities.Unit_Conversions; use UxAS.Common.Utilities.Unit_Conversions; 
-with Ada.Containers.Formal_Vectors;
+with UxAS.Messages.Route.RoutePlan;
+with Uxas.Messages.Route.RouteResponse;    use Uxas.Messages.Route.RouteResponse;
+with UxAS.Messages.Route.RouteConstraints; use UxAS.Messages.Route.RouteConstraints;
 with UxAS.Messages.Route.RouteConstraints.Spark_Boundary; use UxAS.Messages.Route.RouteConstraints.Spark_Boundary;
 
-with Common_Formal_Containers; use Common_Formal_Containers;
+with UxAS.Common.Utilities.Unit_Conversions; use UxAS.Common.Utilities.Unit_Conversions; 
 
+with Uxas.Common.String_Constant.Message_Group; use Uxas.Common.String_Constant.Message_Group;
 
-with Ada.Containers; use Ada.Containers;
-with Ada.Containers.Vectors;
-
-with Afrl.Cmasi.Location3D; use Afrl.Cmasi.Location3D;
-with Uxas.Messages.Lmcptask.TaskOption; use Uxas.Messages.Lmcptask.TaskOption;
-
-with Ada.Containers.Formal_Hashed_Maps;
-
-with Uxas.Messages.Lmcptask.PlanningState; use Uxas.Messages.Lmcptask.PlanningState;
+with Afrl.Cmasi.Enumerations;  use Afrl.Cmasi.Enumerations;
+with Afrl.Cmasi.ServiceStatus; use Afrl.Cmasi.ServiceStatus;
+with Afrl.Cmasi.KeyValuePair;  use Afrl.Cmasi.KeyValuePair;
+with Afrl.Cmasi.Location3D;    use Afrl.Cmasi.Location3D;
+with Afrl.Cmasi.AutomationRequest; use Afrl.Cmasi.AutomationRequest;
+with Afrl.Cmasi.Location3D.Spark_Boundary; use Afrl.Cmasi.Location3D.Spark_Boundary;
+use Afrl.Cmasi.AutomationRequest.Vect_Int64;
 
 
 package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
@@ -56,54 +52,70 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
      --      //  3. Send requests to proper planners
    
    is
-      package Vect_Plan_Request_P is new Ada.Containers.Formal_Vectors
+   
+      package Plan_Request_Vects is new Ada.Containers.Formal_Vectors
         (Index_Type   => Natural,
          Element_Type => RoutePlanRequest);
-      
-      Vect_Plan_Request_P_Commun_Max_Capacity : constant := 200; -- arbitrary
+      use Plan_Request_Vects;
 
-      subtype Vect_Plan_Request is Vect_Plan_Request_P.Vector
-        (Vect_Plan_Request_P_Commun_Max_Capacity);
+      Plan_Request_Vects_Commun_Max_Capacity : constant := 200; -- arbitrary
+
+      subtype Plan_Request_Vect is Plan_Request_Vects.Vector
+        (Plan_Request_Vects_Commun_Max_Capacity);
       
-      Send_Air_Plan_Request    : Vect_Plan_Request;
-      Send_Ground_Plan_Request : Vect_Plan_Request; 
+      Send_Air_Plan_Request    : Plan_Request_Vect;
+      Send_Ground_Plan_Request : Plan_Request_Vect;
       
-      
-     
    begin
       
       if  Areq.GetOriginalRequest.GetEntityList.Is_Empty then
          
-         for Entity of This.Entity_State loop
-            Vect_Int64.Append(Source   => Areq.GetOriginalRequest.GetEntityList,
-                              New_Item => Entity.GetID);
-         end loop;
+         
+         declare
+         
+            State_Cursor :  Int64_Entity_State_Maps.Cursor :=  Int64_Entity_State_Maps.First(Container => This.Entity_State);
+         begin
+           
+            
+            while Int64_Entity_State_Maps.Has_Element(Container => This.Entity_State,
+                                                      Position  => State_Cursor ) loop
+               Areq.GetOriginalRequest.GetEntityList.Append(New_Item => Int64_Entity_State_Maps.Element(Container => This.Entity_State,
+                                                                                                        Position  => State_Cursor).Content.GetID);
+               Int64_Entity_State_Maps.Next (Container => This.Entity_State,
+                                             Position  => State_Cursor );
+            end loop;
+            
+            
+         end;
+           
          
       end if;
       
       
       for Vehicle_ID of Areq.GetOriginalRequest.GetEntityList.all loop
+         
       
          declare
             Vehicles : EntityState;
             Contains_Vehicles : Boolean := Int64_Entity_State_Maps.Contains (Container => This.Entity_State,
-                                                                             Index  => Vehicle_ID);
+                                                                             Key  => Vehicle_ID);
             Start_Heading_DEG : Real32 := 0.0;
             
             Start_Location : My_Location3D_Any;
             
             Is_Foud_Planning_State : Boolean := False;
-               
-            package Vect_Task_Option_P is new Ada.Containers.Formal_Vectors
+            package Task_Option_Vects is new Ada.Containers.Formal_Vectors
               (Index_Type   => Natural,
                Element_Type => TaskOption);
-      
-            Vect_Task_Option_P_Commun_Max_Capacity : constant := 200; -- arbitrary
+            use Task_Option_Vects;
 
-            subtype Vect_Task_Option is Vect_Task_Option_P.Vector
-              (Vect_Plan_Request_P_Commun_Max_Capacity);
+            Task_Option_Vects_Commun_Max_Capacity : constant := 200; -- arbitrary
+
+            subtype Task_Option_Vect is Task_Option_Vects.Vector
+              (Task_Option_Vects_Commun_Max_Capacity);       
       
-            Task_Option_List : Vect_Task_Option;
+            Task_Option_List : Task_Option_Vect;
+            
             use Int64_Task_Plan_Options_Maps;
          begin
             
@@ -120,8 +132,8 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             
             
             if (Is_Foud_Planning_State and Contains_Vehicles) then
-               Vehicles := Int64_Entity_State_Maps.Element(This.Entity_State,
-                                                           Vehicle_ID).Content;
+               Vehicles := EntityState(Int64_Entity_State_Maps.Element(This.Entity_State,
+                                       Vehicle_ID).Content.all);
                
                for Task_ID of Areq.GetOriginalRequest.GetTaskList.all loop
                   if Contains(This.Task_Plan_Options,
@@ -129,31 +141,119 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                      
                      for Option of Element(This.Task_Plan_Options,
                                            Task_ID).Content.GetOptions.all loop
+                
                         
                         
-                        if Vect_Int64.Is_Empty(Option.GetEligibleEntities) 
-                          and Vect_Int64.Find(Container => Option.GetEligibleEntites,
-                                              Item      => Vehicle_ID) then
-                           Vect_Task_Option_P.Append(Source   => Task_Option_List,
-                                                     New_Item => Option); -- TODO clone here
+                        if  Option.GetEligibleEntities.Is_Empty
+                          and Option.GetEligibleEntities.Contains(Item =>Vehicle_ID) then
+                           Task_Option_List.Append(Option.all); -- TODO clone here
                         end if;
                      end loop;
                      
                   end if;
                end loop;
+               
+               --    // create a new route plan request
+               declare 
+                  Plan_Request : RoutePlanRequest;
+               begin
+                  Plan_Request.SetAssociatedTaskID  (0);
+                  Plan_Request.SetIsCostOnlyRequest (False);
+                  Plan_Request.SetOperatingRegion   (Areq.GetOriginalRequest.GetOperatingRegion);
+                  Plan_Request.SetVehicleID         (Vehicle_ID);
+                  --  //planRequest->setRouteID(m_planrequestId);
+                  --  //m_planrequestId++;
+                  
+                  if not Is_Foud_Planning_State then
+
+                     Start_Location := Wrap(This => Vehicles.GetLocation);
+                     Start_Heading_DEG := Vehicles.GetHeading;
+                     
+                  end if;
+                  
+                  for Option_1  of Task_Option_List loop
+                     for Option_2 of Task_Option_List loop
+                        
+                        if not (Option_1 = Option_2) then
+                           
+                           -- // build map from request to full task/option information
+                           declare
+                              Task_Option_Pair : AggregatorTaskOptionPair := AggregatorTaskOptionPair'(VehicleId      => Vehicle_ID,
+                                                                                                       PrevTaskId     => Option_1.GetOptionID,
+                                                                                                       PrevTaskOption => Option_1.GetTaskID,
+                                                                                                       TaskId         => Option_2.GetOptionID,
+                                                                                                       TaskOption     => Option_2.GetTaskID);
+                              Route_Constraints : RouteConstraints_Acc;
+                              
+                              List_Pending_Request : Int64_Set :=Int64_Pending_Auto_Req_Matrix.Element(Container => This.Pending_Auto_Req,
+                                                                                                       Key       => ReqID);
+                           begin
+                              
+                              Int64_Aggregator_Task_Option_Pair_Maps.Include(Container => This.Route_Task_Pairing,
+                                                                             Key       => This.Route_Id,
+                                                                             New_Item  => Task_Option_Pair);
+                              
+                              Route_Constraints.SetStartLocation (Option_1.GetEndLocation);
+                              Route_Constraints.SetStartHeading  (Option_1.GetEndHeading);
+                              Route_Constraints.SetEndLocation   (Option_2.GetStartLocation);
+                              Route_Constraints.SetEndHeading    (Option_2.GetStartHeading);
+                              
+                              Plan_Request.GetRouteRequests.Append(Route_Constraints);
+                              Int64_Sets.Include(Container => List_Pending_Request,
+                                                 New_Item  => This.Route_Id);
+                              This.Route_Id := THis.Route_Id + 1;
+                              
+                         
+                           end;
+                             
+                        end if;
+                     end loop;
+                  end loop;
+                  
+                  if Int64_Sets.Contains(Container => This.Ground_Vehicles,
+                                         Item      => Vehicle_ID) then
+                     Plan_Request_Vects.Append(Container => Send_Ground_Plan_Request,
+                                               New_Item  => Plan_Request);
+                  else
+                     Plan_Request_Vects.Append(Container => Send_Air_Plan_Request,
+                                               New_Item  => Plan_Request);
+                  end if;
+               end;
+                       
             end if;
+               
+         end;
+            
+      end loop;
+         
+         
+      for Request of Send_Air_Plan_Request loop
+         declare
+            Request_Acc : RoutePlanRequest_Acc;
+         begin
+            Request_Acc.all := Request;
+            This.Send_Shared_LMCP_Object_Limited_Cast_Message(Cast_Address => AircraftPathPlanner,
+                                                              Msg          => Object_Any(Request_Acc));
          end;
       end loop;
-      
-                 
+      for Request of Send_Ground_Plan_Request loop
             
-               
-                        
-                          
-                  
-      
-             
-      
+         if This.Fast_Plan then
+            Euclidean_Plan(This,Request);
+         else
+            declare
+               Request_Acc : RoutePlanRequest_Acc;
+            begin
+               Request_Acc.all := Request;
+               This.Send_Shared_LMCP_Object_Limited_Cast_Message(Cast_Address => Uxas.Common.String_Constant.Message_Group.GroundPathPlanner,
+                                                                 Msg          =>Object_Any(Request_Acc));
+            end;
+         end if;
+      end loop;
+         
+      if This.Fast_Plan then
+         Check_All_Route_Plans(This);
+      end if;
       
    end Build_Matrix_Requests;
       

@@ -30,9 +30,9 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
 
 
 
-   -- -- void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
-   -- procedure Euclidean_Plan(This             : in out Route_Aggregator_Service;
-   --                          Route_Plan_Request : RoutePlanRequest);
+    -- void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
+    procedure Euclidean_Plan(This             : in out Route_Aggregator_Service;
+                             Route_Plan_Request : RoutePlanRequest);
 
 
 end  UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK ;
