@@ -1,7 +1,6 @@
 with uxas.messages.route.RouteConstraints; use uxas.messages.route.RouteConstraints;
 with Afrl.Cmasi.Location3D.Spark_Boundary; use Afrl.Cmasi.Location3D.Spark_Boundary;
 
-with Ada.Containers.Vectors;
 
 package UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode is
 

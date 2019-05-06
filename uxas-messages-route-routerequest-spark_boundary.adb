@@ -1,4 +1,3 @@
-with UxAS.Messages.Route.RouteConstraints.Spark_Boundary; use UxAS.Messages.Route.RouteConstraints.Spark_Boundary;
 
 package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => Off is
 

@@ -1,5 +1,4 @@
 
-With Ada.Numerics.Elementary_Functions;
 
 package uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
 

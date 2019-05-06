@@ -20,7 +20,7 @@ package body Convert with SPARK_Mode is
       pragma Assert(Divisor >= 1.0);
       pragma Assert(Dividend_Float'First / Divisor in Dividend_Float'First .. 0.0 );
       pragma Assert(Dividend_Float'Last  / Divisor in 0.0 .. Dividend_Float'Last );
-      pragma Assert(Dividend in Dividend_Float'First .. Dividend_Float'Last);
+      pragma Assert(Dividend'Valid);
       pragma Assert(Dividend / Divisor in Dividend_Float'First .. Dividend_Float'Last);
       Quot   := Dividend_Float'Floor (Dividend / Divisor);
       Modulo := Saturate (Value => Dividend - Divisor * Quot,
@@ -50,7 +50,7 @@ package body Convert with SPARK_Mode is
       pragma Assert(Divisor >= 1.0);
       pragma Assert(Dividend_Long_Float'First / Divisor in Dividend_Long_Float'First .. 0.0 );
       pragma Assert(Dividend_Long_Float'Last  / Divisor in 0.0 .. Dividend_Long_Float'Last );
-      pragma Assert(Dividend in Dividend_Long_Float'First .. Dividend_Long_Float'Last);
+      pragma Assert(Dividend'Valid);
       pragma Assert(Dividend / Divisor in Dividend_Long_Float'First .. Dividend_Long_Float'Last);
       Quot   := Dividend_Long_Float'Floor (Dividend / Divisor);
       Modulo := Saturate (Value => Dividend - Divisor * Quot,

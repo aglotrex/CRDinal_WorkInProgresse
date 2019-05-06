@@ -2,11 +2,8 @@
 
 with AVTAS.Lmcp.Object.SPARK_Boundary;              use AVTAS.Lmcp.Object.SPARK_Boundary;
 
-with AFRL.CMASI.Enumerations;
 with AFRl.CMASI.AutomationResponse;                 use AFRl.CMASI.AutomationResponse;
 with AFRL.CMASI.AutomationRequest;                  use AFRL.CMASI.AutomationRequest;
-with AFRL.CMASI.EntityConfiguration;                use AFRL.CMASI.EntityConfiguration;
-with AFRL.CMASI.EntityState;                        use AFRL.CMASI.EntityState;
 with AFRL.CMASI.LmcpTask;                           use AFRL.CMASI.LmcpTask;
 with AFRL.CMASI.KeepInZone;                         use AFRL.CMASI.KeepInZone;
 with AFRL.CMASI.KeepOutZone;                        use AFRL.CMASI.KeepOutZone;
@@ -35,8 +32,6 @@ with UxAS.Messages.Lmcptask.TaskAutomationResponse; use UxAS.Messages.Lmcptask.T
 with UxAS.Messages.Lmcptask.TaskInitialized;        use UxAS.Messages.Lmcptask.TaskInitialized;
 with UxAS.Messages.Lmcptask.PlanningState;          use UxAS.Messages.Lmcptask.PlanningState;
 with UxAS.Messages.Lmcptask.TaskOption;             use UxAS.Messages.Lmcptask.TaskOption;
-with UxAS.Messages.Lmcptask.TaskPlanOptions;        use UxAS.Messages.Lmcptask.TaskPlanOptions;
-with UxAS.Messages.Route.RoutePlanRequest;          use UxAS.Messages.Route.RoutePlanRequest;
 with UxAS.Messages.Route.Object;                    use UxAS.Messages.Route.Object;
 with UxAS.Messages.Route.RouteConstraints;          use  UxAS.Messages.Route.RouteConstraints;
 
@@ -44,7 +39,6 @@ with UxAS.Common.Utilities.Unit_Conversions;        use  UxAS.Common.Utilities.U
 
 with DOM.Core.Elements; use DOM.Core.Elements;
 with String_Utils; use String_Utils;
-with Ada.Strings.Unbounded;
 
 with UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK;
 
@@ -115,9 +109,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
 
 
 
-     ---------------
-     -- Construct --
-     ---------------
+   ---------------
+   -- Construct --
+   ---------------
 
    procedure Construct
      (This : in out Route_Aggregator_Service)
@@ -333,8 +327,8 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
 
    begin
 
-      Spark.Handle_Route_Request(This => Route_Aggregator_Service,
-                                 Route_Request => Route_Request);
+      Spark.Handle_Route_Request(This          => This,
+                                 Route_Request => RouteRequest_Acc(Route_Request).all);
    end Handle_Route_Request_Msg;
 
 
