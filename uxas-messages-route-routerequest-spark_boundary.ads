@@ -53,12 +53,12 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      with Global => null,
      Post => 
        (Length (Get_RouteRequests (This'Old) )
-      = Length (Get_RouteRequests (This)) + 1)
+        = Length (Get_RouteRequests (This)) + 1)
      and Last_Element(Get_RouteRequests (This)) = Route_Constraints
      and (for all L in Natural
           => (if ( L /= Last_Index(Get_RouteRequests (This))) then
                 Element ( Get_RouteRequests(This), L) =
-                Element ( Get_RouteRequests(This'Old),  L )))
+                  Element ( Get_RouteRequests(This'Old),  L )))
      
      and Get_AssociatedTaskID (This) =
      Get_AssociatedTaskID (This)'Old 
@@ -78,8 +78,10 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
           Get_OperatingRegion (Y)
       and Get_RouteRequests (X) = 
           Get_RouteRequests (Y)
-      and (for all L in Natural
-           => (Element(Get_RouteRequests (X), L) = Element(Get_RouteRequests (Y), L) )));
+      and (First_Index(Get_RouteRequests (X)) = First_Index(Get_RouteRequests (Y) )
+      and then Last_Index(Get_RouteRequests (X)) = Last_Index(Get_RouteRequests (Y) )
+      and then ( for All I in First_Index(Get_RouteRequests (X)) ..  Last_Index(Get_RouteRequests (X) )
+                => (Element(Get_RouteRequests (X), I) = Element(Get_RouteRequests (Y), I) ))));
    --  pragma Annotate (GNATprove, Inline_For_Proof, Same_Requests);
      
      

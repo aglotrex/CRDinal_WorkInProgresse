@@ -6,22 +6,28 @@ with AFRL.CMASI.LmcpTask;
 with UxAS.Messages.LmcpTask;
 with UxAS.Messages.LmcpTask.UniqueAutomationResponse;
 
-with afrl.cmasi.EntityState; use afrl.cmasi.EntityState;
-with afrl.cmasi.EntityConfiguration; use afrl.cmasi.EntityConfiguration;
-with uxas.messages.lmcptask.UniqueAutomationRequest; use uxas.messages.lmcptask.UniqueAutomationRequest;
-with uxas.messages.lmcptask.TaskPlanOptions; use uxas.messages.lmcptask.TaskPlanOptions;
-with uxas.messages.route.RoutePlan; use uxas.messages.route.RoutePlan;
-with uxas.messages.route.RoutePlanResponse; use uxas.messages.route.RoutePlanResponse;
-with uxas.messages.route.RoutePlanRequest; use uxas.messages.route.RoutePlanRequest;
+with Afrl.Cmasi.EntityState; use Afrl.Cmasi.EntityState;
+with Afrl.Cmasi.EntityConfiguration; use Afrl.Cmasi.EntityConfiguration;
+with Uxas.Messages.Lmcptask.UniqueAutomationRequest; use Uxas.Messages.Lmcptask.UniqueAutomationRequest;
+with Uxas.Messages.Lmcptask.TaskPlanOptions; use Uxas.Messages.Lmcptask.TaskPlanOptions;
+with Uxas.Messages.Route.RoutePlan; use Uxas.Messages.Route.RoutePlan;
+with Uxas.Messages.Route.RoutePlanResponse; use Uxas.Messages.Route.RoutePlanResponse;
+with Uxas.Messages.Route.RoutePlanRequest; use Uxas.Messages.Route.RoutePlanRequest;
 
-with uxas.messages.route.RouteRequest; use uxas.messages.route.RouteRequest;
+with Uxas.Messages.Route.RouteRequest; use Uxas.Messages.Route.RouteRequest;
+
+with Afrl.Cmasi.EntityState.SPARK_Boundary; use Afrl.Cmasi.EntityState.SPARK_Boundary;
+with Afrl.Cmasi.EntityConfiguration.SPARK_Boundary; use Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;
+with UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary; use UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary;
+with UxAS.Messages.Lmcptask.TaskPlanOptions; use UxAS.Messages.Lmcptask.TaskPlanOptions;
+with UxAS.Messages.Route.RoutePlanResponse; use UxAS.Messages.Route.RoutePlanResponse;
 
 
 
 with Ada.Containers.Formal_Hashed_Maps;
 with Ada.Containers.Formal_Doubly_Linked_Lists;
 with AFRL.CMASI.OperatingRegion.SPARK_Boundary; use AFRL.CMASI.OperatingRegion.SPARK_Boundary;
-with afrl.cmasi.LmcpTask.SPARK_Boundary;
+with Afrl.Cmasi.LmcpTask.SPARK_Boundary;
 with Common_Formal_Containers; use Common_Formal_Containers;
 
 
@@ -32,7 +38,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
 
    type Route_Aggregator_Service is new Service_Base with private;
 
-   type route_aggregator_service_Ref is access all Route_Aggregator_Service'Class;
+   type Route_Aggregator_Service_Ref is access all Route_Aggregator_Service'Class;
 
    Type_Name : constant String := "RouteAggregatorService";
 
@@ -63,12 +69,12 @@ private
    use UxAS.Messages.LmcpTask.UniqueAutomationResponse;
 
 
-      type AggregatorTaskOptionPair is record
-      vehicleId      : Int64 := 0;
-      prevTaskId     : Int64 := 0;
-      prevTaskOption : Int64 := 0;
-      taskId         : Int64 := 0;
-      taskOption     : Int64 := 0;
+   type AggregatorTaskOptionPair is record
+      VehicleId      : Int64 := 0;
+      PrevTaskId     : Int64 := 0;
+      PrevTaskOption : Int64 := 0;
+      TaskId         : Int64 := 0;
+      TaskOption     : Int64 := 0;
    end record;
 
    overriding
@@ -88,7 +94,7 @@ private
       Received_Message : not null Any_LMCP_Message;
       Result           : out Boolean);
 
-      overriding
+   overriding
    procedure Process_Received_Serialized_LMCP_Message
      (This             : in out Route_Aggregator_Service;
       Received_Message : not null Any_Addressed_Attributed_Message;
@@ -108,7 +114,7 @@ private
 
 
    type Entity_State_Holder is record
-      Content : EntityState_Any;
+      Content : My_EntityState;
    end record;
    package Int64_Entity_State_Maps is new Ada.Containers.Formal_Hashed_Maps
      (Key_Type     => Int64,
@@ -122,7 +128,7 @@ private
       Int64_Entity_State_Maps.Default_Modulus (Entity_State_Max_Capacity));
 
    type Entity_Configuration_Holder is record
-      Content : EntityConfiguration_Any;
+      Content : My_EntityConfiguration;
    end record;
    package Int64_Entity_Configuration_Maps is new Ada.Containers.Formal_Hashed_Maps
      (Key_Type     => Int64,
@@ -137,7 +143,7 @@ private
 
 
    type UniqueAutomationRequest_Handler is record
-      Content : UniqueAutomationRequest_Any;
+      Content : My_UniqueAutomationRequest;
    end record;
 
 
@@ -153,7 +159,7 @@ private
       Int64_Unique_Automation_Request_Maps.Default_Modulus (Unique_Automation_Request_Max_Capacity));
 
    type Task_Plan_Options_Holder is record
-      Content : TaskPlanOptions_Any;
+      Content : My_TaskPlanOptions;
    end record;
    package Int64_Task_Plan_Options_Maps is new Ada.Containers.Formal_Hashed_Maps
      (Key_Type     => Int64,
@@ -167,7 +173,7 @@ private
       Int64_Task_Plan_Options_Maps.Default_Modulus (Task_Plan_Options_Max_Capacity));
 
    type Pair_Int64_Route_Plan is record
-      reponse_ID : Int64;
+      Reponse_ID : Int64;
       Returned_Route_Plan : RoutePlan_Acc;
    end record;
 
@@ -208,7 +214,7 @@ private
       Int64_Aggregator_Task_Option_Pair_Maps.Default_Modulus (Aggregator_Task_Option_Pair_Max_Capacity));
 
    type Route_Plan_Responses_Holder is record
-      Content : RoutePlanResponse_Any;
+      Content : My_RoutePlanResponse;
    end record;
 
    package Int64_Route_Plan_Responses_Maps is new Ada.Containers.Formal_Hashed_Maps
@@ -239,7 +245,7 @@ private
 
 
 
-   type Route_Aggregator_Service is new Service_Base with Record
+   type Route_Aggregator_Service is new Service_Base with record
 
       Fast_Plan : Boolean := False;
 
