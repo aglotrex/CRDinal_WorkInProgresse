@@ -1,7 +1,7 @@
 with Afrl.Cmasi.Location3D; use Afrl.Cmasi.Location3D;
 
 
-package Afrl.Cmasi.Location3D.Spark_Boundary with SPARK_Mode is
+package Afrl.Cmasi.Location3D.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, Spark_Boundary);
 
    --  This package introduces a wrapper around UniqueAutomationRequest.
@@ -131,4 +131,4 @@ private
      (Unwrap (X) = Unwrap (Y));
 
 
-end Afrl.Cmasi.Location3D.Spark_Boundary;
+end Afrl.Cmasi.Location3D.SPARK_Boundary;

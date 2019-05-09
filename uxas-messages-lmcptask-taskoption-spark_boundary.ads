@@ -3,7 +3,7 @@ with Common_Formal_Containers; use Common_Formal_Containers;
 
 
 
-package UxAS.Messages.Lmcptask.TaskOption.Spark_Boundary with SPARK_Mode is
+package UxAS.Messages.Lmcptask.TaskOption.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
    type My_TaskOption is private;
@@ -96,4 +96,4 @@ private
    
    
 
-end UxAS.Messages.Lmcptask.TaskOption.Spark_Boundary;
+end UxAS.Messages.Lmcptask.TaskOption.SPARK_Boundary;

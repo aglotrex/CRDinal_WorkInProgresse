@@ -1,11 +1,11 @@
 with uxas.messages.route.RouteConstraints; use uxas.messages.route.RouteConstraints;
-with Afrl.Cmasi.Location3D.Spark_Boundary; use Afrl.Cmasi.Location3D.Spark_Boundary;
+with Afrl.Cmasi.Location3D.SPARK_Boundary; use Afrl.Cmasi.Location3D.SPARK_Boundary;
 
 
-package UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode is
+package UxAS.Messages.Route.RouteConstraints.SPARK_Boundary with SPARK_Mode is
 
 
-   pragma Annotate (GNATprove, Terminating, Spark_Boundary);
+   pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
 
    type My_RouteConstraints is private;
@@ -233,4 +233,4 @@ private
    function Wrap (This : RouteConstraints) return My_RouteConstraints is
      (Content => This);
 
-end UxAS.Messages.Route.RouteConstraints.Spark_Boundary ;
+end UxAS.Messages.Route.RouteConstraints.SPARK_Boundary ;

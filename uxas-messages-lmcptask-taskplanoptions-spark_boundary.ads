@@ -1,7 +1,7 @@
 with UxAS.Messages.Lmcptask.TaskOption.Spark_Boundary; use UxAS.Messages.Lmcptask.TaskOption.Spark_Boundary;
 with Ada.Containers.Formal_Vectors;
 
-package UxAS.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary with SPARK_Mode is
+package UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
    type My_TaskPlanOptions is private;
@@ -60,4 +60,4 @@ private
    function Wrap (This : TaskPlanOptions) return My_TaskPlanOptions is 
      (Content => This);
    
-end UxAS.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary;
+end UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary;

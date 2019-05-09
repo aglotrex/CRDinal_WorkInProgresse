@@ -265,7 +265,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       -- if (uxas::messages::route::isRoutePlanResponse(receivedLmcpMessage->m_object.get()))
       if    Received_Message.Payload.all in RoutePlanResponse'Class           then
          This.Handle_Route_Plan_Response_Msg(Received_Message);
-      --   SPARK.Check_All_Route_Plans(This);
+         --   SPARK.Check_All_Route_Plans(This);
 
          --  else if (uxas::messages::route::isRouteRequest(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in RouteRequest'Class                then
@@ -300,17 +300,17 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          -- else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object.get())
       elsif Received_Message.Payload.all in UniqueAutomationRequest'Class     then
          This.Handle_Unique_Automation_Request_Msg(Received_Message);
-       --  SPARK.Check_All_Task_Option_Received(This => This);
+         --  SPARK.Check_All_Task_Option_Received(This => This);
 
          --  else if (afrl::impact::isImpactAutomationRequest(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in ImpactAutomationRequest'Class     then
          This.Handle_Impact_Automation_Request_Msg(Received_Message);
-       --  SPARK.Check_All_Task_Option_Received(This => This);
+         --  SPARK.Check_All_Task_Option_Received(This => This);
 
          -- else if (uxas::messages::task::isTaskPlanOptions(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in TaskPlanOptions'Class             then
          This.Handle_Task_Plan_Options_Msg(Received_Message);
-        -- SPARK.Check_All_Task_Option_Received(This => This);
+         -- SPARK.Check_All_Task_Option_Received(This => This);
 
       end if;
       Result := False;
@@ -328,8 +328,8 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    begin
       Route_Request := Route_Request;
 
-    --  Spark.Handle_Route_Request(This          => This,
-    --                             Route_Request => RouteRequest_Acc(Route_Request).all);
+      --  Spark.Handle_Route_Request(This          => This,
+      --                             Route_Request => RouteRequest_Acc(Route_Request).all);
    end Handle_Route_Request_Msg;
 
 
@@ -350,7 +350,8 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       C : Int64_Route_Plan_Responses_Maps.Cursor;
       C2 : Int64_Pair_Int64_Route_Plan_Maps.Cursor;
       Inserted : Boolean;
-      Wrapped_RoutePlan : constant Route_Plan_Responses_Holder := Route_Plan_Responses_Holder'(Content => Route_Plan);
+      use UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary;
+      Wrapped_RoutePlan : constant Route_Plan_Responses_Holder := Route_Plan_Responses_Holder'(Content => Wrap(RoutePlanResponse_Acc(Route_Plan).all));
       Pair  : Pair_Int64_Route_Plan;
    begin
       --  m_routePlanResponses[rplan->getResponseID()] = rplan;
@@ -400,6 +401,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       --  int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
       ID :constant Int64 :=  AirVehicle.GetID;
       C : Int64_Entity_State_Maps.Cursor;
+      use  Afrl.Cmasi.EntityState.SPARK_Boundary;
       Wrapped_AirVehicle : constant Entity_State_Holder := Entity_State_Holder'(Content => Wrap(EntityState(AirVehicle.all)));
       Inserted : Boolean;
       use Int64_Sets;
@@ -445,6 +447,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       ID :constant Int64 :=  GroundVehicles.GetID;
 
       C : Int64_Entity_State_Maps.Cursor;
+      use  Afrl.Cmasi.EntityState.SPARK_Boundary;
       Wrapped_GroundVehicles : constant Entity_State_Holder := Entity_State_Holder'(Content => Wrap(EntityState(GroundVehicles.all)));
       Inserted : Boolean;
       use Int64_Sets;
@@ -482,6 +485,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       ID :constant Int64 :=  SurfaceVehicles.GetID;
 
       C : Int64_Entity_State_Maps.Cursor;
+      use  Afrl.Cmasi.EntityState.SPARK_Boundary;
       Wrapped_SurfacesVehicles : constant Entity_State_Holder := Entity_State_Holder'(Content => Wrap(EntityState(SurfaceVehicles.all)));
       Inserted : Boolean;
       use Int64_Sets;
@@ -519,6 +523,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       --   int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
       ID :constant Int64 := AirVehicle.GetID;
       C : Int64_Entity_Configuration_Maps.Cursor;
+      use  Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;
       Wrapped_AirVehicle : constant Entity_Configuration_Holder := Entity_Configuration_Holder'(Content => Wrap(EntityConfiguration(AirVehicle.all)));
       Inserted : Boolean;
       use Int64_Sets;
@@ -553,6 +558,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       --    int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
       ID : constant Int64 := GroundVehicle.GetID;
       C : Int64_Entity_Configuration_Maps.Cursor;
+      use  Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;
       Wrapped_GroundVehicles : constant Entity_Configuration_Holder := Entity_Configuration_Holder'(Content => Wrap(EntityConfiguration(GroundVehicle.all)));
       Inserted : Boolean;
       use Int64_Sets;
@@ -590,6 +596,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       --    int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
       ID :constant  Int64 := SurfaceVehicle.GetID;
       C : Int64_Entity_Configuration_Maps.Cursor;
+      use  Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;
       Wrapped_SurfaceVehicles : constant Entity_Configuration_Holder := Entity_Configuration_Holder'(Content => Wrap(EntityConfiguration(SurfaceVehicle.all)));
       Inserted : Boolean;
       use Int64_Sets;
@@ -691,7 +698,8 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       Task_Option : constant TaskPlanOptions_Any := TaskPlanOptions_Any(Msg.Payload);
 
       C : Int64_Task_Plan_Options_Maps.Cursor;
-      Wrapped_TaskOption : constant Task_Plan_Options_Holder := Task_Plan_Options_Holder'(Content => Task_Option);
+      use  Uxas.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary;
+      Wrapped_TaskOption : constant Task_Plan_Options_Holder := Task_Plan_Options_Holder'(Content => Wrap(TaskPlanOptions_Acc(Task_Option).all));
       Inserted : Boolean;
 
    begin

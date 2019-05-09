@@ -1,4 +1,4 @@
-package body UxAS.Messages.Lmcptask.TaskOption.Spark_Boundary with SPARK_Mode => Off is
+package body UxAS.Messages.Lmcptask.TaskOption.SPARK_Boundary with SPARK_Mode => Off is
 
    
    --------------------------
@@ -20,4 +20,4 @@ package body UxAS.Messages.Lmcptask.TaskOption.Spark_Boundary with SPARK_Mode =>
    
    
 
-end UxAS.Messages.Lmcptask.TaskOption.Spark_Boundary;
+end UxAS.Messages.Lmcptask.TaskOption.SPARK_Boundary;

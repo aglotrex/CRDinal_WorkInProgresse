@@ -1,5 +1,5 @@
 
-package body UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode => Off is
+package body UxAS.Messages.Route.RouteConstraints.SPARK_Boundary with SPARK_Mode => Off is
 
    -------------------
    --  Set_RouteID  --
@@ -88,4 +88,4 @@ package body UxAS.Messages.Route.RouteConstraints.Spark_Boundary with SPARK_Mode
 
 
 
-end UxAS.Messages.Route.RouteConstraints.Spark_Boundary;
+end UxAS.Messages.Route.RouteConstraints.SPARK_Boundary;

@@ -34,7 +34,7 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      (This : My_RouteRequest) return Int64
      with Global => null;
    
-   function Get_Vehicle_ID
+   function Get_VehicleID
      (Request : My_RouteRequest) return Int64_Vect
      with Global => null;
    
@@ -46,7 +46,29 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      (Request : My_RouteRequest) return Vect_My_RouteConstraints
      with Global => null;
    
+   procedure Add_VehiclesID
+     (This : in out My_RouteRequest;
+      VehiclesID : Int64) with
+     Global => null,
+     Post => Last_Element(Get_VehicleID(This)) = VehiclesID
+     and (First_Index(Get_VehicleID (This)) = First_Index(Get_VehicleID (This'Old) )
+          and then Last_Index(Get_VehicleID (This)) = Last_Index(Get_VehicleID (This'Old) ) + 1
+          and then ( for all I in First_Index(Get_VehicleID (This'Old)) ..  Last_Index(Get_VehicleID (This'Old) )
+                    => (Element(Get_VehicleID (This), I) = Element(Get_VehicleID (This'Old), I) )))
+     and Get_RequestID(This) =  Get_RequestID(This'Old) 
+     and Get_AssociatedTaskID (This) =
+     Get_AssociatedTaskID (This)'Old 
+     and Get_OperatingRegion (This)
+     = Get_OperatingRegion (This)'Old
+     and Get_RouteRequests (This)
+     = Get_RouteRequests (This)'Old
+     
+     and (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old) )
+          and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old) )
+          and then ( for all I in First_Index(Get_RouteRequests (This)) ..  Last_Index(Get_RouteRequests (This'Old) )
+                    => (Element(Get_RouteRequests (This), I) = Element(Get_RouteRequests (This'Old), I) )));
    
+     
    procedure Add_RouteConstraints 
      (This : in out My_RouteRequest;
       Route_Constraints : in My_RouteConstraints)
@@ -62,26 +84,30 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      
      and Get_AssociatedTaskID (This) =
      Get_AssociatedTaskID (This)'Old 
-     and Get_Vehicle_ID (This) 
-     = Get_Vehicle_ID (This)'Old
      and Get_OperatingRegion (This)
-     = Get_OperatingRegion (This)'Old;
+     = Get_OperatingRegion (This)'Old
+     and (First_Index(Get_VehicleID (This)) = First_Index(Get_VehicleID (This'Old) )
+          and then Last_Index(Get_VehicleID (This)) = Last_Index(Get_VehicleID (This'Old) )
+          and then ( for all I in First_Index(Get_VehicleID (This'Old)) ..  Last_Index(Get_VehicleID (This'Old) )
+                    => (Element(Get_VehicleID (This), I) = Element(Get_VehicleID (This'Old), I) ))) ;
      
      
    function Same_Requests (X, Y : My_RouteRequest) return Boolean is
      (Get_RequestID (X) = Get_RequestID (Y)
       and Get_AssociatedTaskID (X) =
           Get_AssociatedTaskID (Y)
-      and Get_Vehicle_ID (X) =
-          Get_Vehicle_ID (Y)
       and Get_OperatingRegion (X) =
           Get_OperatingRegion (Y)
       and Get_RouteRequests (X) = 
           Get_RouteRequests (Y)
       and (First_Index(Get_RouteRequests (X)) = First_Index(Get_RouteRequests (Y) )
-      and then Last_Index(Get_RouteRequests (X)) = Last_Index(Get_RouteRequests (Y) )
-      and then ( for All I in First_Index(Get_RouteRequests (X)) ..  Last_Index(Get_RouteRequests (X) )
-                => (Element(Get_RouteRequests (X), I) = Element(Get_RouteRequests (Y), I) ))));
+           and then Last_Index(Get_RouteRequests (X)) = Last_Index(Get_RouteRequests (Y) )
+           and then ( for all I in First_Index(Get_RouteRequests (X)) ..  Last_Index(Get_RouteRequests (X) )
+                     => (Element(Get_RouteRequests (X), I) = Element(Get_RouteRequests (Y), I) )))
+      and (First_Index(Get_VehicleID (X)) = First_Index(Get_VehicleID (Y) )
+           and then Last_Index(Get_VehicleID (X)) = Last_Index(Get_VehicleID (Y) )
+           and then ( for all I in First_Index(Get_VehicleID (X)) ..  Last_Index(Get_VehicleID (X) )
+                     => (Element(Get_VehicleID (X), I) = Element(Get_VehicleID (Y), I) ))));
    --  pragma Annotate (GNATprove, Inline_For_Proof, Same_Requests);
      
      
@@ -97,12 +123,18 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      Post => Get_RequestID(This) = RequestID 
      and Get_AssociatedTaskID (This) =
      Get_AssociatedTaskID (This)'Old 
-     and Get_Vehicle_ID (This) 
-     = Get_Vehicle_ID (This)'Old
      and Get_OperatingRegion (This)
      = Get_OperatingRegion (This)'Old
      and Get_RouteRequests (This)
-     = Get_RouteRequests (This)'Old;
+     = Get_RouteRequests (This)'Old
+     and (First_Index(Get_VehicleID (This)) = First_Index(Get_VehicleID (This'Old) )
+          and then Last_Index(Get_VehicleID (This)) = Last_Index(Get_VehicleID (This'Old) )
+          and then ( for all I in First_Index(Get_VehicleID (This'Old)) ..  Last_Index(Get_VehicleID (This'Old) )
+                    => (Element(Get_VehicleID (This), I) = Element(Get_VehicleID (This'Old), I) )))
+     and (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old) )
+          and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old) )
+          and then ( for all I in First_Index(Get_RouteRequests (This)) ..  Last_Index(Get_RouteRequests (This'Old) )
+                    => (Element(Get_RouteRequests (This), I) = Element(Get_RouteRequests (This'Old), I) )));
    
    procedure Set_AssociatedTaskID 
      (This : in out My_RouteRequest;
@@ -111,12 +143,18 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      Post => Get_AssociatedTaskID(This) = AssociatedTaskID 
      and Get_RequestID(This) 
      = Get_RequestID(This)'Old 
-     and Get_Vehicle_ID (This) 
-     = Get_Vehicle_ID (This)'Old
      and Get_OperatingRegion (This)
      = Get_OperatingRegion (This)'Old
      and Get_RouteRequests (This)
-     = Get_RouteRequests (This)'Old;
+     = Get_RouteRequests (This)'Old
+     and (First_Index(Get_VehicleID (This)) = First_Index(Get_VehicleID (This'Old) )
+          and then Last_Index(Get_VehicleID (This)) = Last_Index(Get_VehicleID (This'Old) )
+          and then ( for all I in First_Index(Get_VehicleID (This'Old)) ..  Last_Index(Get_VehicleID (This'Old) )
+                    => (Element(Get_VehicleID (This), I) = Element(Get_VehicleID (This'Old), I) )))
+     and (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old) )
+          and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old) )
+          and then ( for all I in First_Index(Get_RouteRequests (This)) ..  Last_Index(Get_RouteRequests (This'Old) )
+                    => (Element(Get_RouteRequests (This), I) = Element(Get_RouteRequests (This'Old), I) )));
    
    procedure Set_OperatingRegion
      (This : in out My_RouteRequest;
@@ -127,10 +165,16 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      = Get_RequestID(This)'Old 
      and Get_AssociatedTaskID (This) 
      = Get_AssociatedTaskID (This)'Old 
-     and Get_Vehicle_ID (This) 
-     = Get_Vehicle_ID (This)'Old
      and Get_RouteRequests (This)
-     = Get_RouteRequests (This)'Old;
+     = Get_RouteRequests (This)'Old
+     and (First_Index(Get_VehicleID (This)) = First_Index(Get_VehicleID (This'Old) )
+          and then Last_Index(Get_VehicleID (This)) = Last_Index(Get_VehicleID (This'Old) )
+          and then ( for all I in First_Index(Get_VehicleID (This'Old)) ..  Last_Index(Get_VehicleID (This'Old) )
+                    => (Element(Get_VehicleID (This), I) = Element(Get_VehicleID (This'Old), I) )))
+     and (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old) )
+          and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old) )
+          and then ( for all I in First_Index(Get_RouteRequests (This)) ..  Last_Index(Get_RouteRequests (This'Old) )
+                    => (Element(Get_RouteRequests (This), I) = Element(Get_RouteRequests (This'Old), I) )));
    
    function Unwrap (This : My_RouteRequest) return RouteRequest;
    

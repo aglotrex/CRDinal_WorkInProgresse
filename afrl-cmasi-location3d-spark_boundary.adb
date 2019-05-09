@@ -1,4 +1,4 @@
-package body Afrl.Cmasi.Location3D.Spark_Boundary with SPARK_Mode => Off is
+package body Afrl.Cmasi.Location3D.SPARK_Boundary with SPARK_Mode => Off is
 
    procedure Set_Latitude
      (This : in out  My_Location3D_Any;
@@ -34,4 +34,4 @@ package body Afrl.Cmasi.Location3D.Spark_Boundary with SPARK_Mode => Off is
       This.Content.setAltitudeType (AltitudeType);
    end Set_AltitudeType;
 
-end Afrl.Cmasi.Location3D.Spark_Boundary;
+end Afrl.Cmasi.Location3D.SPARK_Boundary;

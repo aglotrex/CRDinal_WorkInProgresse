@@ -1,7 +1,7 @@
-with UxAS.Messages.Route.ROuteConstraints.Spark_Boundary; use UxAS.Messages.Route.ROuteConstraints.Spark_Boundary;
+with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary; use UxAS.Messages.Route.ROuteConstraints.Spark_Boundary;
 with Ada.Containers.Formal_Vectors;
 
-package UxAS.Messages.Route.ROuteConstraints.Spark_Boundary.Vects with SPARK_Mode is
+package UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects with SPARK_Mode is
 
    package Vect_My_RouteConstraints_P is new Ada.Containers.Formal_Vectors
      (Index_Type   => Natural,
@@ -13,4 +13,4 @@ package UxAS.Messages.Route.ROuteConstraints.Spark_Boundary.Vects with SPARK_Mod
    subtype Vect_My_RouteConstraints is Vect_My_RouteConstraints_P.Vector
      (Vect_My_RouteConstraints_Commun_Max_Capacity);
 
-end UxAS.Messages.Route.ROuteConstraints.Spark_Boundary.Vects;
+end UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects;

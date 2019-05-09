@@ -2,12 +2,12 @@
 package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => Off is
 
  
-   ----------------------
-   --  Get_Vehicle_ID  --
-   ----------------------
+   ---------------------
+   --  Get_VehicleID  --
+   ---------------------
    
    
-   function Get_Vehicle_ID
+   function Get_VehicleID
      (Request : My_RouteRequest) return Int64_Vect
    is
       L : constant Vect_Int64_Acc := Request.Content.GetVehicleID;
@@ -18,7 +18,7 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
                                 New_Item  => E);
          end loop;
       end return;
-   end Get_Vehicle_ID;
+   end Get_VehicleID;
    
    
    -------------------------
@@ -87,6 +87,19 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
       This.Content.RouteRequests.Append
         (New_Item => Pointer);
    end Add_RouteConstraints;
+   
+   ----------------------
+   --  Add_VehiclesID  --
+   ----------------------
+    
+   procedure Add_VehiclesID
+     (This : in out My_RouteRequest;
+      VehiclesID : Int64) 
+   is
+   begin
+      This.Content.GetVehicleID.Append(New_Item => VehiclesID);
+   end Add_VehiclesID;
+   
    
    
          

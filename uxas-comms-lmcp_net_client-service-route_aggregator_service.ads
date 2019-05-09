@@ -8,21 +8,23 @@ with UxAS.Messages.LmcpTask.UniqueAutomationResponse;
 
 with Afrl.Cmasi.EntityState; use Afrl.Cmasi.EntityState;
 with Afrl.Cmasi.EntityConfiguration; use Afrl.Cmasi.EntityConfiguration;
+with Afrl.Cmasi.EntityState.SPARK_Boundary; use Afrl.Cmasi.EntityState.SPARK_Boundary;
+with Afrl.Cmasi.EntityConfiguration.SPARK_Boundary; use Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;
+
 with Uxas.Messages.Lmcptask.UniqueAutomationRequest; use Uxas.Messages.Lmcptask.UniqueAutomationRequest;
 with Uxas.Messages.Lmcptask.TaskPlanOptions; use Uxas.Messages.Lmcptask.TaskPlanOptions;
 with Uxas.Messages.Route.RoutePlan; use Uxas.Messages.Route.RoutePlan;
-with Uxas.Messages.Route.RoutePlanResponse; use Uxas.Messages.Route.RoutePlanResponse;
 with Uxas.Messages.Route.RoutePlanRequest; use Uxas.Messages.Route.RoutePlanRequest;
+with Uxas.Messages.Route.RoutePlanResponse; use Uxas.Messages.Route.RoutePlanResponse;
+with UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary; use UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary;
+
 
 with Uxas.Messages.Route.RouteRequest; use Uxas.Messages.Route.RouteRequest;
 
-with Afrl.Cmasi.EntityState.SPARK_Boundary; use Afrl.Cmasi.EntityState.SPARK_Boundary;
-with Afrl.Cmasi.EntityConfiguration.SPARK_Boundary; use Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;
 with UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary; use UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary;
-with UxAS.Messages.Lmcptask.TaskPlanOptions; use UxAS.Messages.Lmcptask.TaskPlanOptions;
 with UxAS.Messages.Route.RoutePlanResponse; use UxAS.Messages.Route.RoutePlanResponse;
-
-
+with UxAS.Messages.Lmcptask.TaskPlanOptions; use UxAS.Messages.Lmcptask.TaskPlanOptions;
+with UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary; use UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary;
 
 with Ada.Containers.Formal_Hashed_Maps;
 with Ada.Containers.Formal_Doubly_Linked_Lists;
@@ -174,7 +176,7 @@ private
 
    type Pair_Int64_Route_Plan is record
       Reponse_ID : Int64;
-      Returned_Route_Plan : RoutePlan_Acc;
+      Returned_Route_Plan : RoutePlan;
    end record;
 
    package Int64_Pair_Int64_Route_Plan_Maps is new Ada.Containers.Formal_Hashed_Maps

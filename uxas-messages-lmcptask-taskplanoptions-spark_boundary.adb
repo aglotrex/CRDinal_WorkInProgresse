@@ -1,4 +1,4 @@
-package body UxAS.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary with SPARK_Mode => Off is
+package body UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary with SPARK_Mode => Off is
 
    
   function Get_Options
@@ -15,4 +15,4 @@ package body UxAS.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary with SPARK_Mo
    end Get_Options;
    
         
-end UxAS.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary;
+end UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary;
