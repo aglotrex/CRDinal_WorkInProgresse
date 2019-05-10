@@ -1,5 +1,23 @@
 package body UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary with SPARK_Mode => Off is
-
+   
+   ----------------------------------
+   --  Get_ID_From_RouteResponses  --
+   ----------------------------------
+   
+   function Get_ID_From_RouteResponses
+     (This : My_RoutePlanResponse) return Int64_Vect 
+   is 
+      L : constant UxAS.Messages.Route.RoutePlanResponse.Vect_RoutePlan_Acc_Acc :=
+        This.Content.GetRouteResponses;
+   begin
+      return R : Int64_Vect do
+         for E of L.all loop
+            Int64_Vects.Append(Container => R,
+                               New_Item  => E.GetRouteID);
+         end loop;
+      end return;
+   end Get_ID_From_RouteResponses;
+   
    ----------------------
    --  Set_ResponseID  --
    ----------------------

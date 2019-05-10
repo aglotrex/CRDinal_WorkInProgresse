@@ -30,7 +30,9 @@ package UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary with SPARK_Mode is
    function Get_RequestID
      (This : My_RoutePlanRequest) return Int64 with
      Global => null;
-    use  UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects.Vect_My_RouteConstraints_P;
+   
+   
+   use  UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects.Vect_My_RouteConstraints_P;
    function Same_Requests (X, Y : My_RoutePlanRequest) return Boolean is
      (Get_AssociatedTaskID (X) = Get_AssociatedTaskID (Y)
       and Get_IsCostOnlyRequest (X) = Get_IsCostOnlyRequest (Y)
@@ -43,129 +45,144 @@ package UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary with SPARK_Mode is
          and then (for all I in First_Index(Get_RouteRequests (X)) .. Last_Index(Get_RouteRequests (X)) 
                    => (Element (Get_RouteRequests (X) , I) = Element (Get_RouteRequests (Y) , I))))); 
            
-      pragma Annotate (GNATprove, Inline_For_Proof, Same_Requests);
+   pragma Annotate (GNATprove, Inline_For_Proof, Same_Requests);
  
-      overriding
-      function "=" (X, Y : My_RoutePlanRequest) return Boolean;
+   overriding
+   function "=" (X, Y : My_RoutePlanRequest) return Boolean;
    
-      function Unwrap (This : My_RoutePlanRequest) return RoutePlanRequest;
+   function Unwrap (This : My_RoutePlanRequest) return RoutePlanRequest;
 
-      function Wrap (This : RoutePlanRequest) return My_RoutePlanRequest;
+   function Wrap (This : RoutePlanRequest) return My_RoutePlanRequest;
    
-      procedure Set_AssociatedTaskID
-        (This : in out My_RoutePlanRequest;
-         AssociatedTaskID : Int64) with
-        Post =>  Get_AssociatedTaskID (This) = AssociatedTaskID
-      and Get_IsCostOnlyRequest (This) = Get_IsCostOnlyRequest (This'Old)
-      and Get_OperatingRegion (This)   = Get_OperatingRegion (This'Old)
-      and Get_VehicleID (This) = Get_VehicleID (This'Old)
-      and Get_RequestID (This) = Get_RequestID (This'Old)
-      and 
-        (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old))
-         and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old))
-         and then (for all I in First_Index(Get_RouteRequests (This)) .. Last_Index(Get_RouteRequests (This)) 
-                   => Element (Get_RouteRequests (This) , I) = Element (Get_RouteRequests (This'Old) , I)));
+   procedure Set_AssociatedTaskID
+     (This : in out My_RoutePlanRequest;
+      AssociatedTaskID : Int64) with
+     Post =>  Get_AssociatedTaskID (This) = AssociatedTaskID
+     and Get_IsCostOnlyRequest (This) = Get_IsCostOnlyRequest (This'Old)
+     and Get_OperatingRegion (This)   = Get_OperatingRegion (This'Old)
+     and Get_VehicleID (This) = Get_VehicleID (This'Old)
+     and Get_RequestID (This) = Get_RequestID (This'Old)
+     and 
+       (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old))
+        and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old))
+        and then (for all I in First_Index(Get_RouteRequests (This)) .. Last_Index(Get_RouteRequests (This)) 
+                  => Element (Get_RouteRequests (This) , I) = Element (Get_RouteRequests (This'Old) , I)));
    
    
-      procedure Set_IsCostOnlyRequest
-        (This : in out My_RoutePlanRequest;
-         IsCostOnlyRequest : Boolean) with
-        Post => Get_IsCostOnlyRequest (This) = IsCostOnlyRequest
-      and Get_AssociatedTaskID (This) = Get_AssociatedTaskID (This'Old)
-      and Get_OperatingRegion (This)   = Get_OperatingRegion (This'Old)
-      and Get_VehicleID (This) = Get_VehicleID (This'Old)
-      and Get_RequestID (This) = Get_RequestID (This'Old)
-      and 
-        (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old))
-         and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old))
-         and then (for all I in First_Index(Get_RouteRequests (This)) .. Last_Index(Get_RouteRequests (This)) 
-                   => Element (Get_RouteRequests (This) , I) = Element (Get_RouteRequests (This'Old) , I)));
+   procedure Set_IsCostOnlyRequest
+     (This : in out My_RoutePlanRequest;
+      IsCostOnlyRequest : Boolean) with
+     Post => Get_IsCostOnlyRequest (This) = IsCostOnlyRequest
+     and Get_AssociatedTaskID (This) = Get_AssociatedTaskID (This'Old)
+     and Get_OperatingRegion (This)   = Get_OperatingRegion (This'Old)
+     and Get_VehicleID (This) = Get_VehicleID (This'Old)
+     and Get_RequestID (This) = Get_RequestID (This'Old)
+     and 
+       (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old))
+        and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old))
+        and then (for all I in First_Index(Get_RouteRequests (This)) .. Last_Index(Get_RouteRequests (This)) 
+                  => Element (Get_RouteRequests (This) , I) = Element (Get_RouteRequests (This'Old) , I)));
    
      
-      procedure Set_OperatingRegion
-        (This : in out My_RoutePlanRequest;
-         OperatingRegion : Int64) with
-        Post => Get_OperatingRegion (This) = OperatingRegion
-      and Get_AssociatedTaskID (This) = Get_AssociatedTaskID (This'Old)
-      and Get_IsCostOnlyRequest (This) = Get_IsCostOnlyRequest (This'Old)
-      and Get_VehicleID (This) = Get_VehicleID (This'Old)
-      and Get_RequestID (This) = Get_RequestID (This'Old)
-      and 
-        (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old))
-         and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old))
-         and then (for all I in First_Index(Get_RouteRequests (This)) .. Last_Index(Get_RouteRequests (This)) 
-                   => Element (Get_RouteRequests (This) , I) = Element (Get_RouteRequests (This'Old) , I)));
+   procedure Set_OperatingRegion
+     (This : in out My_RoutePlanRequest;
+      OperatingRegion : Int64) with
+     Post => Get_OperatingRegion (This) = OperatingRegion
+     and Get_AssociatedTaskID (This) = Get_AssociatedTaskID (This'Old)
+     and Get_IsCostOnlyRequest (This) = Get_IsCostOnlyRequest (This'Old)
+     and Get_VehicleID (This) = Get_VehicleID (This'Old)
+     and Get_RequestID (This) = Get_RequestID (This'Old)
+     and 
+       (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old))
+        and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old))
+        and then (for all I in First_Index(Get_RouteRequests (This)) .. Last_Index(Get_RouteRequests (This)) 
+                  => Element (Get_RouteRequests (This) , I) = Element (Get_RouteRequests (This'Old) , I)));
    
       
-      procedure Set_VehicleID
-        (This : in out My_RoutePlanRequest;
-         VehicleID : Int64) with
-        Post =>  GEt_VehicleID  (This) = VehicleID
-      and Get_AssociatedTaskID  (This) = Get_AssociatedTaskID (This'Old)
-      and Get_IsCostOnlyRequest (This) = Get_IsCostOnlyRequest (This'Old)
-      and Get_OperatingRegion   (This)   = Get_OperatingRegion (This'Old)
-      and Get_RequestID (This) = Get_RequestID (This'Old)
-      and 
-        (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old))
-         and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old))
-         and then (for all I in First_Index(Get_RouteRequests (This)) .. Last_Index(Get_RouteRequests (This)) 
-                   => Element (Get_RouteRequests (This) , I) = Element (Get_RouteRequests (This'Old) , I)));
+   procedure Set_VehicleID
+     (This : in out My_RoutePlanRequest;
+      VehicleID : Int64) with
+     Post =>  Get_VehicleID  (This) = VehicleID
+     and Get_AssociatedTaskID  (This) = Get_AssociatedTaskID (This'Old)
+     and Get_IsCostOnlyRequest (This) = Get_IsCostOnlyRequest (This'Old)
+     and Get_OperatingRegion   (This)   = Get_OperatingRegion (This'Old)
+     and Get_RequestID (This) = Get_RequestID (This'Old)
+     and 
+       (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old))
+        and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old))
+        and then (for all I in First_Index(Get_RouteRequests (This)) .. Last_Index(Get_RouteRequests (This)) 
+                  => Element (Get_RouteRequests (This) , I) = Element (Get_RouteRequests (This'Old) , I)));
+
+   procedure Set_RequestID
+     (This : in out My_RoutePlanRequest;
+      RequestID : Int64) with
+     Post =>  Get_RequestID  (This) = RequestID
+     and Get_AssociatedTaskID  (This) = Get_AssociatedTaskID (This'Old)
+     and Get_IsCostOnlyRequest (This) = Get_IsCostOnlyRequest (This'Old)
+     and Get_OperatingRegion   (This)   = Get_OperatingRegion (This'Old)
+     and GEt_VehicleID (This) = GEt_VehicleID (This'Old)
+     and 
+       (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old))
+        and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old))
+        and then (for all I in First_Index(Get_RouteRequests (This)) .. Last_Index(Get_RouteRequests (This)) 
+                  => Element (Get_RouteRequests (This) , I) = Element (Get_RouteRequests (This'Old) , I)));
    
-        procedure Append_RouteRequests
-        (This : in out My_RoutePlanRequest;
-         RouteRequests : My_RouteConstraints) with
+    
+   procedure Append_RouteRequests
+     (This : in out My_RoutePlanRequest;
+      RouteRequests : My_RouteConstraints) with
      Post =>  Element(Get_RouteRequests (This),
-                     Last_Index (Get_RouteRequests (This)) ) = RouteRequests
-      and Get_VehicleID  (This) = Get_VehicleID (This'Old)
-      and Get_AssociatedTaskID  (This) = Get_AssociatedTaskID (This'Old)
-      and Get_IsCostOnlyRequest (This) = Get_IsCostOnlyRequest (This'Old)
-      and Get_OperatingRegion   (This)   = Get_OperatingRegion (This'Old)
-      and Get_RequestID (This) = Get_RequestID (This'Old)
-      and 
-        (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old))
-         and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old))  + 1
-         and then (for all I in First_Index(Get_RouteRequests (This'Old)) .. Last_Index(Get_RouteRequests (This'Old)) 
-                   => Element (Get_RouteRequests (This) , I) = Element (Get_RouteRequests (This'Old) , I)));
+                      Last_Index (Get_RouteRequests (This)) ) = RouteRequests
+     and Get_VehicleID  (This) = Get_VehicleID (This'Old)
+     and Get_AssociatedTaskID  (This) = Get_AssociatedTaskID (This'Old)
+     and Get_IsCostOnlyRequest (This) = Get_IsCostOnlyRequest (This'Old)
+     and Get_OperatingRegion   (This)   = Get_OperatingRegion (This'Old)
+     and Get_RequestID (This) = Get_RequestID (This'Old)
+     and 
+       (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old))
+        and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old))  + 1
+        and then (for all I in First_Index(Get_RouteRequests (This'Old)) .. Last_Index(Get_RouteRequests (This'Old)) 
+                  => Element (Get_RouteRequests (This) , I) = Element (Get_RouteRequests (This'Old) , I)));
    
       
   
       
-      private
-      type My_RoutePlanRequest is record
+private
+   type My_RoutePlanRequest is record
       Content : RoutePlanRequest;
-      end record;
+   end record;
    
-      function Get_AssociatedTaskID
-        (This : My_RoutePlanRequest) return Int64 is 
-          (This.Content.GetAssociatedTaskID);
+   function Get_AssociatedTaskID
+     (This : My_RoutePlanRequest) return Int64 is 
+     (This.Content.GetAssociatedTaskID);
    
-      function Get_IsCostOnlyRequest
-        (This : My_RoutePlanRequest) return Boolean is 
-          (This.Content.GetIsCostOnlyRequest);
+   function Get_IsCostOnlyRequest
+     (This : My_RoutePlanRequest) return Boolean is 
+     (This.Content.GetIsCostOnlyRequest);
    
-      function Get_OperatingRegion
-        (This : My_RoutePlanRequest) return Int64 is 
-          (This.Content.GetOperatingRegion);
+   function Get_OperatingRegion
+     (This : My_RoutePlanRequest) return Int64 is 
+     (This.Content.GetOperatingRegion);
    
-      function Get_VehicleID
-        (This : My_RoutePlanRequest) return Int64 is 
-          (This.Content.GetVehicleID);
+   function Get_VehicleID
+     (This : My_RoutePlanRequest) return Int64 is 
+     (This.Content.GetVehicleID);
   
    
-      function Get_RequestID
-        (This : My_RoutePlanRequest) return Int64 is
-          (This.Content.GetRequestID);
+   function Get_RequestID
+     (This : My_RoutePlanRequest) return Int64 is
+     (This.Content.GetRequestID);
    
    
-      overriding 
-      function "=" (X, Y : My_RoutePlanRequest) return Boolean is
-          (X.Content = Y.Content); 
+   overriding 
+   function "=" (X, Y : My_RoutePlanRequest) return Boolean is
+     (X.Content = Y.Content); 
    
-      function Unwrap (This : My_RoutePlanRequest) return RoutePlanRequest is 
-          (This.Content);
+   function Unwrap (This : My_RoutePlanRequest) return RoutePlanRequest is 
+     (This.Content);
 
-      function Wrap (This : RoutePlanRequest) return My_RoutePlanRequest is
-          (Content => This);
+   function Wrap (This : RoutePlanRequest) return My_RoutePlanRequest is
+     (Content => This);
    
 
-      end UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary ;
+end UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary ;

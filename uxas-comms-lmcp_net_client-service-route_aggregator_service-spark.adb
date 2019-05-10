@@ -18,16 +18,23 @@ with UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary; use UxAS.Mes
 with UxAS.Messages.Route.Object;
 with UxAS.Messages.Route.RoutePlan;
 
+with UxAS.Messages.Route.RouteResponse;    use UxAS.Messages.Route.RouteResponse;
 with UxAS.Messages.Route.RouteRequest.SPARK_Boundary;     use UxAS.Messages.Route.RouteRequest.SPARK_Boundary;
+with UxAS.Messages.Route.RouteResponse.SPARK_Boundary;    use UxAS.Messages.Route.RouteResponse.SPARK_Boundary;
 with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary; use UxAS.Messages.Route.RouteConstraints.SPARK_Boundary;
 with UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary; use UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary;
+with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects; use UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects;
+
 
 with Uxas.Messages.Lmcptask.TaskOption.Spark_Boundary;      use Uxas.Messages.Lmcptask.TaskOption.Spark_Boundary;
 with Uxas.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary; use Uxas.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary;
-
+with UxAS.Messages.Lmcptask.TAskOptionCost.SPARK_Boundary;  use UxAS.Messages.Lmcptask.TAskOptionCost.SPARK_Boundary;
+with UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary; use UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary;
 with UxAS.Common.Utilities.Unit_Conversions; use UxAS.Common.Utilities.Unit_Conversions; 
-
+               
+     
 with UxAS.Common.String_Constant.Message_Group; use UxAS.Common.String_Constant.Message_Group;
+
 
 with Afrl.Cmasi.Enumerations;  use Afrl.Cmasi.Enumerations;
 with Afrl.Cmasi.ServiceStatus; use Afrl.Cmasi.ServiceStatus;
@@ -38,6 +45,7 @@ with Afrl.Cmasi.Location3D.Spark_Boundary; use Afrl.Cmasi.Location3D.Spark_Bound
 use Afrl.Cmasi.AutomationRequest.Vect_Int64;
 
 with Ada.Containers.Formal_Vectors;
+with Common_Formal_Containers; use Common_Formal_Containers;
 
 
 package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
@@ -77,6 +85,20 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       Send_Air_Plan_Request    : My_Plan_Request_Vect;
       Send_Ground_Plan_Request : My_Plan_Request_Vect;
       use Int64_Vects;
+      
+      procedure My_Send_Shared_LMCP_Object_Limited_Cast_Message
+        (This : in out Route_Aggregator_Service;
+         Cast_Address : String;
+         Request : My_RoutePlanRequest)
+      is
+         Request_Acc : RoutePlanRequest_Acc;
+      begin
+         Request_Acc.all := Unwrap(Request);
+         This.Send_Shared_LMCP_Object_Limited_Cast_Message(Cast_Address,
+                                                           Object_Any(Request_Acc)); 
+      end My_Send_Shared_LMCP_Object_Limited_Cast_Message;
+          
+          
    begin 
       
       if Is_Empty(Get_EntityList_From_OriginalRequest(Request => Areq)) then
@@ -178,8 +200,8 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                                  if  Is_Empty(Get_EligibleEntities(Option))
                                    and Contains(Container => Get_EligibleEntities(Option),
                                                 Item =>Vehicle_ID) then
-                                    Task_Option_Vects.Append(Container => Task_Option_List,
-                                                             New_Item  => Option); -- TODO clone here
+                                    My_Task_Option_Vects.Append(Container => Task_Option_List,
+                                                                New_Item  => Option); -- TODO clone here
                                  end if;
                               end;
                               
@@ -309,30 +331,15 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          
          
       for Id_Req in First_Index(Send_Air_Plan_Request) .. Last_Index(Send_Air_Plan_Request) loop
-         declare
-            Request : constant My_RoutePlanRequest := Element(Send_Air_Plan_Request,Id_Req);
-            Request_Acc : RoutePlanRequest_Acc;
-         begin
-            Request_Acc.all := Unwrap(Request);
-            This.Send_Shared_LMCP_Object_Limited_Cast_Message(Cast_Address => AircraftPathPlanner,
-                                                              Msg          => Object_Any(Request_Acc));
-         end;
+         My_Send_Shared_LMCP_Object_Limited_Cast_Message(This,
+                                                         AIrcraftPathPlanner,
+                                                         Element(Send_Air_Plan_Request,Id_Req));
       end loop;
       
       for Id_Req in First_Index(Send_Ground_Plan_Request) .. Last_Index(Send_Ground_Plan_Request) loop
-         declare
-            Request : My_RoutePlanRequest := Element(Send_Ground_Plan_Request,Id_Req);
-            Request_Acc : RoutePlanRequest_Acc;
-         begin
-            if This.Fast_Plan then
-               Euclidean_Plan(This,Request);
-            else
-               Request_Acc.all := Unwrap(Request);
-               This.Send_Shared_LMCP_Object_Limited_Cast_Message(Cast_Address => Uxas.Common.String_Constant.Message_Group.GroundPathPlanner,
-                                                                 Msg          =>Object_Any(Request_Acc));
-            end if;
-         end;
-         
+         My_Send_Shared_LMCP_Object_Limited_Cast_Message(This,
+                                                         GroundPathPlanner,
+                                                         Element(Send_Ground_Plan_Request,Id_Req));
       end loop;
          
       if This.Fast_Plan then
@@ -362,15 +369,17 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          
       --  auto response = std::shared_ptr<uxas::messages::route::RoutePlanResponse>(new uxas::messages::route::RoutePlanResponse);
       Response : My_RoutePlanResponse;
+      use Vect_My_RouteConstraints_P;
    begin
       --  if (m_entityConfigurations.find(vehicleId) != m_entityConfigurations.end())
       if Int64_Entity_Configuration_Maps.Contains(Container => This.Entity_Configuration,
                                                   Key       => Vehicles_ID)
       then
          
+         
          --   double speed = m_entityConfigurations[vehicleId]->getNominalSpeed();
-         Speed := Long_Float(Get_NominalSpeed(Element(Container => This.Entity_Configuration,
-                                                      Index     => Vehicles_ID)));
+         Speed := Long_Float(Get_NominalSpeed(Int64_Entity_Configuration_Maps.Element(Container => This.Entity_Configuration,
+                                                                                      Key       => Vehicles_ID).Content));
          
          -- if (speed < 1e-2)
          if (Speed < 0.02) then
@@ -385,7 +394,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       Set_ResponseID (Response, Get_RequestID(Route_Plan_Request));
          
       -- for (size_t k = 0; k < request->getRouteRequests().size(); k++)
-      for K In First_Index(Get_RouteRequests(Route_Plan_Request)) .. Last_Index(Get_RouteRequests(Route_Plan_Request)) loop
+      for K in First_Index(Get_RouteRequests(Route_Plan_Request)) .. Last_Index(Get_RouteRequests(Route_Plan_Request)) loop
          declare
             
             -- uxas::messages::route::RouteConstraints* routeRequest = request->getRouteRequests().at(k);
@@ -403,14 +412,14 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             End_East     : Long_Float;
          
             -- uxas::messages::route::RoutePlan* plan = new uxas::messages::route::RoutePlan;
-            Plan : RoutePlan_Acc := new RoutePlan;
+            Plan : My_RoutePlan;
          
             Line_Dist : Long_Float;
             Pair_Response_Route :  Pair_Int64_Route_Plan;
          
          
          begin
-            Plan.SetRouteID(Route_ID);
+            SetRouteID (Plan, Route_ID);
          
             -- flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getStartLocation()->getLatitude(), routeRequest->getStartLocation()->getLongitude(), north, east);
             Convert_Lat_Long_DEG_To_North_East_M
@@ -436,7 +445,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             -- Line_Dist := Distance(Start_Point , End_Point);
             Line_Dist := Sqrt( ((End_North - Start_North)**2.0) + ((End_East - Start_East)**2.0));
          
-            Plan.SetRouteCost( Int64( Line_Dist / Speed * 1000.0));
+            SetRouteCost (Plan, Int64( Line_Dist / Speed * 1000.0));
          
             --  m_routePlans[routeId] = std::make_pair(request->getRequestID(), std::shared_ptr<uxas::messages::route::RoutePlan>(plan));
             Int64_Pair_Int64_Route_Plan_Maps.Insert
@@ -461,15 +470,25 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    procedure Send_Route_Reponse ( This : in out Route_Aggregator_Service;
                                   RouteKey : Int64)
    is 
-      Response  : constant My_RouteResponse;
-      RouteList : constant Vect_RoutePlanResponse_Acc_Acc := Response.GetRoutes;
+      Response  : My_RouteResponse;
       Exepcted_Plan_Response_IDs : constant Int64_Set := Int64_Pending_Route_Matrix.Element(This.Pending_Route,
                                                                                             RouteKey);
-            
+      
+      procedure My_Send_LMCP_Object_Broadcast_Message
+        (This :in out Route_Aggregator_Service ;
+         Request : My_RouteResponse)
+      is
+         Request_Acc : RouteResponse_Acc := new RouteResponse;
+      begin
+         Request_Acc.all := Unwrap(Request);
+         
+         This.Send_LMCP_Object_Broadcast_Message(Object_Any(Request_Acc)); 
+      end My_Send_LMCP_Object_Broadcast_Message;
+      
    begin
               
       --  response->setResponseID(routeKey);
-      Response.SetResponseID(RouteKey);
+      Set_ResponseID (Response, RouteKey);
             
       --  for (auto& rId : m_pendingRoute[routeKey])
       for Plan_Reponse_Id of Exepcted_Plan_Response_IDs loop
@@ -479,26 +498,27 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          if Int64_Route_Plan_Responses_Maps.Contains(This.Route_Plan_Responses,
                                                      Plan_Reponse_Id) then
             declare
-               Plan_Acc : My_RoutePlanResponse;
+               Plan : My_RoutePlanResponse;
+               use Int64_Vects;
                         
             begin
-               Plan_Acc := RoutePlanResponse_Acc( Int64_Route_Plan_Responses_Maps.Element(This.Route_Plan_Responses,
-                                                  Plan_Reponse_Id).Content);
+               Plan := Int64_Route_Plan_Responses_Maps.Element(This.Route_Plan_Responses,
+                                                               Plan_Reponse_Id).Content;
                         
-               RouteList.Append(Plan_Acc);   -- clone here
-                     
+               
+               Add_Route (Response, Plan);    -- clone here   
                      
                      
                --  // delete all individual routes from storage
                --  for (auto& i : plan->second->getRouteResponses())
-               for Route_Reponse of  Plan_Acc.GetRouteResponses.all loop
+               
+               for Index_Route_ID in First_Index(Get_ID_From_RouteResponses(Plan)) .. Last_Index(Get_ID_From_RouteResponses(Plan))loop
                           
                   --  M_RoutePlans.Erase(I->GetRouteID());
                   Int64_Pair_Int64_Route_Plan_Maps.Delete(This.Route_Plan,
-                                                          Route_Reponse.GetRouteID);
+                                                          Element(Container => Get_ID_From_RouteResponses(Plan),
+                                                                  Index     => Index_Route_ID));
                end loop;
-                     
-                     Lucifer
                      
                --   m_routePlanResponses.erase(plan);   
                Int64_Route_Plan_Responses_Maps.Delete(This.Route_Plan_Responses,
@@ -508,8 +528,8 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       end loop;
                
       --  sendSharedLmcpObjectBroadcastMessage(pResponse);
-      This.Send_LMCP_Object_Broadcast_Message(Object_Any(Response));
-               
+      My_Send_LMCP_Object_Broadcast_Message  (This,
+                                              Response);
            
                
    end Send_Route_Reponse;
@@ -535,7 +555,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                              AutoKey : Int64)
       is
          --   auto matrix = std::shared_ptr<uxas::messages::task::AssignmentCostMatrix>(new uxas::messages::task::AssignmentCostMatrix);
-         Matrix :  AssignmentCostMatrix_Acc := new AssignmentCostMatrix;
+         Matrix :  My_AssignmentCostMatrix;
             
          --   auto& areq = m_uniqueAutomationRequests[autoKey];
          Areq   : constant My_UniqueAutomationRequest := 
@@ -543,12 +563,33 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                                                         Key       => AutoKey).Content;
          Route_Not_Found : Unbounded_String := To_Unbounded_String("");
                      
-         Service_Status  : ServiceStatus_Acc;
+         Service_Status  : My_ServiceStatus;
             
          -- auto keyValuePair = new afrl::cmasi::KeyValuePair;
-         Key_Pair_Acc    : KeyValuePair_Acc;
+         Key_Pair   : My_KeyValuePair;
+         
+         procedure My_Send_Shared_LMCP_Object_Broadcast_Message
+           (This : in out Route_Aggregator_Service;
+            Matrix : My_AssignmentCostMatrix)
+         is 
+            Matrix_Acc : AssignmentCostMatrix_Acc := new AssignmentCostMatrix;
+         begin
+            Matrix_Acc.all := Uwrap(Matrix);
+            This.Send_Shared_LMCP_Object_Broadcast_Message(Object_Any(Matrix_Acc));
+         end My_Send_Shared_LMCP_Object_Broadcast_Message;
+         
+         procedure My_Send_LMCP_Object_Broadcast_Message
+           ( This : in out Route_Aggregator_Service;
+             Service_Status : My_ServiceStatus)
+         is 
+            Service_Status_Acc : ServiceStatus_Acc := new ServiceStatus;
+         begin
+            Service_Status_Acc.all := Uwrap(Service_Status);
+            This.Send_Shared_LMCP_Object_Broadcast_Message(Object_Any(Service_Status_Acc));
+         end My_Send_LMCP_Object_Broadcast_Message;
+         
       begin
-            
+         
          --   for (auto& rId : m_pendingAutoReq[autoKey])
          for R_Id of Int64_Pending_Auto_Req_Matrix.Element(Container => This.Pending_Auto_Req,
                                                            Key       => AutoKey) loop 
@@ -573,7 +614,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                                                                                                                R_Id);
                                 
                         -- auto toc = new uxas::messages::task::TaskOptionCost;                                                                                      
-                        Task_Option_Cost : TaskOptionCost_Acc := new TaskOptionCost;
+                        Task_Option_Cost : My_TaskOptionCost;
                      begin
                            
                         -- if (plan->second.second->getRouteCost() < 0)
@@ -584,15 +625,15 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                         end if;
                                     
                                     
-                        Task_Option_Cost.SetDestinationTaskID(Task_Pair.TaskId);
-                        Task_Option_Cost.SetDestinationTaskOption(Task_Pair.TaskOption);
-                        Task_Option_Cost.SetIntialTaskID(Task_Pair.PrevTaskId);
-                        Task_Option_Cost.SetIntialTaskOption(Task_Pair.PrevTaskOption);
-                        Task_Option_Cost.SetTimeToGo(Plan.Returned_Route_Plan.GetRouteCost);
-                        Task_Option_Cost.SetVehicleID(Task_Pair.VehicleId);
+                        SetDestinationTaskID (Task_Option_Cost, Task_Pair.TaskId);
+                        SetIntialTaskOption  (Task_Option_Cost, Task_Pair.PrevTaskOption);
+                        SetDestinationTaskOption (Task_Option_Cost, Task_Pair.TaskOption);
+                        SetIntialTaskID (Task_Option_Cost, Task_Pair.PrevTaskId);
+                        SetTimeToGo  (Task_Option_Cost, Plan.Returned_Route_Plan.GetRouteCost);
+                        SetVehicleID (Task_Option_Cost, Task_Pair.VehicleId);
                           
                         --  matrix->getCostMatrix().push_back(toc);
-                        Matrix.GetCostMatrix.Append(New_Item => Task_Option_Cost);
+                        Add_TaskOptionCost_To_CostMatrix(Matrix, Task_Option_Cost);
                            
                         -- m_routeTaskPairing.erase(taskpair); 
                         Int64_Aggregator_Task_Option_Pair_Maps.Delete(This.Route_Task_Pairing,
@@ -614,8 +655,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          --  // Send The Total Cost Matrix
          --  Std::Shared_Ptr<Avtas::Lmcp::Object> PResponse = Std::Static_Pointer_Cast<Avtas::Lmcp::Object>(Matrix);
          --  SendSharedLmcpObjectBroadcastMessage(PResponse);
-         This.Send_Shared_LMCP_Object_Broadcast_Message(Object_Any(Matrix));
-            
+         My_Send_Shared_LMCP_Object_Broadcast_Message(This,
+                                                      Matrix);
+        
        
          --  // clear out old options
          --  M_TaskOptions.Clear();
@@ -628,24 +670,24 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          if Length(Route_Not_Found) > 0 then
                         
                
-            Key_Pair_Acc.SetKey(To_Unbounded_String("RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId)"));
+            Key_Pair.SetKey(To_Unbounded_String("RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId)"));
                         
-            Key_Pair_Acc.SetValue(Route_Not_Found);
-            Service_Status.GetInfo.Append(Key_Pair_Acc);
+            Key_Pair.SetValue(Route_Not_Found);
+            Service_Status.GetInfo.Append(Key_Pair);
                
               
             Put(To_String("RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId) :: " & Route_Not_Found));
                      
          else
               
-            Key_Pair_Acc.SetKey(To_Unbounded_String("AssignmentMatrix - full"));
+            Key_Pair.SetKey(To_Unbounded_String("AssignmentMatrix - full"));
                
-            Service_Status.GetInfo.Append(Key_Pair_Acc);
+            Service_Status.GetInfo.Append(Key_Pair);
                
          end if;
             
          --  sendSharedLmcpObjectBroadcastMessage(serviceStatus);
-         THis.Send_LMCP_Object_Broadcast_Message(Object_Any(Service_Status));
+         My_Send_LMCP_Object_Broadcast_Message(This,Service_Status);
             
             
       end Send_Matrix;
@@ -756,8 +798,6 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       C : Int64_Unique_Automation_Request_Maps.Cursor := Int64_Unique_Automation_Request_Maps.First(Container => THis.Unique_Automation_Request);
           
             
-            
-         
    begin
       while Int64_Unique_Automation_Request_Maps.Has_Element(Container => This.Unique_Automation_Request,
                                                              Position  => C) loop
@@ -771,21 +811,22 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             -- areqIter->second
             Request : My_UniqueAutomationRequest := Int64_Unique_Automation_Request_Maps.Element(Container => This.Unique_Automation_Request,
       
-                                                                                                      Position  => C).Content;
+                                                                                                 Position  => C).Content;
       
             -- areqIter->first
             Index_Request : Int64 := Int64_Unique_Automation_Request_Maps.Key(Container => This.Unique_Automation_Request,
                                                                               Position  => C);
+            use Int64_Vects;
          begin
       
             -- for (size_t t = 0; t < areqIter->second->getOriginalRequest()->getTaskList().size(); t++)
-            for T in First_Index (Get_TaskList_From_OriginalRequest(Request)) .. Last_Index(Get_TaskList_From_OriginalRequest(Request)) loop
+            for T in First_Index (Get_TaskList_From_OriginalRequest (Request)) .. Last_Index(Get_TaskList_From_OriginalRequest(Request)) loop
       
       
                declare
                   -- int64_t taskId = areqIter->second->getOriginalRequest()->getTaskList().at(t);
-                  Task_ID : Int64 :=Element(Container => Get_TaskList_From_OriginalRequest(Request) ,
-                                            Index     => T);
+                  Task_ID : Int64 := Element(Container => Get_TaskList_From_OriginalRequest(Request) ,
+                                             Index     => T);
                begin
       
                   -- if (m_taskOptions.find(taskId) == m_taskOptions.end())
@@ -824,50 +865,68 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       
    procedure Handle_Route_Request
      (This          : in out Route_Aggregator_Service;
-      Route_Request : in My_RouteRequest)
+      Route_Request : My_RouteRequest)
    is
       use Int64_Vects;
       use Int64_Sets;
       use Ada.Containers;
+      use Int64_Entity_State_Maps;
+      Vect_VehiclesID : Int64_Vect := Get_VehicleID (Route_Request);
+      
+      procedure My_Send_LMCP_Object_Limited_Cast_Message
+        (This : in out Route_Aggregator_Service;
+         CastAddress : String;
+         Request : My_RoutePlanRequest)
+      is
+         Request_Acc : RoutePlanRequest_Acc := new RoutePlanRequest;
+      begin
+         Request_Acc.all := Unwrap(Request);
+         This.Send_LMCP_Object_Limited_Cast_Message(CastAddress => CastAddress,
+                                                    Msg         => Object_Any(Request_Acc));
+      end My_Send_LMCP_Object_Limited_Cast_Message;
+      
    begin
       
       --  if (request->getVehicleID().empty())
-      if Length(Get_VehicleID (Route_Request)) = 0 then
+      if Length(Vect_VehiclesID) = 0 then
       
-         --request->getVehicleID().reserve(m_entityStates.size());
+         --request->getVehicleId().reserve(m_entityStates.size());
       
          declare
-            C : Int64_Entity_State_Maps.Cursor := Int64_Entity_State_Maps.First(This.Entity_State);
+            C : Int64_Entity_State_Maps.Cursor := First(This.Entity_State);
          begin
             -- for (const auto& v : m_entityStates)
-            while Int64_Entity_State_Maps.Has_Element(Container => This.Entity_State,
-                                                      Position  => C) loop
+            while Has_Element(Container => This.Entity_State,
+                              Position  => C) loop
       
                -- request->getVehicleID().push_back(v.second->getID());
-               Route_Request.Get_VehicleID.Append( Int64_Entity_State_Maps.Element
-                                                  (Container => This.Entity_State,
-                                                   Position  => C).Content.Get_ID);
-               Int64_Entity_State_Maps.Next(Container => This.Entity_State,
-                                            Position  => C);
+               Int64_Vects.Append(Container => Vect_VehiclesID,
+                                  New_Item  => Get_ID(Element(Container => This.Entity_State,
+                                                           Position  => C).Content) );
+               
+               Next(Container => This.Entity_State,
+                    Position  => C);
             end loop;
          end;
       end if;
       
-      for Id_Indx in Route_Request.GetVehicleID.First_Index .. Route_Request.GetVehicleID.Last_Index  loop
+      for Id_Indx in First_Index(Vect_VehiclesID) .. Last_Index(Vect_VehiclesID)  loop
       
       
          declare
       
-            Vehicles_Id : Int64 := Route_Request.GetVehicleID.Element(Index => Id_Indx);
+            Vehicles_Id : Int64 := Element(Container => Vect_VehiclesID,
+                                           Index     => Id_Indx);
+            
             -- std::shared_ptr<uxas::messages::route::RoutePlanRequest> planRequest(new uxas::messages::route::RoutePlanRequest);
             Plan_Request : My_RoutePlanRequest;
       
       
             --  m_pendingRoute[request->getRequestID()]
             Pending_Route_Request : Int64_Set := Int64_Pending_Route_Matrix.Element(Container => This.Pending_Route,
-                                                                                    Key       => Route_Request.GetRequestID);
+                                                                                    Key       => Get_RequestID (Route_Request));
       
-      
+            use Vect_My_RouteConstraints_P;
          begin
       
             -- planRequest->setAssociatedTaskID(request->getAssociatedTaskID());
@@ -875,11 +934,12 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             -- planRequest->setOperatingRegion(request->getOperatingRegion());
             -- planRequest->setVehicleID(vehicleId);
             -- planRequest->setRequestID(m_routeRequestId);
-            Plan_Request.SetAssociatedTaskID (Route_Request.GetAssociatedTaskID);
-            Plan_Request.SetIsCostOnlyRequest(Route_Request.GetIsCostOnlyRequest);
-            Plan_Request.SetOperatingRegion  (Route_Request.GetOperatingRegion);
-            Plan_Request.SetVehicleID        (Vehicles_Id);
-            Plan_Request.SetRequestID        (Route_Request.GetRequestID);
+            Set_AssociatedTaskID  (Plan_Request, Get_AssociatedTaskID  (Route_Request));
+            Set_IsCostOnlyRequest (Plan_Request, Get_IsCostOnlyRequest (Route_Request));
+            Set_OperatingRegion   (Plan_Request, Get_OperatingRegion   (Route_Request));
+            Set_RequestID         (Plan_Request, Get_RequestID         (Route_Request));
+            Set_VehicleID         (Plan_Request, Vehicles_Id);
+            
       
             --  m_pendingRoute[request->getRequestID()].insert(m_routeRequestId);
             Int64_Sets.Insert(Container => Pending_Route_Request,
@@ -888,47 +948,46 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             This.Route_Request_ID := This.Route_Request_ID + 1;
       
       
-            for Indx in Route_Request.GetRouteRequests.First_Index .. Route_Request.GetRouteRequests.Last_Index loop
+            for Indx in First_Index (Get_RouteRequests (Route_Request)) .. Last_Index (Get_RouteRequests (Route_Request))  loop
                -- planRequest->getRouteRequests().push_back(r->clone());
-               Plan_Request.GetRouteRequests.Append(Route_Request.GetRouteRequests.Element(Indx));
+               Append_RouteRequests(This          => Plan_Request,
+                                    RouteRequests => Element (Container => Get_RouteRequests (Route_Request),
+                                                              Index     => Indx));
             end loop;
       
-            declare
-               -- std::shared_ptr<avtas::lmcp::Object> pRequest = std::static_pointer_cast<avtas::lmcp::Object>(planRequest);
-               P_Request : Avtas.Lmcp.Object.Object_Any := Avtas.Lmcp.Object.Object_Any(Plan_Request);
-      
-            begin
+          
       
       
-               --  if (m_groundVehicles.find(vehicleId) != m_groundVehicles.end())
-               if Int64_Sets.Contains(Container => This.Ground_Vehicles,
-                                      Item      => Vehicles_Id)
-               then
+            --  if (m_groundVehicles.find(vehicleId) != m_groundVehicles.end())
+            if Int64_Sets.Contains(Container => This.Ground_Vehicles,
+                                   Item      => Vehicles_Id)
+            then
       
-                  -- if (m_fastPlan)
-                  if This.Fast_Plan then
+               -- if (m_fastPlan)
+               if This.Fast_Plan then
       
-                     -- // short-circuit and just plan with straight line planner
-                     -- EuclideanPlan(planRequest);
-                     Euclidean_Plan(This               => This,
-                                    Route_Plan_Request => Plan_Request.all);
+                  -- // short-circuit and just plan with straight line planner
+                  -- EuclideanPlan(planRequest);
+                  Euclidean_Plan(This               => This,
+                                 Route_Plan_Request => Plan_Request);
       
-                  else
-      
-                     -- // send externally
-                     -- sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::GroundPathPlanner(), pRequest);
-                     This.Send_LMCP_Object_Limited_Cast_Message(CastAddress => GroundPathPlanner,
-                                                                Msg         => P_Request);
-      
-                  end if;
                else
       
-                  -- // send to aircraft planner
-                  -- sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::AircraftPathPlanner(), pRequest);
-                  This.Send_LMCP_Object_Limited_Cast_Message(CastAddress => AircraftPathPlanner,
-                                                             Msg         => P_Request);
+                  -- // send externally
+                  -- sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::GroundPathPlanner(), pRequest);
+                  My_Send_LMCP_Object_Limited_Cast_Message(This,
+                                                           GroundPathPlanner,
+                                                           Plan_Request);
+      
                end if;
-            end;
+            else
+      
+               -- // send to aircraft planner
+               -- sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::AircraftPathPlanner(), pRequest);
+               My_Send_LMCP_Object_Limited_Cast_Message(This,
+                                                        AircraftPathPlanner,
+                                                        Plan_Request);
+            end if;
          end;
       
       end loop;

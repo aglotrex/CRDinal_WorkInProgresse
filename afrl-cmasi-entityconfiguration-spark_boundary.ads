@@ -18,7 +18,7 @@ package Afrl.Cmasi.EntityConfiguration.SPARK_Boundary is
    overriding
    function "=" (X, Y : My_EntityConfiguration) return Boolean with
     Global => null,
-     Post => (if "="'Result then Same_Requests (X, Y))
+     Post => (if "="'Result then Same_Requests (X, Y));
    
    function Unwrap (This : My_EntityConfiguration) return EntityConfiguration;
 

@@ -42,6 +42,10 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      (This : My_RouteRequest) return Int64
      with Global => null;
    
+   function Get_IsCostOnlyRequest
+     (This : My_RouteRequest) return Boolean
+     with Global => null;
+   
    function Get_RouteRequests
      (Request : My_RouteRequest) return Vect_My_RouteConstraints
      with Global => null;
@@ -58,6 +62,8 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      and Get_RequestID(This) =  Get_RequestID(This'Old) 
      and Get_AssociatedTaskID (This) =
      Get_AssociatedTaskID (This)'Old 
+     and Get_IsCostOnlyRequest (This) 
+     = Get_IsCostOnlyRequest (This'Old)
      and Get_OperatingRegion (This)
      = Get_OperatingRegion (This)'Old
      and Get_RouteRequests (This)
@@ -84,6 +90,8 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      
      and Get_AssociatedTaskID (This) =
      Get_AssociatedTaskID (This)'Old 
+     and Get_IsCostOnlyRequest (This) 
+     = Get_IsCostOnlyRequest (This'Old)
      and Get_OperatingRegion (This)
      = Get_OperatingRegion (This)'Old
      and (First_Index(Get_VehicleID (This)) = First_Index(Get_VehicleID (This'Old) )
@@ -98,6 +106,8 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
           Get_AssociatedTaskID (Y)
       and Get_OperatingRegion (X) =
           Get_OperatingRegion (Y)
+      and Get_IsCostOnlyRequest (X) =
+          Get_IsCostOnlyRequest (Y)
       and Get_RouteRequests (X) = 
           Get_RouteRequests (Y)
       and (First_Index(Get_RouteRequests (X)) = First_Index(Get_RouteRequests (Y) )
@@ -125,6 +135,8 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      Get_AssociatedTaskID (This)'Old 
      and Get_OperatingRegion (This)
      = Get_OperatingRegion (This)'Old
+     and Get_IsCostOnlyRequest (This) 
+     = Get_IsCostOnlyRequest (This'Old)
      and Get_RouteRequests (This)
      = Get_RouteRequests (This)'Old
      and (First_Index(Get_VehicleID (This)) = First_Index(Get_VehicleID (This'Old) )
@@ -145,6 +157,8 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      = Get_RequestID(This)'Old 
      and Get_OperatingRegion (This)
      = Get_OperatingRegion (This)'Old
+     and Get_IsCostOnlyRequest (This) 
+     = Get_IsCostOnlyRequest (This'Old)
      and Get_RouteRequests (This)
      = Get_RouteRequests (This)'Old
      and (First_Index(Get_VehicleID (This)) = First_Index(Get_VehicleID (This'Old) )
@@ -165,6 +179,8 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
      = Get_RequestID(This)'Old 
      and Get_AssociatedTaskID (This) 
      = Get_AssociatedTaskID (This)'Old 
+     and Get_IsCostOnlyRequest (This) 
+     = Get_IsCostOnlyRequest (This'Old)
      and Get_RouteRequests (This)
      = Get_RouteRequests (This)'Old
      and (First_Index(Get_VehicleID (This)) = First_Index(Get_VehicleID (This'Old) )
@@ -175,6 +191,33 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
           and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old) )
           and then ( for all I in First_Index(Get_RouteRequests (This)) ..  Last_Index(Get_RouteRequests (This'Old) )
                     => (Element(Get_RouteRequests (This), I) = Element(Get_RouteRequests (This'Old), I) )));
+   
+     
+   procedure Set_IsCostOnlyRequest
+     (This : in out My_RouteRequest;
+      IsCostOnlyRequest : Boolean)
+     with Global => null,
+     Post => Get_IsCostOnlyRequest (This) = IsCostOnlyRequest
+     and Get_OperatingRegion(This) 
+     = Get_OperatingRegion(This'Old) 
+     and Get_RequestID(This) 
+     = Get_RequestID(This)'Old 
+     and Get_AssociatedTaskID (This) 
+     = Get_AssociatedTaskID (This)'Old 
+     and Get_RouteRequests (This)
+     = Get_RouteRequests (This)'Old
+     and (First_Index(Get_VehicleID (This)) = First_Index(Get_VehicleID (This'Old) )
+          and then Last_Index(Get_VehicleID (This)) = Last_Index(Get_VehicleID (This'Old) )
+          and then ( for all I in First_Index(Get_VehicleID (This'Old)) ..  Last_Index(Get_VehicleID (This'Old) )
+                    => (Element(Get_VehicleID (This), I) = Element(Get_VehicleID (This'Old), I) )))
+     and (First_Index(Get_RouteRequests (This)) = First_Index(Get_RouteRequests (This'Old) )
+          and then Last_Index(Get_RouteRequests (This)) = Last_Index(Get_RouteRequests (This'Old) )
+          and then ( for all I in First_Index(Get_RouteRequests (This)) ..  Last_Index(Get_RouteRequests (This'Old) )
+                    => (Element(Get_RouteRequests (This), I) = Element(Get_RouteRequests (This'Old), I) )));
+   
+  
+
+       
    
    function Unwrap (This : My_RouteRequest) return RouteRequest;
    
@@ -188,6 +231,9 @@ private
    
    overriding function "=" (X, Y : My_RouteRequest) return Boolean is
      (X.Content = Y.Content);
+   
+   function Get_IsCostOnlyRequest (This : My_RouteRequest) return Boolean is
+     (This.Content.GetIsCostOnlyRequest);
 
    function Get_RequestID (This : My_RouteRequest) return Int64 is
      (This.Content.GetRequestID);

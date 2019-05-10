@@ -88,6 +88,20 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
         (New_Item => Pointer);
    end Add_RouteConstraints;
    
+   -----------------------------
+   --  Set_IsCostOnlyRequest  --
+   -----------------------------
+        
+   procedure Set_IsCostOnlyRequest
+     (This : in out My_RouteRequest;
+      IsCostOnlyRequest : Boolean)
+   is
+   begin
+      This.Content.SetIsCostOnlyRequest(IsCostOnlyRequest);
+   end Set_IsCostOnlyRequest;
+   
+   
+   
    ----------------------
    --  Add_VehiclesID  --
    ----------------------

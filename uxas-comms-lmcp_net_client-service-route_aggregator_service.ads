@@ -176,7 +176,7 @@ private
 
    type Pair_Int64_Route_Plan is record
       Reponse_ID : Int64;
-      Returned_Route_Plan : RoutePlan;
+      Returned_Route_Plan : My_RoutePlan;
    end record;
 
    package Int64_Pair_Int64_Route_Plan_Maps is new Ada.Containers.Formal_Hashed_Maps
