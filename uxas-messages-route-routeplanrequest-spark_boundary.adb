@@ -67,7 +67,19 @@ package body UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary with SPARK_Mode
    begin
       This.Content.SetVehicleID (VehicleID);
    end Set_VehicleID;
- 
+   
+   ---------------------
+   --  Set_RequestID  --
+   ---------------------
+   
+   procedure Set_RequestID
+     (This : in out My_RoutePlanRequest;
+      RequestID : Int64)
+   is 
+   begin
+      This.Content.SetRequestID(RequestID);
+   end Set_RequestID;
+     
    ----------------------------
    --  Append_RouteRequests  --
    ----------------------------

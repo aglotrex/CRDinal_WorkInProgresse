@@ -21,7 +21,7 @@ package Afrl.Cmasi.EntityState.SPARK_Boundary with SPARK_Mode is
      (This : My_EntityState) return My_Location3D_Any with 
      Global => null;
    
-   function Same_Requests (X, Y : My_EntityConfiguration) return Boolean is
+   function Same_Requests (X, Y : My_EntityState) return Boolean is
      (Get_ID (X) = Get_ID (Y)
       and Get_Heading (X) = Get_Heading (Y)
       and Get_Location (X) = Get_Location (Y));

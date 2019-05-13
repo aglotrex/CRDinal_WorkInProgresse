@@ -13,7 +13,7 @@ with Afrl.Cmasi.EntityConfiguration.SPARK_Boundary; use Afrl.Cmasi.EntityConfigu
 
 with Uxas.Messages.Lmcptask.UniqueAutomationRequest; use Uxas.Messages.Lmcptask.UniqueAutomationRequest;
 with Uxas.Messages.Lmcptask.TaskPlanOptions; use Uxas.Messages.Lmcptask.TaskPlanOptions;
-with Uxas.Messages.Route.RoutePlan; use Uxas.Messages.Route.RoutePlan;
+with Uxas.Messages.Route.RoutePlan.SPARK_Boundary; use Uxas.Messages.Route.RoutePlan.SPARK_Boundary;
 with Uxas.Messages.Route.RoutePlanRequest; use Uxas.Messages.Route.RoutePlanRequest;
 with Uxas.Messages.Route.RoutePlanResponse; use Uxas.Messages.Route.RoutePlanResponse;
 with UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary; use UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary;

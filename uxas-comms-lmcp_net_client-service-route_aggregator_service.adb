@@ -368,15 +368,15 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       -- for (auto p : rplan->getRouteResponses())
       for P of Route_Plan.GetRouteResponses.all loop
          declare
-            RoutePlan_Acc_Clone :constant RoutePlan_Acc := RoutePlan_Acc(P);
+            RoutePlan_Clone : My_RoutePlan :=  Wrap (P.all);
          begin
 
             Pair := Pair_Int64_Route_Plan'(Reponse_ID          => Route_Plan.GetResponseID,
-                                           Returned_Route_Plan => RoutePlan_Acc_Clone);
+                                           Returned_Route_Plan => RoutePlan_Clone);
 
             Int64_Pair_Int64_Route_Plan_Maps.Insert
               (This.Route_Plan,
-               Key       => RoutePlan_Acc_Clone.GetRouteID,
+               Key       => Get_RouteID (RoutePlan_Clone),
                New_Item  => Pair,
                Position  => C2,
                Inserted  => Inserted);
