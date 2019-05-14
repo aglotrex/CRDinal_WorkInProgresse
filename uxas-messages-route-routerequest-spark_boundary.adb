@@ -81,7 +81,7 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
      (This : in out My_RouteRequest;
       Route_Constraints : in My_RouteConstraints)
    is 
-      Pointer : RouteConstraints_Acc;
+      Pointer : RouteConstraints_Acc := new RouteConstraints.RouteConstraints;
    begin
       Pointer.all := Unwrap(Route_Constraints);
       This.Content.RouteRequests.Append

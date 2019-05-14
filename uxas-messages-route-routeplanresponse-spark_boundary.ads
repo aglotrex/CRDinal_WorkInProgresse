@@ -4,7 +4,8 @@ with UxAS.Messages.Route.RoutePlan;
 package UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
-   type My_RoutePlanResponse is private;
+   type My_RoutePlanResponse is private with
+   Default_Initial_Condition => True;
    
     use all type Int64_Vect;
    

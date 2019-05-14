@@ -5,7 +5,8 @@ with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary; use  UxAS.Messages.Rou
 
 package UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary with SPARK_Mode is
 
-   type My_RoutePlanRequest is private;
+   type My_RoutePlanRequest is private with
+   Default_Initial_Condition => True;
    
    function Get_AssociatedTaskID
      (This : My_RoutePlanRequest) return Int64 with 

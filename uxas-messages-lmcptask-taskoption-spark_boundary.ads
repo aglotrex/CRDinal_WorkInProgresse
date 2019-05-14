@@ -6,7 +6,8 @@ with Common_Formal_Containers; use Common_Formal_Containers;
 package UxAS.Messages.Lmcptask.TaskOption.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
-   type My_TaskOption is private;
+   type My_TaskOption is private with 
+   Default_Initial_Condition => True;
    
    use all type Int64_Vect;
       

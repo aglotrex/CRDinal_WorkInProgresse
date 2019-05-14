@@ -1,6 +1,7 @@
 package UxAS.Messages.Route.RoutePlan.SPARK_Boundary with SPARK_Mode is
 
-   type My_RoutePlan is private;
+   type My_RoutePlan is private with
+   Default_Initial_Condition => True;
    
    function Get_RouteID
      (This : My_RoutePlan) return Int64 with

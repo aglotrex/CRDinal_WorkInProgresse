@@ -6,11 +6,7 @@ with Uxas.Messages.Route.RoutePlanResponse.SPARK_Boundary; use Uxas.Messages.Rou
 package UxAS.Messages.Route.RouteResponse.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
    
-   
-   type My_RouteResponse is private;
-   
-   
-   
+      
    package Vect_My_RoutePlanResponse_V is new Ada.Containers.Formal_Vectors
      (Index_Type   => Natural,
       Element_Type => My_RoutePlanResponse);
@@ -21,6 +17,12 @@ package UxAS.Messages.Route.RouteResponse.SPARK_Boundary with SPARK_Mode is
    subtype Vect_My_RoutePlanResponse is Vect_My_RoutePlanResponse_V.Vector
      (Vect_My_RoutePlanResponse_Commun_Max_Capacity);
  
+   
+   type My_RouteResponse is private with
+   Default_Initial_Condition => True;
+   
+   
+
    
    function Get_Routes 
      (This : My_RouteResponse) return Vect_My_RoutePlanResponse with

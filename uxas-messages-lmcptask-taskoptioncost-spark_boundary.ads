@@ -2,7 +2,8 @@ with UxAS.Messages.Lmcptask.TaskOptionCost; use UxAS.Messages.Lmcptask.TaskOptio
 
 package UxAS.Messages.Lmcptask.TaskOptionCost.SPARK_Boundary with SPARK_Mode is
    
-   type My_TaskOptionCost is private;
+   type My_TaskOptionCost is private with 
+   Default_Initial_Condition => True;
       
    function Get_DestinationTaskID
      (This : My_TaskOptionCost) return Int64 with 

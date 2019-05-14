@@ -8,7 +8,8 @@ with Common_Formal_Containers; use Common_Formal_Containers;
 package UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
-   type My_AssignmentCostMatrix is private;
+   type My_AssignmentCostMatrix is private with
+   Default_Initial_Condition => True;
    
    use all type Int64_Vect;
 

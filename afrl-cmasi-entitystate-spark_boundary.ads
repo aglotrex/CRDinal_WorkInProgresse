@@ -7,7 +7,8 @@ package Afrl.Cmasi.EntityState.SPARK_Boundary with SPARK_Mode is
 
    use all type Int64_Vect;
    
-   type My_EntityState is private;
+   type My_EntityState is private with
+   Default_Initial_Condition => True;
    
    function Get_ID
      (This : My_EntityState) return Int64 with 

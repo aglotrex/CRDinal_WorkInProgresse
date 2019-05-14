@@ -6,7 +6,8 @@ package Afrl.Cmasi.ServiceStatus.SPARK_Boundary with SPARK_Mode is
     pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
 
-   type My_ServiceStatus is private;
+   type My_ServiceStatus is private with
+   Default_Initial_Condition => True;
    
    
    package Vect_KeyValuePair_P is new Ada.Containers.Formal_Vectors

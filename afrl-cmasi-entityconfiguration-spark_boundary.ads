@@ -1,6 +1,7 @@
 package Afrl.Cmasi.EntityConfiguration.SPARK_Boundary is
 
-   type My_EntityConfiguration is private;
+   type My_EntityConfiguration is private with 
+   Default_Initial_Condition => True;
    
    function Get_ID
      (This : My_EntityConfiguration) return Int64 with

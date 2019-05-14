@@ -9,7 +9,8 @@ package Afrl.Cmasi.Location3D.SPARK_Boundary with SPARK_Mode is
    --  This wrapper is only used to introduce contracts on the type and
    --  its accessors.
 
-   type My_Location3D_Any is private;
+   type My_Location3D_Any is private with 
+   Default_Initial_Condition => True;
 
    function Get_Latitude
      (This : My_Location3D_Any) return Real64 with

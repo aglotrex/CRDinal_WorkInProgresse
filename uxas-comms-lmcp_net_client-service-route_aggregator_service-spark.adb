@@ -21,6 +21,7 @@ with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects; use UxAS.Message
 with Uxas.Messages.Lmcptask.TaskOption.Spark_Boundary;      use Uxas.Messages.Lmcptask.TaskOption.Spark_Boundary;
 with Uxas.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary; use Uxas.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary;
 with UxAS.Messages.Lmcptask.TAskOptionCost.SPARK_Boundary;  use UxAS.Messages.Lmcptask.TAskOptionCost.SPARK_Boundary;
+with UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary; use UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary;
 with UxAS.Common.Utilities.Unit_Conversions; use UxAS.Common.Utilities.Unit_Conversions; 
                
      
@@ -35,6 +36,9 @@ with Afrl.Cmasi.AutomationRequest; use Afrl.Cmasi.AutomationRequest;
 with Afrl.Cmasi.Location3D.Spark_Boundary; use Afrl.Cmasi.Location3D.Spark_Boundary;
 with Afrl.Cmasi.ServiceStatus.SPARK_Boundary; use Afrl.Cmasi.ServiceStatus.SPARK_Boundary;
 use Afrl.Cmasi.AutomationRequest.Vect_Int64;
+
+
+
 
 
 
@@ -209,9 +213,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                end loop;
                
                --    // create a new route plan request
-               declare 
-                  PlanReq : RoutePlanRequest;
-                  Plan_Request : My_RoutePlanRequest := Wrap(PlanReq);
+               declare
+                  
+                  Plan_Request : My_RoutePlanRequest;
                begin
                   
                   Set_AssociatedTaskID (Plan_Request,  0);
@@ -244,7 +248,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                         --:= UxAS.Messages.Route.RouteConstraints.Spark_Boundary.Wrap( RouteConstraints );
                         use Int64_Aggregator_Task_Option_Pair_Maps;
                         
-                        List_Pending_Request : Int64_Set :=Int64_Pending_Auto_Req_Matrix.Element(Container => This.Pending_Auto_Req,
+                        List_Pending_Request : Int64_Set := Int64_Pending_Auto_Req_Matrix.Element(Container => This.Pending_Auto_Req,
                                                                                                  Key       => ReqID);
                      begin
                         Include(Container => This.Route_Task_Pairing,
@@ -261,6 +265,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                         
                         Int64_Sets.Include(Container => List_Pending_Request,
                                            New_Item  => This.Route_Id);
+                        Int64_Pending_Auto_Req_Matrix.Replace(Container => This.Pending_Auto_Req,
+                                                              Key       => ReqID,
+                                                              New_Item  => List_Pending_Request);
                         
                         
                         
@@ -303,6 +310,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                               Append_RouteRequests (Plan_Request, Route_Constraints);
                               Int64_Sets.Include(Container => List_Pending_Request,
                                                  New_Item  => This.Route_Id);
+                              Int64_Pending_Auto_Req_Matrix.Replace(Container => This.Pending_Auto_Req,
+                                                                    Key       => ReqID,
+                                                                    New_Item  => List_Pending_Request);
                               This.Route_Id := THis.Route_Id + 1;
                               
                          
@@ -969,6 +979,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             --  m_pendingRoute[request->getRequestID()].insert(m_routeRequestId);
             Int64_Sets.Insert(Container => Pending_Route_Request,
                               New_Item  => This.Route_Request_ID);
+            Int64_Pending_Route_Matrix.Replace(Container => This.Pending_Route,
+                                               Key       => Get_RequestID (Route_Request),
+                                               New_Item  => Pending_Route_Request);
       
             This.Route_Request_ID := This.Route_Request_ID + 1;
       

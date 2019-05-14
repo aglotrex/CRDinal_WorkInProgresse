@@ -88,7 +88,7 @@ package body UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary with SPARK_Mode
      (This : in out My_RoutePlanRequest;
       RouteRequests : My_RouteConstraints)
    is
-      RouteRequests_Acc : RouteConstraints_Acc;
+      RouteRequests_Acc : constant RouteConstraints_Acc := new RouteConstraints.RouteConstraints;
       
    begin
       RouteRequests_Acc.all := UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Unwrap (RouteRequests);

@@ -1,3 +1,4 @@
+
 package body UxAS.Messages.Route.RouteResponse.SPARK_Boundary with SPARK_Mode => Off is
    
    ------------------
@@ -39,7 +40,7 @@ package body UxAS.Messages.Route.RouteResponse.SPARK_Boundary with SPARK_Mode =>
      (This : in Out My_RouteResponse;
       Route : My_RoutePlanResponse)
    is 
-      RoutePlan_Acc : RoutePlanResponse_Acc;
+      RoutePlan_Acc : constant RoutePlanResponse_Acc := new RoutePlanResponse.RoutePlanResponse;
    begin
       RoutePlan_Acc.all := Unwrap(Route);
       This.Content.GetRoutes.Append(RoutePlan_Acc);

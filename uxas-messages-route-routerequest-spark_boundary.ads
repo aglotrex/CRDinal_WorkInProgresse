@@ -22,7 +22,8 @@ package  UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
    use all type Vect_My_RouteConstraints;
   
    
-   type My_RouteRequest is private;
+   type My_RouteRequest is private with 
+   Default_Initial_Condition => True;
 
    
    function Get_RequestID 

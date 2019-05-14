@@ -8,7 +8,8 @@ package UxAS.Messages.Route.RouteConstraints.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
 
-   type My_RouteConstraints is private;
+   type My_RouteConstraints is private with 
+   Default_Initial_Condition => True;
 
    function Get_RouteID
      (This : My_RouteConstraints) return Int64

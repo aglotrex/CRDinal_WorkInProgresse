@@ -4,7 +4,8 @@ with Ada.Containers.Formal_Vectors;
 package UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
-   type My_TaskPlanOptions is private;
+   type My_TaskPlanOptions is private with 
+   Default_Initial_Condition => True;
    
    
    package Vect_My_TaskOptions is new Ada.Containers.Formal_Vectors
