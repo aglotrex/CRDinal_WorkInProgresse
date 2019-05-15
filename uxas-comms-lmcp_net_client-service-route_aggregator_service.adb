@@ -265,15 +265,15 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       -- if (uxas::messages::route::isRoutePlanResponse(receivedLmcpMessage->m_object.get()))
       if    Received_Message.Payload.all in RoutePlanResponse'Class           then
          This.Handle_Route_Plan_Response_Msg(Received_Message);
-         --   SPARK.Check_All_Route_Plans(This);
+         SPARK.Check_All_Route_Plans(This);
 
          --  else if (uxas::messages::route::isRouteRequest(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in RouteRequest'Class                then
          This.Handle_Route_Request_Msg(Received_Message);
 
          --  else if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleState>(receivedLmcpMessage->m_object))
-         --      elsif Received_Message.Payload.all in AirVehicleState'Class             then
-         --       This.Handle_Air_Vehicule_State_Msg(Received_Message);
+      elsif Received_Message.Payload.all in AirVehicleState'Class             then
+         This.Handle_Air_Vehicule_State_Msg(Received_Message);
 
          --  else if (afrl::vehicles::isGroundVehicleState(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in GroundVehicleState'Class          then
@@ -300,17 +300,17 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          -- else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object.get())
       elsif Received_Message.Payload.all in UniqueAutomationRequest'Class     then
          This.Handle_Unique_Automation_Request_Msg(Received_Message);
-         --  SPARK.Check_All_Task_Option_Received(This => This);
+         SPARK.Check_All_Task_Option_Received(This => This);
 
          --  else if (afrl::impact::isImpactAutomationRequest(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in ImpactAutomationRequest'Class     then
          This.Handle_Impact_Automation_Request_Msg(Received_Message);
-         --  SPARK.Check_All_Task_Option_Received(This => This);
+         SPARK.Check_All_Task_Option_Received(This => This);
 
          -- else if (uxas::messages::task::isTaskPlanOptions(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in TaskPlanOptions'Class             then
          This.Handle_Task_Plan_Options_Msg(Received_Message);
-         -- SPARK.Check_All_Task_Option_Received(This => This);
+         SPARK.Check_All_Task_Option_Received(This => This);
 
       end if;
       Result := False;
@@ -423,11 +423,6 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          Insert(This.Air_Vehicules,ID);
       end if;
    end Handle_Air_Vehicule_State_Msg;
-
-
-
-
-
 
 
 
@@ -670,7 +665,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       Unique_Automation_Request.SetOriginalRequest( OriginalRequest => Impact_Automation_Request.GetTrialRequest);
 
       --   areq->setRequestID(m_autoRequestId);
-      Unique_Automation_Request.SetRequestID(This.Auto_Request_Id +1);
+      Unique_Automation_Request.SetRequestID(This.Auto_Request_Id);
 
       Wrapped_UniqueAutomationRequest := UniqueAutomationRequest_Handler'(Content => Wrap(UniqueAutomationRequest(Unique_Automation_Request.all)));
 
