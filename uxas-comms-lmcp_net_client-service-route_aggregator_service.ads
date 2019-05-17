@@ -17,12 +17,10 @@ with Uxas.Messages.Route.RoutePlan.SPARK_Boundary; use Uxas.Messages.Route.Route
 with Uxas.Messages.Route.RoutePlanRequest; use Uxas.Messages.Route.RoutePlanRequest;
 with Uxas.Messages.Route.RoutePlanResponse; use Uxas.Messages.Route.RoutePlanResponse;
 with UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary; use UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary;
-
-
+with Uxas.Messages.Route.RouteRequest.SPARK_Boundary; use Uxas.Messages.Route.RouteRequest.SPARK_Boundary;
 with Uxas.Messages.Route.RouteRequest; use Uxas.Messages.Route.RouteRequest;
 
 with UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary; use UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary;
-with UxAS.Messages.Route.RoutePlanResponse; use UxAS.Messages.Route.RoutePlanResponse;
 with UxAS.Messages.Lmcptask.TaskPlanOptions; use UxAS.Messages.Lmcptask.TaskPlanOptions;
 with UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary; use UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary;
 
@@ -57,7 +55,6 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -- must be manually called to "construct" the object
 
    procedure Construct (This : in out Route_Aggregator_Service);
-   --  the ctor
 
 private
 
@@ -101,18 +98,6 @@ private
      (This             : in out Route_Aggregator_Service;
       Received_Message : not null Any_Addressed_Attributed_Message;
       Result           : out Boolean);
-
-
-
-
-
-
-
-
-
-
-
-
 
 
    type Entity_State_Holder is record
@@ -257,9 +242,6 @@ private
       --  std::unordered_map<int64_t, std::shared_ptr<afrl::cmasi::EntityConfiguration> > m_entityConfigurations;
       Entity_Configuration : Entity_Configuration_Map;
 
-
-
-
       --   std::unordered_set<int64_t> m_airVehicles;
       Air_Vehicules : Int64_Set;
 
@@ -291,10 +273,12 @@ private
       Route_Task_Pairing : Aggregator_Task_Option_Pair_Map;
 
       --  int64_t m_routeRequestId{1};
-      --  std::unordered_map<int64_t, std::shared_ptr<uxas::messages::route::RoutePlanResponse> > m_routePlanResponses;
       Route_Request_ID : Int64 := 1;
+
+       --  std::unordered_map<int64_t, std::shared_ptr<uxas::messages::route::RoutePlanResponse> > m_routePlanResponses;
       Route_Plan_Responses : Route_Plan_Responses_Map;
 
+      --                  Route_Request_ID        Route_Plan_Request_ID
       --  std::unordered_map<int64_t, std::unordered_set<int64_t> > m_pendingRoute;
       Pending_Route : Pending_Route_Matrix;
    end record;

@@ -42,8 +42,314 @@ use Afrl.Cmasi.AutomationRequest.Vect_Int64;
 
 
 package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
+   
+   
+   -----------------------------
+   -- Check_of_Data_Structure --
+   -----------------------------
+   
+   function Check_Pending_Route
+     (This : Route_Aggregator_Service) return Boolean 
+   is
+      Cursor_Request_ID_1 : Int64_Pending_Route_Matrix.Cursor := Int64_Pending_Route_Matrix.First (This.Pending_Route);
+      use all type Int64_Set;
+   begin
+      while Has_Element (This.Pending_Route, Cursor_Request_ID_1) loop
+         declare
+            Route_Plan_Request_ID_1 : constant Int64_Set := Element (This.Pending_Route, Cursor_Request_ID_1);
+            Cursor_Route_Plan_1     : Int64_Sets.Cursor := First (Route_Plan_Request_ID_1);
+         begin
+            while Has_Element (Route_Plan_Request_ID_1, Cursor_Route_Plan_1) loop
+               declare
+                  Route_Plan_ID : constant Int64 := Element (Route_Plan_Request_ID_1 , Cursor_Route_Plan_1);
+                  Cursor_Route_Plan_2 : Int64_Sets.Cursor := Next (Route_Plan_Request_ID_1 ,
+                                                                   Cursor_Route_Plan_1);
+                  Cursor_Request_ID_2 : Int64_Pending_Route_Matrix.Cursor := Next(This.Pending_Route , Cursor_Request_ID_1);
+               begin
+                  
+                  -- Test of id in comparaison to This.Route_Request_ID
+                  if Route_Plan_ID >= This.Route_Request_ID then
+                     return False;
+                  end if;
+                  
+                  
+                  -- Test of Id for the same request_ID
+                  while Has_Element (Route_Plan_Request_ID_1, Cursor_Route_Plan_2) loop
+                  
+                     if Route_Plan_ID = Int64_Sets.Element (Route_Plan_Request_ID_1,Cursor_Route_Plan_2) then
+                        return False;
+                     
+                     end if;
+                     Next(Route_Plan_Request_ID_1, Cursor_Route_Plan_2);
+                     
+                  end loop;
+                  
+                  
+                  -- Test of Id for the other request_ID
+                  while Has_Element (This.Pending_Route,Cursor_Request_ID_2) loop
+                     declare 
+                        Route_Plan_Request_ID_2 : constant Int64_Set := Element (This.Pending_Route, Cursor_Request_ID_2);
+                        Cursor_Route_Plan_2     : Int64_Sets.Cursor := First (Route_Plan_Request_ID_2);
+                     begin
+                        while Has_Element (Route_Plan_Request_ID_2, Cursor_Route_Plan_2) loop
+                           if Route_Plan_ID = Element (Route_Plan_Request_ID_2, Cursor_Route_Plan_2) then
+                              return False;
+                           end if;
+                           Next (Route_Plan_Request_ID_2, Cursor_Route_Plan_2);
+                        end loop;
+                     end;
+                     Next (This.Pending_Route,Cursor_Request_ID_2);
+                  end loop;
+               end;
+               
+               Next (Route_Plan_Request_ID_1, Cursor_Route_Plan_1);
+            end loop;
+         end;
+         Next (This.Pending_Route, Cursor_Request_ID_1);
+      end loop;
+      return True;
+   end Check_Pending_Route;
+   
+   function Check_List_Pending_Request
+     (This : Route_Aggregator_Service) return Boolean 
+   is
+      Cursor_Request_ID_1 : Int64_Pending_Auto_Req_Matrix.Cursor := Int64_Pending_Auto_Req_Matrix.First (This.Pending_Auto_Req);
+      
+      use all type Pending_Auto_Req_Matrix;
+      use all type Int64_Set;
+   begin
+      while Has_Element (This.Pending_Auto_Req, Cursor_Request_ID_1) loop
+         declare
+            Request_ID_1 : constant Int64_Set := Element (This.Pending_Auto_Req, Cursor_Request_ID_1);
+            Cursor_Response_ID_1     : Int64_Sets.Cursor := First (Request_ID_1);
+         begin
+            while Has_Element (Request_ID_1, Cursor_Response_ID_1) loop
+               declare
+                  Response_ID : constant Int64 := Element (Request_ID_1 , Cursor_Response_ID_1);
+                  Cursor_Response_ID_2 : Int64_Sets.Cursor := Next (Request_ID_1 ,
+                                                                    Cursor_Response_ID_1);
+                  Cursor_Request_ID_2 : Int64_Pending_Auto_Req_Matrix.Cursor := Next(This.Pending_Auto_Req , Cursor_Request_ID_1);
+               begin
+                  
+                  -- Test of id in comparaison to This.Route_Request_ID
+                  if Response_ID >= This.Route_Request_ID then
+                     return False;
+                  end if;
+                  
+                  
+                  -- Test of Id for the same request_ID
+                  while Has_Element (Request_ID_1, Cursor_Response_ID_2) loop
+                  
+                     if Response_ID = Int64_Sets.Element (Request_ID_1,Cursor_Response_ID_2) then
+                        return False;
+                     
+                     end if;
+                     Next(Request_ID_1, Cursor_Response_ID_2);
+                     
+                  end loop;
+                  
+                  
+                  -- Test of Id for the other request_ID
+                  while Has_Element (This.Pending_Auto_Req,Cursor_Request_ID_2) loop
+                     declare 
+                        Request_ID_2 : constant Int64_Set := Element (This.Pending_Auto_Req, Cursor_Request_ID_2);
+                        Cursor_Response_ID_2     : Int64_Sets.Cursor := First (Request_ID_2);
+                     begin
+                        while Has_Element (Request_ID_2, Cursor_Response_ID_2) loop
+                           if Response_ID = Element (Request_ID_2, Cursor_Response_ID_2) then
+                              return False;
+                           end if;
+                           Next (Request_ID_2, Cursor_Response_ID_2);
+                        end loop;
+                     end;
+                     Next (This.Pending_Auto_Req,Cursor_Request_ID_2);
+                  end loop;
+               end;
+               
+               Next (Request_ID_1, Cursor_Response_ID_1);
+            end loop;
+         end;
+         Next (This.Pending_Auto_Req, Cursor_Request_ID_1);
+      end loop;
+      return True;
+   end Check_List_Pending_Request;
+   
+   
+   function Check_Task_Plan_Options
+     (This : Route_Aggregator_Service) return Boolean
+   is 
+      use all type Task_Plan_Options_Map;
+      Cursor : Int64_Task_Plan_Options_Maps.Cursor := First (THis.Task_Plan_Options);
+   begin
+      while Has_Element (This.Task_Plan_Options, Cursor) loop
+         if Key (This.Task_Plan_Options, Cursor) /= Get_TaskID (Element (This.Task_Plan_Options,
+                                                                Cursor).Content) then
+            return False;
+         end if;
+         Next (This.Task_Plan_Options, Cursor);
+      end loop;
+      return True;
+   end Check_Task_Plan_Options;
+   
+   function Check_Route_Plan_Response
+     (This : Route_Aggregator_Service) return Boolean 
+   is 
+      use all type Route_Plan_Responses_Map;
+      Cursor : Int64_Route_Plan_Responses_Maps.Cursor := First (THis.Route_Plan_Responses);
+   begin
+      while Has_Element (This.Route_Plan_Responses, Cursor) loop
+         if Key (This.Route_Plan_Responses, Cursor) /= Get_ResponseID (Element (This.Route_Plan_Responses,
+                                                                       Cursor).Content) then
+            return False;
+         end if;
+         Next (This.Route_Plan_Responses, Cursor);
+      end loop;
+      return True;
+   end Check_Route_Plan_Response;
+   
+   function Check_Route_Plan
+     (This : Route_Aggregator_Service) return Boolean 
+   is 
+      use all type Pair_Int64_Route_Plan_Map;
+      Cursor : Int64_Pair_Int64_Route_Plan_Maps.Cursor := First (THis.Route_Plan);
+   begin
+      while Has_Element (This.Route_Plan, Cursor) loop
+         if Key (This.Route_Plan, Cursor) /= Get_RouteID (Element (This.Route_Plan,
+                                                          Cursor).Returned_Route_Plan) then
+            return False;
+         end if;
+         Next (This.Route_Plan, Cursor);
+      end loop;
+      return True;
+   end Check_Route_Plan;
+   
+   function Check_Entity_State
+     (This : Route_Aggregator_Service) return Boolean 
+   is 
+      use all type Entity_State_Map;
+      Cursor : Int64_Entity_State_Maps.Cursor := First (THis.Entity_State);
+   begin
+      while Has_Element (This.Entity_State, Cursor) loop
+         declare 
+            ID : constant Int64 :=  Key (This.Entity_State, Cursor);
+            use all type Int64_Set;
+         begin
+            
+            if ID /= Get_ID (Element (This.Entity_State,
+                             Cursor).Content) then
+               return False;
+            end if;
+         
+            if  not (  Contains (This.Air_Vehicules, ID)
+                     xor
+                       Contains (This.Ground_Vehicles, ID)
+                     xor
+                       Contains (This.Surface_Vehicles, ID)) then
+               return False;
+            end if;
+         end;
+         Next (This.Entity_State, Cursor);
+         
+      end loop;      
+      return True;
+   end Check_Entity_State;
+   
+   
+   function Check_Entity_Configuration
+     (This : Route_Aggregator_Service) return Boolean 
+   is 
+      use all type Entity_Configuration_Map;
+      Cursor : Int64_Entity_Configuration_Maps.Cursor := First (THis.Entity_Configuration);
+   begin
+      while Has_Element (This.Entity_Configuration, Cursor) loop
+         declare 
+            ID : constant Int64 :=  Key (This.Entity_Configuration, Cursor);
+             use all type Int64_Set;
+         begin
+            
+            if ID /= Get_ID (Element (This.Entity_Configuration,
+                             Cursor).Content) then
+               return False;
+            end if;
+         
+            if  not (  Contains (This.Air_Vehicules, ID)
+                     xor
+                       Contains (This.Ground_Vehicles, ID)
+                     xor
+                       Contains (This.Surface_Vehicles, ID)) then
+               return False;
+            end if;
+         end;
+         Next (This.Entity_Configuration, Cursor);
+      end loop;      
+      return True;
+   end Check_Entity_Configuration;
+   
+   function Check_Unique_Automation_Request
+     (This : Route_Aggregator_Service) return Boolean
+   is
+      Cursor : Int64_Unique_Automation_Request_Maps.Cursor := First (This.Unique_Automation_Request);
+   begin
+      while Has_Element (This.Unique_Automation_Request, Cursor) loop
+         if Key(This.Unique_Automation_Request,Cursor) >= This.Auto_Request_Id then
+            return False;
+         end if;
+         Next (This.Unique_Automation_Request, Cursor);
+      end loop;
+      return True;
+   end Check_Unique_Automation_Request;
+      
+               
+   
+   
+   
+           
+   
+   
 
-
+   function Check_Send_Valid (This : Route_Aggregator_Service;
+                              Route_Plan_Request : Int64_Set) return Boolean
+   is 
+      use all type Route_Plan_Responses_Map;
+      use all type Pair_Int64_Route_Plan_Map;
+      use all type Int64_Vect;
+      use all type Int64_Set;
+      Cursor : Int64_Sets.Cursor := First(Route_Plan_Request);
+      
+   begin
+      
+      while Int64_Sets.Has_Element(Container => Route_Plan_Request,
+                                   Position  => Cursor) loop
+         -- verification que chaque route plan response est bien calculé 
+         if  not Contains (This.Route_Plan_Responses,
+                                Element (Route_Plan_Request ,Cursor)) then
+            return False;
+         end if;
+           
+          
+         for J in 
+           First_Index (Get_ID_From_RouteResponses ( Element (This.Route_Plan_Responses,
+                        Element (Route_Plan_Request , Cursor)).Content)) ..
+             Last_Index (Get_ID_From_RouteResponses ( Element (This.Route_Plan_Responses,
+                         Element (Route_Plan_Request , Cursor)).Content)) loop
+            
+            if not Contains (This.Route_Plan,
+                                   Element ( Get_ID_From_RouteResponses ( Element (This.Route_Plan_Responses,
+                                     Element (Route_Plan_Request , Cursor)).Content),J)) then
+               return False;
+            end if;
+         end loop;
+         Next(Route_Plan_Request,
+              Cursor);
+      end loop;
+      return True;
+   end Check_Send_Valid;
+   
+   
+      
+     
+     
+     
    package My_Task_Option_Vects is new Ada.Containers.Formal_Vectors
      (Index_Type   => Natural,
       Element_Type => My_TaskOption);
@@ -302,9 +608,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                               
                            begin
                               
-                              Int64_Aggregator_Task_Option_Pair_Maps.Include (Container => This.Route_Task_Pairing,
-                                                                              Key       => This.Route_Id,
-                                                                              New_Item  => Task_Option_Pair);
+                              Int64_Aggregator_Task_Option_Pair_Maps.Insert (Container => This.Route_Task_Pairing,
+                                                                             Key       => This.Route_Id,
+                                                                             New_Item  => Task_Option_Pair);
                               
                               Set_StartLocation (Route_Constraints, Get_EndLocation (Option_1));
                               Set_StartHeading  (Route_Constraints, Get_EndHeading  (Option_1));
@@ -375,10 +681,6 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    procedure Send_Route_Reponse ( This : in out Route_Aggregator_Service;
                                   RouteKey : Int64)
    is 
-      Response  : My_RouteResponse;
-      Exepcted_Plan_Response_IDs : constant Int64_Set := Int64_Pending_Route_Matrix.Element (This.Pending_Route,
-                                                                                             RouteKey);
-      
       procedure My_Send_LMCP_Object_Broadcast_Message
         (This :in out Route_Aggregator_Service ;
          Request : My_RouteResponse);
@@ -397,6 +699,12 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          This.Send_LMCP_Object_Broadcast_Message (Object_Any(Request_Acc)); 
       end My_Send_LMCP_Object_Broadcast_Message;
       
+      
+      Response  : My_RouteResponse;
+      Exepcted_Plan_Response_IDs : constant Int64_Set := Int64_Pending_Route_Matrix.Element (This.Pending_Route,
+                                                                                             RouteKey);
+      
+      
    begin
               
       --  response->setResponseID (routeKey);
@@ -407,36 +715,41 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                
          --  auto plan = m_routePlanResponses.find (rId);
          --  if (plan != m_routePlanResponses.end ())
-         if Int64_Route_Plan_Responses_Maps.Contains (This.Route_Plan_Responses,
-                                                      Plan_Reponse_Id) then
-            declare
-               Plan : My_RoutePlanResponse;
-               use Int64_Vects;
+         
+         -- verify by contrustion / call
+         --------------------------------
+         -- if Int64_Route_Plan_Responses_Maps.Contains (This.Route_Plan_Responses,
+         --                                             Plan_Reponse_Id) then     
+         
+         declare
+            Plan : constant My_RoutePlanResponse := Int64_Route_Plan_Responses_Maps.Element (This.Route_Plan_Responses,
+                                                                                    Plan_Reponse_Id).Content;
+            use Int64_Vects;
+            
+            Route_Responses_ID : constant Int64_Vect:= Get_ID_From_RouteResponses (Plan);
                         
-            begin
-               Plan := Int64_Route_Plan_Responses_Maps.Element (This.Route_Plan_Responses,
-                                                                Plan_Reponse_Id).Content;
+         begin
                         
                
-               Add_Route (Response, Plan);    -- clone here   
+            Add_Route (Response, Plan);    -- clone here   
                      
                      
-               --  // delete all individual routes from storage
-               --  for (auto& i : plan->second->getRouteResponses ())
+            --  // delete all individual routes from storage
+            --  for (auto& i : plan->second->getRouteResponses ())
                
-               for Index_Route_ID in First_Index (Get_ID_From_RouteResponses (Plan)) .. Last_Index (Get_ID_From_RouteResponses (Plan))loop
+            for Index_Route_ID in First_Index (Route_Responses_ID) .. Last_Index (Route_Responses_ID)loop
                           
-                  --  M_RoutePlans.Erase (I->GetRouteID ());
-                  Int64_Pair_Int64_Route_Plan_Maps.Delete (This.Route_Plan,
-                                                           Element (Container => Get_ID_From_RouteResponses (Plan),
-                                                                    Index     => Index_Route_ID));
-               end loop;
+               --  M_RoutePlans.Erase (I->GetRouteID ());
+               Int64_Pair_Int64_Route_Plan_Maps.Delete (This.Route_Plan,
+                                                        Element (Container => Route_Responses_ID,
+                                                                 Index     => Index_Route_ID));
+            end loop;
                      
-               --   m_routePlanResponses.erase (plan);   
-               Int64_Route_Plan_Responses_Maps.Delete (This.Route_Plan_Responses,
-                                                       Plan_Reponse_Id);
-            end;
-         end if;
+            --   m_routePlanResponses.erase (plan);   
+            Int64_Route_Plan_Responses_Maps.Delete (This.Route_Plan_Responses,
+                                                    Plan_Reponse_Id);
+         end;
+         -- end if;
       end loop;
                
       --  sendSharedLmcpObjectBroadcastMessage (pResponse);
@@ -541,7 +854,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                      if (Get_RouteCost (Plan.Returned_Route_Plan) < 0)
                      then
                         Route_Not_Found := To_Unbounded_String ("V[" & Task_Pair.VehicleId'Image & "](" & Task_Pair.PrevTaskId'Image  &  ","
-                                                               & Task_Pair.PrevTaskOption'Image  & ")-(" & Task_Pair.TaskId'Image  & "," & Task_Pair.TaskOption'Image  & ")") ;
+                                                                & Task_Pair.PrevTaskOption'Image  & ")-(" & Task_Pair.TaskId'Image  & "," & Task_Pair.TaskOption'Image  & ")") ;
                      end if;
                                     
                                     
@@ -661,12 +974,12 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                                              Position  => C);
       
             -- i->second ()
-            Liste_Route : constant  Int64_Set :=
+            Liste_RouteRequest_ID : constant  Int64_Set :=
               Int64_Pending_Route_Matrix.Element (Container => THis.Pending_Route,
                                                   Position  => C);
               
             -- bool isFulfilled = true;
-            Is_Fulfilled : constant Boolean := (for all Id_Request of Liste_Route => 
+            Is_Fulfilled : constant Boolean := (for all Id_Request of Liste_RouteRequest_ID => 
                                                   Int64_Route_Plan_Responses_Maps.Contains (Container => This.Route_Plan_Responses,
                                                                                             Key       => Id_Request));
          begin
@@ -922,8 +1235,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       -- m_routePlanResponses[response->getResponseID ()] = response;
       Int64_Route_Plan_Responses_Maps.Insert (Container => This.Route_Plan_ResponseS,
                                               Key       => Get_ResponseID (Response),
-                                              New_Item  => Route_Plan_Responses_Holder'(
-                                                Content => Response));
+                                              New_Item  => Route_Plan_Responses_Holder'(Content => Response));
          
    end Euclidean_Plan;
          
@@ -967,7 +1279,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       Vect_VehiclesID : Int64_Vect := Get_VehicleID (Route_Request);
       
    begin
-      
+     
       --  if (request->getVehicleID ().empty())
       if Length(Vect_VehiclesID) = 0 then
       
@@ -1023,15 +1335,15 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                Set_AssociatedTaskID  (Plan_Request, Get_AssociatedTaskID  (Route_Request));
                Set_IsCostOnlyRequest (Plan_Request, Get_IsCostOnlyRequest (Route_Request));
                Set_OperatingRegion   (Plan_Request, Get_OperatingRegion   (Route_Request));
-               Set_RequestID         (Plan_Request, Get_RequestID         (Route_Request));
                Set_VehicleID         (Plan_Request, Vehicles_Id);
+               Set_RequestID         (Plan_Request, This.Route_Request_ID);
             
       
                --  m_pendingRoute[request->getRequestID ()].insert (m_routeRequestId);
                Int64_Sets.Insert (Container => Pending_Route_Request,
                                   New_Item  => This.Route_Request_ID);
          
-      
+               -- m_routeRequestId++;
                This.Route_Request_ID := This.Route_Request_ID + 1;
       
       

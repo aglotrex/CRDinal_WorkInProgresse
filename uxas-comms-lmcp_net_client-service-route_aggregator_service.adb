@@ -323,13 +323,14 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
      (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
    is
-      Route_Request : RouteRequest_Any := RouteRequest_Any(Msg.Payload);
+
+      use  Uxas.Messages.Route.RouteRequest.SPARK_Boundary;
+      Route_Request : My_RouteRequest := Wrap( RouteRequest_Acc(RouteRequest_Any(Msg.Payload)).all);
 
    begin
-      Route_Request := Route_Request;
 
-      --  Spark.Handle_Route_Request(This          => This,
-      --                             Route_Request => RouteRequest_Acc(Route_Request).all);
+      Spark.Handle_Route_Request(This          => This,
+                                 Route_Request => Route_Request);
    end Handle_Route_Request_Msg;
 
 
@@ -676,7 +677,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
           New_Item  => Wrapped_UniqueAutomationRequest,
           Position  => C,
           Inserted  => Inserted);
-      This.Auto_Request_Id := This.Auto_Request_Id +1;
+      This.Auto_Request_Id := This.Auto_Request_Id + 1;
    end Handle_Impact_Automation_Request_Msg;
 
 
@@ -707,17 +708,5 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
           Position  => C,
           Inserted  => Inserted);
    end Handle_Task_Plan_Options_Msg;
-
-
-
-
-
-
-
-
-
-
-
-
 
 end UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;
