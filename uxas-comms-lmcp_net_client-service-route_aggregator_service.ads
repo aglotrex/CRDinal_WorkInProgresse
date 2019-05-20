@@ -259,8 +259,8 @@ private
       -- std::unordered_map<int64_t, std::shared_ptr<uxas::messages::task::TaskPlanOptions> > m_taskOptions;
       Task_Plan_Options : Task_Plan_Options_Map;
 
-      -- int64_t m_routeId{1000000}
-      Route_Id : Int64 := 1000000;
+      -- // Starting ID for uniquely identifying route plan
+      Route_Id : Int64 := 1000000;  -- // start outside of any task or waypoint id
 
       --  //                route id,    plan response id                 returned route plan
       --  std::unordered_map<int64_t, std::pair<int64_t, std::shared_ptr<uxas::messages::route::RoutePlan> > > m_routePlans;
