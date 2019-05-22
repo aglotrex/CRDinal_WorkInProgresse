@@ -8,6 +8,7 @@ with Ada.Containers.Formal_Vectors;
 with UxAS.Messages.Lmcptask.TaskOption;     use UxAS.Messages.Lmcptask.TaskOption;
 with UxAS.Messages.Lmcptask.TaskOptionCost; use UxAS.Messages.Lmcptask.TaskOptionCost;
 with UxAS.Messages.Lmcptask.AssignmentCostMatrix; use UxAS.Messages.Lmcptask.AssignmentCostMatrix;
+with UxAs.Messages.Lmcptask.PlanningState.SPARK_Boundary; use UxAs.Messages.Lmcptask.PlanningState.SPARK_Boundary;
 
 with UxAS.Messages.Route.RoutePlan;
 
@@ -43,6 +44,18 @@ use Afrl.Cmasi.AutomationRequest.Vect_Int64;
 
 package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
    
+   
+   
+   procedure Lemma_Check_Same_Entity_State_Identity (This : in Entity_State_Map ) is null;
+   procedure Lemma_Check_Same_Entity_State_Commutativity (X, Y : in Entity_State_Map ) is null;
+   procedure Lemma_Check_Same_Entity_State_Associativity (X, Y, Z : in Entity_State_Map ) is null;
+   
+   procedure Lemma_Same_Route_Aggregator_Identity (This : in Route_Aggregator_Service ) is null;   
+   procedure Lemma_Same_Route_Aggregator_Validity (X, Y : in Route_Aggregator_Service ) is null;
+   procedure Lemma_Same_Route_Aggregator_Commutativity (X, Y    : in Route_Aggregator_Service ) is null;
+   procedure Lemma_Same_Route_Aggregator_Associativity (X, Y, Z : in Route_Aggregator_Service ) is null;
+
+  
      
    package My_Task_Option_Vects is new Ada.Containers.Formal_Vectors
      (Index_Type   => Natural,
@@ -161,23 +174,23 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             Task_Option_List : My_Task_Option_Vect;
 
             use Int64_Task_Plan_Options_Maps;
+            use all type Vect_My_PlanningState;
          begin
 
 
 
-            for Index_Planning_State in First_Index ( Get_PlanningStates_Ids (Areq)) .. Last_Index ( Get_PlanningStates_Ids (Areq)) loop
+            for Index_Planning_State in First_Index ( Get_PlanningStates (Areq)) .. Last_Index ( Get_PlanningStates (Areq)) loop
                declare
-                  Planning_State_EntityId : constant Int64 := Element ( Get_PlanningStates_Ids (Areq), Index_Planning_State);
+                  Planning_State : constant My_PlanningState := Element ( Get_PlanningStates (Areq), Index_Planning_State);
                begin
 
-                  if Planning_State_EntityId = Vehicle_ID then
-                     -- Start_Location := Planning_State. Get_PlanningPosition;    TODO
-                     -- Start_Heading_DEG := Planning_State.GetPlanningHeading; TODO
+                  if Get_EntityId (Planning_State) = Vehicle_ID then
+                     Start_Location    := Get_PlanningPosition (Planning_State); 
+                     Start_Heading_DEG := Get_PlanningHeading  (Planning_State);
                      Is_Foud_Planning_State := True;
                      exit;
                   end if;
                end;
-
             end loop;
 
 
@@ -514,7 +527,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
         
       Set_CorrespondingAutomationRequestID ( Matrix , GetRequestID (Areq));
       Set_OperatingRegion ( Matrix , Get_OperatingRegion_From_OriginalRequest ( Areq ) );
-      -- Set_TaskLevelRelationship ( Matrix , Get_TaskLevelRelationship_From_OriginalRequest ( Areq )) ; TODO
+      Set_TaskLevelRelationship ( Matrix , Get_TaskRelationship_From_OriginalRequest ( Areq )) ;
       Set_TaskList ( Matrix , Get_TaskList_From_OriginalRequest (Areq));
          
          

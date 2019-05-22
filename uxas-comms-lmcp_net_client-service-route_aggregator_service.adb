@@ -11,6 +11,11 @@ with AFRL.CMASI.RemoveTasks;                        use AFRL.CMASI.RemoveTasks;
 with AFRL.CMASI.ServiceStatus;                      use AFRL.CMASI.ServiceStatus;
 with AFRL.CMASI.KeyValuePair;                       use AFRL.CMASI.KeyValuePair;
 with AFRL.CMASI.OperatingRegion;                    use AFRL.CMASI.OperatingRegion;
+with AFRL.CMASI.AirVehicleConfiguration;            use AFRL.CMASI.AirVehicleConfiguration;
+with AFRL.CMASI.AirVehicleState;                    use AFRL.CMASI.AirVehicleState;
+with AFRL.CMASI.EntityConfiguration;                use AFRL.CMASI.EntityConfiguration;
+with AFRL.CMASI.EntityState;                        use AFRL.CMASI.EntityState;
+
 
 with AFRL.Impact.ImpactAutomationRequest;           use AFRL.Impact.ImpactAutomationRequest;
 with AFRL.Impact.PointOfInterest;                   use AFRL.Impact.PointOfInterest;
@@ -18,8 +23,6 @@ with AFRL.Impact.LineOfInterest;                    use AFRL.Impact.LineOfIntere
 with AFRL.Impact.AreaOfInterest;                    use AFRL.Impact.AreaOfInterest;
 with AFRL.Impact.ImpactAutomationResponse;          use AFRL.Impact.ImpactAutomationResponse;
 
-with AFRL.CMASI.AirVehicleConfiguration;            use AFRL.CMASI.AirVehicleConfiguration;
-with AFRL.CMASI.AirVehicleState;                    use AFRL.CMASI.AirVehicleState;
 with Afrl.Vehicles.SurfaceVehicleConfiguration;     use AFRL.Vehicles.SurfaceVehicleConfiguration;
 with Afrl.Vehicles.SurfaceVehicleState;             use AFRL.Vehicles.SurfaceVehicleState;
 with Afrl.Vehicles.GroundVehicleConfiguration;      use AFRL.Vehicles.GroundVehicleConfiguration;
@@ -39,6 +42,8 @@ with UxAS.Common.Utilities.Unit_Conversions;        use  UxAS.Common.Utilities.U
 
 with DOM.Core.Elements; use DOM.Core.Elements;
 with String_Utils; use String_Utils;
+
+with Ada.Containers.Indefinite_Vectors;
 
 with UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK;
 
@@ -155,63 +160,65 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       UInt32_Lmcp_Message_Size_Max : UInt32 := 1000000;
       --   Sstr_Errors : Dynamic_String;
 
-      Str_Component_Type : String :=   Get_Attribute(XML_Node,Name => "STRING_XML_TYPE");
-      Str_Component_Fast_Plan : String :=   Get_Attribute(XML_Node,Name => "STRING_XML_FAST_PLAN");
+      Str_Component_Type : String :=   Get_Attribute (XML_Node,Name => "STRING_XML_TYPE");
+      Str_Component_Fast_Plan : String :=   Get_Attribute (XML_Node,Name => "STRING_XML_FAST_PLAN");
       Unused : Boolean;
-
-
+      use Afrl.Cmasi.EntityConfiguration.String_Vectors;
+      EntityConfiguration_Descendants : Afrl.Cmasi.EntityConfiguration.String_Vectors.Vector := Afrl.Cmasi.EntityConfiguration.EntityConfiguration_Descendants;
+      use Afrl.Cmasi.EntityState.String_Vectors;
+      EntityState_Descendants : Afrl.Cmasi.EntityState.String_Vectors.Vector := Afrl.Cmasi.EntityState.EntityState_Descendants;
 
    begin
 
-      --  EntityConfigurationDescendants(
-      --        if(Str_Component_Fast_Plan'Length < 0 ) then
-      --           THis.Fast_Plan := Boolean'Value(Str_Component_Fast_Plan);
-      --        end if;
-      --
-      --
-      --
-      --        -- // track states and configurations for assignment cost matrix calculation
-      --        -- // [EntityStates] are used to calculate costs from current position to first task
-      --        -- // [EntityConfigurations] are used for nominal speed values (all costs are in terms of time to arrive)
-      --
-      --        -- // ENTITY CONFIGURATIONS
-      --        -- addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
-      --        This.Add_Subscription_Address(AFRL.CMASI.EntityConfiguration.Subscription, Unused);
-      --        -- std::vector< std::string > childconfigs = afrl::cmasi::EntityConfigurationDescendants();
-      --        -- for(auto child : childconfigs)
-      --        --    addSubscriptionAddress(child);
-      --
-      --
-      --        for Descendant of EntityConfiguration_Descendants loop
-      --           This.Add_Subscription_Address(Descendant, Unused);
-      --        end loop;
-      --
-      --
-      --
-      --        -- addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
-      --        THis.Add_Subscription_Address(AFRL.CMASI.EntityState.Subscription, Unused);
-      --        -- std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
-      --        -- for(auto child : childstates)
-      --        --     addSubscriptionAddress(child);
-      --        for Descendant of EntityState_Descendants loop
-      --           This.Add_Subscription_Address(Descendant, Unused);
-      --        end loop;
-      --
-      --        -- // track requests to kickoff matrix calculation
-      --        -- addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
-      --        This.Add_Subscription_Address(UxAS.Messages.LmcpTask.UniqueAutomationRequest.Subscription, Unused);
-      --
-      --        -- // subscribe to task plan options to build matrix
-      --        -- addSubscriptionAddress(uxas::messages::task::TaskPlanOptions::Subscription);
-      --        This.Add_Subscription_Address(UxAS.Messages.LmcpTask.TaskPlanOptions.Subscription, Unused);
-      --
-      --        -- // handle batch route requests
-      --        -- addSubscriptionAddress(uxas::messages::route::RouteRequest::Subscription);
-      --        This.Add_Subscription_Address(UxAS.Messages.Route.RouteRequest.Subscription, Unused);
-      --
-      --        -- // listen for responses to requests from route planner(s)
-      --        -- addSubscriptionAddress(uxas::messages::route::RoutePlanResponse::Subscription);
-      --        This.Add_Subscription_Address(UxAS.Messages.Route.RoutePlanResponse.Subscription, Unused);
+      if Str_Component_Fast_Plan'Length < 0  then
+         This.Fast_Plan := Boolean'Value (Str_Component_Fast_Plan);
+      end if;
+
+
+
+      -- // track states and configurations for assignment cost matrix calculation
+      -- // [EntityStates] are used to calculate costs from current position to first task
+      -- // [EntityConfigurations] are used for nominal speed values (all costs are in terms of time to arrive)
+
+      -- // ENTITY CONFIGURATIONS
+      -- addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
+
+      This.Add_Subscription_Address (AFRL.CMASI.EntityConfiguration.Subscription, Unused);
+
+      -- std::vector< std::string > childconfigs = afrl::cmasi::EntityConfigurationDescendants();
+      -- for(auto child : childconfigs)
+      --    addSubscriptionAddress(child);
+
+      for Descendant of EntityConfiguration_Descendants loop
+         This.Add_Subscription_Address(Descendant, Unused);
+      end loop;
+
+
+
+      -- addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+      THis.Add_Subscription_Address (AFRL.CMASI.EntityState.Subscription, Unused);
+      -- std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
+      -- for(auto child : childstates)
+      --     addSubscriptionAddress(child);
+      for Descendant of EntityState_Descendants loop
+         This.Add_Subscription_Address(Descendant, Unused);
+      end loop;
+
+      -- // track requests to kickoff matrix calculation
+      -- addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
+      This.Add_Subscription_Address(UxAS.Messages.LmcpTask.UniqueAutomationRequest.Subscription, Unused);
+
+      -- // subscribe to task plan options to build matrix
+      -- addSubscriptionAddress(uxas::messages::task::TaskPlanOptions::Subscription);
+      This.Add_Subscription_Address(UxAS.Messages.LmcpTask.TaskPlanOptions.Subscription, Unused);
+
+      -- // handle batch route requests
+      -- addSubscriptionAddress(uxas::messages::route::RouteRequest::Subscription);
+      This.Add_Subscription_Address(UxAS.Messages.Route.RouteRequest.Subscription, Unused);
+
+      -- // listen for responses to requests from route planner(s)
+      -- addSubscriptionAddress(uxas::messages::route::RoutePlanResponse::Subscription);
+      This.Add_Subscription_Address(UxAS.Messages.Route.RoutePlanResponse.Subscription, Unused);
 
 
       Result := True;

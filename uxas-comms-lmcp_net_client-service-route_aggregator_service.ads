@@ -64,8 +64,6 @@ private
    -- See the pactakge body executable part
 
 
-   use UxAS.Messages.LmcpTask.UniqueAutomationRequest;
-   use UxAS.Messages.LmcpTask.UniqueAutomationResponse;
 
 
    type AggregatorTaskOptionPair is record

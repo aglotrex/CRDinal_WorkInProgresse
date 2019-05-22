@@ -1,11 +1,12 @@
 with Common_Formal_Containers; use Common_Formal_Containers;
-with afrl.cmasi.AutomationRequest.SPARK_Boundary; use afrl.cmasi.AutomationRequest.SPARK_Boundary;
-with afrl.impact.ImpactAutomationRequest; use afrl.impact.ImpactAutomationRequest;
-with afrl.impact.ImpactAutomationRequest.SPARK_Boundary; use afrl.impact.ImpactAutomationRequest.SPARK_Boundary;
-with avtas.lmcp.object.SPARK_Boundary; use avtas.lmcp.object.SPARK_Boundary;
-with uxas.messages.lmcptask.TaskAutomationRequest; use uxas.messages.lmcptask.TaskAutomationRequest;
-with uxas.messages.lmcptask.TaskAutomationRequest.SPARK_Boundary; use uxas.messages.lmcptask.TaskAutomationRequest.SPARK_Boundary;
-
+with Afrl.Cmasi.AutomationRequest.SPARK_Boundary; use Afrl.Cmasi.AutomationRequest.SPARK_Boundary;
+with Afrl.Impact.ImpactAutomationRequest; use Afrl.Impact.ImpactAutomationRequest;
+with Afrl.Impact.ImpactAutomationRequest.SPARK_Boundary; use Afrl.Impact.ImpactAutomationRequest.SPARK_Boundary;
+with Avtas.Lmcp.Object.SPARK_Boundary; use Avtas.Lmcp.Object.SPARK_Boundary;
+with Uxas.Messages.Lmcptask.TaskAutomationRequest; use Uxas.Messages.Lmcptask.TaskAutomationRequest;
+with Uxas.Messages.Lmcptask.TaskAutomationRequest.SPARK_Boundary; use Uxas.Messages.Lmcptask.TaskAutomationRequest.SPARK_Boundary;
+with Uxas.Messages.Lmcptask.PlanningState.SPARK_Boundary; use Uxas.Messages.Lmcptask.PlanningState.SPARK_Boundary;
+with Ada.Containers.Formal_Vectors;
 package UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
@@ -20,6 +21,16 @@ package UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with SPARK
      Default_Initial_Condition =>
        Int64_Vects.Is_Empty (Get_PlanningStates_Ids (My_UniqueAutomationRequest));
 
+   package Vect_My_PlanningState_P is new Ada.Containers.Formal_Vectors
+     (Index_Type   => Natural,
+      Element_Type => My_PlanningState);
+   use Vect_My_PlanningState_P;
+
+   Vect_My_PlanningState_Commun_Max_Capacity : constant := 200; -- arbitrary
+
+   subtype Vect_My_PlanningState is Vect_My_PlanningState_P.Vector
+     (Vect_My_PlanningState_Commun_Max_Capacity);
+
    function Get_EntityList_From_OriginalRequest
      (Request : My_UniqueAutomationRequest) return Int64_Vect
      with Global => null;
@@ -32,20 +43,20 @@ package UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with SPARK
      (Request : My_UniqueAutomationRequest) return Int64_Vect
      with Global => null;
 
-   function getRequestID
-     (this : My_UniqueAutomationRequest) return Int64
+   function Get_PlanningStates
+     (Request : My_UniqueAutomationRequest) return Vect_My_PlanningState
+     with Global => null;
+
+   function GetRequestID
+     (This : My_UniqueAutomationRequest) return Int64
      with Global => null;
 
    function Get_TaskList_From_OriginalRequest
      (Request : My_UniqueAutomationRequest) return Int64_Vect
      with Global => null;
 
---     function Get_PlanningPosition
---       (Request : My_UniqueAutomationRequest) return My_Location3D_Any;
---     function Get_PlanningHeading
---       (Request : My_UniqueAutomationRequest) return Real32;
---     function Get_TaskLevelRelationship_From_OriginalRequest
---       (Request : My_UniqueAutomationRequest) return Unbounded_String
+   function Get_TaskRelationship_From_OriginalRequest
+     (Request : My_UniqueAutomationRequest) return Unbounded_String;
 
    function Same_Requests (X, Y : My_UniqueAutomationRequest) return Boolean is
      (Get_PlanningStates_Ids (X) = Get_PlanningStates_Ids (Y)
@@ -63,7 +74,7 @@ package UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with SPARK
 
    procedure Copy_PlanningState_From_TaskAutomationRequest
      (Target : in out My_UniqueAutomationRequest;
-      Source : uxas.messages.lmcptask.TaskAutomationRequest.TaskAutomationRequest)
+      Source : Uxas.Messages.Lmcptask.TaskAutomationRequest.TaskAutomationRequest)
      with Global => null,
      Post => Get_PlanningStates_Ids (Target) =
      Get_PlanningStates_Ids (Source)
@@ -90,7 +101,7 @@ package UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with SPARK
    procedure Copy_OriginalRequest_From_AutomationRequest
      (Target : in out My_UniqueAutomationRequest;
       Source : My_Object_Any)
-   with Global => null,
+     with Global => null,
      Pre => Deref (Source) in AutomationRequest,
      Post => Get_EntityList_From_OriginalRequest (Target) =
      Get_EntityList (AutomationRequest (Deref (Source)))
@@ -103,7 +114,7 @@ package UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with SPARK
 
    procedure Copy_OriginalRequest_From_TaskAutomationRequest
      (Target : in out My_UniqueAutomationRequest;
-      Source : uxas.messages.lmcptask.TaskAutomationRequest.TaskAutomationRequest)
+      Source : Uxas.Messages.Lmcptask.TaskAutomationRequest.TaskAutomationRequest)
      with Global => null,
      Post => Get_EntityList_From_OriginalRequest (Target) =
      Get_EntityList_From_OriginalRequest (Source)
@@ -114,10 +125,10 @@ package UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with SPARK
      and Get_PlanningStates_Ids (Target) =
      Get_PlanningStates_Ids (Target)'Old;
 
-   procedure setRequestID
-     (this : in out My_UniqueAutomationRequest; RequestID : in Int64)
+   procedure SetRequestID
+     (This : in out My_UniqueAutomationRequest; RequestID : in Int64)
      with Global => null,
-     Post => getRequestID (This) = RequestID
+     Post => GetRequestID (This) = RequestID
      and Get_EntityList_From_OriginalRequest (This) =
      Get_EntityList_From_OriginalRequest (This)'Old
      and Get_PlanningStates_Ids (This) =
@@ -127,8 +138,8 @@ package UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with SPARK
      and Get_TaskList_From_OriginalRequest (This) =
      Get_TaskList_From_OriginalRequest (This)'Old;
 
-   procedure setSandBoxRequest
-     (this           : in out My_UniqueAutomationRequest;
+   procedure SetSandBoxRequest
+     (This           : in out My_UniqueAutomationRequest;
       SandBoxRequest : Boolean)
      with Global => null,
      Post => Get_EntityList_From_OriginalRequest (This) =
@@ -141,9 +152,9 @@ package UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with SPARK
      Get_TaskList_From_OriginalRequest (This)'Old;
    --  Simple renaming to add a contract
 
-   function Unwrap (this : My_UniqueAutomationRequest) return UniqueAutomationRequest;
+   function Unwrap (This : My_UniqueAutomationRequest) return UniqueAutomationRequest;
 
-   function Wrap (this : UniqueAutomationRequest) return My_UniqueAutomationRequest;
+   function Wrap (This : UniqueAutomationRequest) return My_UniqueAutomationRequest;
 private
    pragma SPARK_Mode (Off);
    type My_UniqueAutomationRequest is record
@@ -153,12 +164,16 @@ private
    overriding function "=" (X, Y : My_UniqueAutomationRequest) return Boolean is
      (X.Content = Y.Content);
 
-   function getRequestID (this : My_UniqueAutomationRequest) return Int64 is
-     (this.Content.getRequestID);
+   function GetRequestID (This : My_UniqueAutomationRequest) return Int64 is
+     (This.Content.GetRequestID);
 
-   function Unwrap (this : My_UniqueAutomationRequest) return UniqueAutomationRequest is
-     (this.Content);
+   function Get_TaskRelationship_From_OriginalRequest
+     (Request : My_UniqueAutomationRequest) return Unbounded_String is
+     (Request.Content.GetOriginalRequest.GetTaskRelationships);
 
-   function Wrap (this : UniqueAutomationRequest) return My_UniqueAutomationRequest is
-     (Content => this);
+   function Unwrap (This : My_UniqueAutomationRequest) return UniqueAutomationRequest is
+     (This.Content);
+
+   function Wrap (This : UniqueAutomationRequest) return My_UniqueAutomationRequest is
+     (Content => This);
 end UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary;
