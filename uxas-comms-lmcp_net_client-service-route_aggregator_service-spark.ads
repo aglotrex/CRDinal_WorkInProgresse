@@ -11,10 +11,17 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    ------------------------------------------------
 
    use all type Pair_Int64_Route_Plan_Map;
+   use all type Route_Plan_Responses_Map;
+
+   use all type Pending_Route_Matrix;
    function Check_Route_Plan    (This : Route_Aggregator_Service) return Boolean is
      (for all Cursor in This.Route_Plan
-      => Key ( This.Route_Plan, Cursor) = Get_RouteID( Element (This.Route_Plan,
-                                                                Cursor).Returned_Route_Plan))
+      =>(Key ( This.Route_Plan, Cursor) = Get_RouteID( Element (This.Route_Plan,
+                                                                Cursor).Returned_Route_Plan)
+         and Contains (This.Pending_Route, Element (This.Route_Plan,
+                                                    Cursor).Reponse_ID)
+         and Contains (This.Route_Plan_ResponseS,Element (This.Route_Plan,
+                                                          Cursor).Reponse_ID)))
      with Ghost;
    use all type Task_Plan_Options_Map;
    function Check_Task_Plan_Options    (This : Route_Aggregator_Service) return Boolean is
@@ -22,7 +29,6 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
       => Key (This.Task_Plan_Options, Cursor) = Get_TaskID (Element (This.Task_Plan_Options,
                                                                      Cursor).Content))
      with Ghost;
-   use all type Route_Plan_Responses_Map;
    function Check_Route_Plan_Response  (This : Route_Aggregator_Service) return Boolean is
      (for all Cursor in This.Route_Plan_Responses
       => Key (This.Route_Plan_Responses, Cursor) = Get_ResponseID (Element (This.Route_Plan_Responses,
@@ -67,7 +73,6 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
               Contains ( This.Surface_Vehicles, Key (This.Entity_Configuration, Cursor)))))
        with Ghost;
 
-   use all type Pending_Route_Matrix;
    function Check_Pending_Route (This : Route_Aggregator_Service) return Boolean is
      (for all Cursor_Request_ID_1 in This.Pending_Route
       => (for all Cursor_Route_Plan_1 in Element (This.Pending_Route, Cursor_Request_ID_1)
@@ -149,19 +154,13 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
         (Int64_Entity_State_Maps.Formal_Model.Model (X),
          Int64_Entity_State_Maps.Formal_Model.Model (Y))
       and then (for all C of X
-                => (Element (X, C).Content = Element (Y, C).Content)))
+                => Same_Requests (Element (X, C).Content, Element (Y, C).Content)))
      with Ghost;
-   procedure Lemma_Check_Same_Entity_State_Identity
-     (This : in Entity_State_Map ) with Global => null,
+   procedure Lemma_Check_Same_Entity_State_Identity      (This    : in Entity_State_Map ) with Global => null,
      Post => Check_Same_Entity_State(This,This);
-
-
-   procedure Lemma_Check_Same_Entity_State_Commutativity
-     (X, Y : in Entity_State_Map ) with Global => null,
+   procedure Lemma_Check_Same_Entity_State_Commutativity (X, Y    : in Entity_State_Map ) with Global => null,
      Pre => Check_Same_Entity_State(X,Y), Post => Check_Same_Entity_State(Y,X);
-
-   procedure Lemma_Check_Same_Entity_State_Associativity
-     (X, Y, Z : in Entity_State_Map ) with Global => null,
+   procedure Lemma_Check_Same_Entity_State_Associativity (X, Y, Z : in Entity_State_Map ) with Global => null,
      Pre => Check_Same_Entity_State(X,Y) and Check_Same_Entity_State(Y,Z),  Post => Check_Same_Entity_State(X,Z);
 
 
@@ -171,7 +170,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
         (Int64_Entity_Configuration_Maps.Formal_Model.Model (X),
          Int64_Entity_Configuration_Maps.Formal_Model.Model (Y))
       and then (for all C of X
-                => (Element (X, C).Content = Element (Y, C).Content )))
+                => Same_Requests (Element (X, C).Content, Element (Y, C).Content )))
      with Ghost;
    function Check_Same_Unique_Automation_Request
      (X, Y : Unique_Automation_Request_Map) return Boolean is
@@ -179,7 +178,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
         (Int64_Unique_Automation_Request_Maps.Formal_Model.Model (X),
          Int64_Unique_Automation_Request_Maps.Formal_Model.Model (Y))
       and then (for all C of X
-                => (Element (X, C).Content = Element (Y, C).Content)))
+                => Same_Requests (Element (X, C).Content, Element (Y, C).Content)))
      with Ghost;
    function Check_Same_Task_Plan_Options
      (X, Y : Task_Plan_Options_Map) return Boolean is
@@ -187,7 +186,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
         (Int64_Task_Plan_Options_Maps.Formal_Model.Model (X),
          Int64_Task_Plan_Options_Maps.Formal_Model.Model (Y))
       and then (for all C of X
-                => (Element (X, C).Content = Element (Y, C).Content)))
+                => Same_Requests (Element (X, C).Content, Element (Y, C).Content)))
      with Ghost;
    function Check_Same_Route_Plan
      (X, Y : Pair_Int64_Route_Plan_Map) return Boolean is
@@ -196,8 +195,8 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
          Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.Model (Y))
       and then (for all C of X
                 => (Element (X, C).Reponse_ID   = Element (Y, C).Reponse_ID and
-                      Element (X, C).Returned_Route_Plan = Element (Y, C).Returned_Route_Plan)))
-     with Ghost;
+                      Same_Requests (Element (X, C).Returned_Route_Plan,Element (Y, C).Returned_Route_Plan))))
+       with Ghost;
    function Check_Same_Pending_Auto_Req
      (X, Y : Pending_Auto_Req_Matrix) return Boolean is
      (Int64_Pending_Auto_Req_Matrix.Formal_Model.M.Same_Keys
@@ -224,7 +223,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
         (Int64_Route_Plan_Responses_Maps.Formal_Model.Model (X),
          Int64_Route_Plan_Responses_Maps.Formal_Model.Model (Y))
       and then (for all C of X
-                => (Element (X, C).Content = Element (Y, C).Content)))
+                => Same_Requests (Element (X, C).Content, Element (Y, C).Content)))
      with Ghost;
    function Check_Same_Pending_Route
      (X, Y : Pending_Route_Matrix) return Boolean is
@@ -267,17 +266,16 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
 
       and Check_Same_Pending_Route (X.Pending_Route, Y.Pending_Route))  with Ghost;
    procedure Lemma_Same_Route_Aggregator_Validity
-     (X, Y : in Route_Aggregator_Service ) with Pre => Same_Route_Aggretor (X,Y) and All_Requests_Valid (X), Post => All_Requests_Valid (Y);
-
+     (X, Y : in Route_Aggregator_Service ) with Global => null,
+     Pre => Same_Route_Aggretor (X,Y) and All_Requests_Valid (X), Post => All_Requests_Valid (Y);
    procedure Lemma_Same_Route_Aggregator_Identity
      (This : in Route_Aggregator_Service ) with Post => Same_Route_Aggretor(This,This);
-
-
    procedure Lemma_Same_Route_Aggregator_Commutativity
-     (X, Y : in Route_Aggregator_Service ) with Pre => Same_Route_Aggretor(X,Y), Post => Same_Route_Aggretor(Y,X);
-
+     (X, Y : in Route_Aggregator_Service ) with Global => null,
+     Pre => Same_Route_Aggretor(X,Y), Post => Same_Route_Aggretor(Y,X);
    procedure Lemma_Same_Route_Aggregator_Associativity
-     (X, Y, Z : in Route_Aggregator_Service ) with Pre => Same_Route_Aggretor(X,Y) and Same_Route_Aggretor(Y,Z),  Post => Same_Route_Aggretor(X,Z);
+     (X, Y, Z : in Route_Aggregator_Service ) with Global => null,
+     Pre => Same_Route_Aggretor(X,Y) and Same_Route_Aggretor(Y,Z),  Post => Same_Route_Aggretor(X,Z);
 
 
 
@@ -341,31 +339,47 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                              Route_Plan_Request : in My_RoutePlanRequest) with
      Pre => Int64_Route_Plan_Responses_Maps.Contains (This.Route_Plan_Responses,
                                                       Get_RequestID (Route_Plan_Request))
-     and (for all Id In First_Index (Get_RouteRequests (Route_Plan_Request)) ..  Last_Index (Get_RouteRequests (Route_Plan_Request))
+     and not Contains (This.Route_Plan_Responses, Get_RequestID (Route_Plan_Request))
+     and (for all Id in First_Index (Get_RouteRequests (Route_Plan_Request)) ..  Last_Index (Get_RouteRequests (Route_Plan_Request))
           => not Contains (This.Route_Plan,
                            Get_RouteID ( Element (Get_RouteRequests (Route_Plan_Request),
-                                                                             ID))))
-     and All_Requests_Valid (This),
+                                                  ID))))
+     and All_Requests_Valid (This)
+     and Contains (This.Pending_Route,
+                   Get_RequestID (Route_Plan_Request))
+
+
+
+           ,
+
      Post => All_Requests_Valid (This)
-     and This.Fast_Plan = This.Fast_Plan'Old
 
-     and Check_Same_Entity_State (This.Entity_State,This.Entity_State'Old)
-     and Check_Same_Entity_Configuration (This.Entity_Configuration, This.Entity_Configuration'Old)
+     and Contains (This.Route_Plan_Responses,
+                   Get_RequestID (Route_Plan_Request))
 
-     and This.Ground_Vehicles = This.Ground_Vehicles'Old
-     and This.Surface_Vehicles = This.Surface_Vehicles'Old
-     and This.Air_Vehicules = This.Air_Vehicules'Old
+     and  (for all I in First_Index (Get_RouteRequests (Route_Plan_Request)) ..  Last_Index (Get_RouteRequests (Route_Plan_Request))
+           => Contains (This.Route_Plan, Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request), I))));
 
-     and This.Auto_Request_Id = This.Auto_Request_Id'Old
-     and Check_Same_Unique_Automation_Request (This.Unique_Automation_Request, This.Unique_Automation_Request'Old)
-     and Check_Same_Task_Plan_Options (This.Task_Plan_Options, This.Task_Plan_Options'Old)
 
-     and This.Route_Id = This.Route_Id'Old
-     and Check_Same_Pending_Auto_Req (This.Pending_Auto_Req, This.Pending_Auto_Req'Old)
-     and Check_Same_Route_Task_Pairing (This.Route_Task_Pairing, This.Route_Task_Pairing'Old)
-
-     and This.Route_Request_ID = This.Route_Request_ID'Old
-     and Check_Same_Pending_Route (This.Pending_Route, This.Pending_Route'Old);
+   --       and This.Fast_Plan = This.Fast_Plan'Old
+   --
+   --       and Check_Same_Entity_State (This.Entity_State,This.Entity_State'Old)
+   --       and Check_Same_Entity_Configuration (This.Entity_Configuration, This.Entity_Configuration'Old)
+   --
+   --       and This.Ground_Vehicles = This.Ground_Vehicles'Old
+   --       and This.Surface_Vehicles = This.Surface_Vehicles'Old
+   --       and This.Air_Vehicules = This.Air_Vehicules'Old
+   --
+   --       and This.Auto_Request_Id = This.Auto_Request_Id'Old
+   --       and Check_Same_Unique_Automation_Request (This.Unique_Automation_Request, This.Unique_Automation_Request'Old)
+   --       and Check_Same_Task_Plan_Options (This.Task_Plan_Options, This.Task_Plan_Options'Old)
+   --
+   --       and This.Route_Id = This.Route_Id'Old
+   --       and Check_Same_Pending_Auto_Req (This.Pending_Auto_Req, This.Pending_Auto_Req'Old)
+   --       and Check_Same_Route_Task_Pairing (This.Route_Task_Pairing, This.Route_Task_Pairing'Old)
+   --
+   --       and This.Route_Request_ID = This.Route_Request_ID'Old
+   --       and Check_Same_Pending_Route (This.Pending_Route, This.Pending_Route'Old);
 
    --  Void SendMatrix(Int64_T);
    procedure Send_Matrix (This    : in out Route_Aggregator_Service;

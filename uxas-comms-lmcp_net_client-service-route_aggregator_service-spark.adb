@@ -847,6 +847,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       Region_ID   : constant Int64 := Get_OperatingRegion (Route_Plan_Request);
       Vehicles_ID : constant Int64 := Get_VehicleID (Route_Plan_Request);
       Task_ID     : constant Int64 := Get_AssociatedTaskID (Route_Plan_Request);
+      Request_ID  : constant Int64 := Get_RequestID (Route_Plan_Request);
          
       -- double speed = 1.0; // default if no speed available
       Speed  : Long_Float := 1.0;
@@ -875,10 +876,23 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       Set_AssociatedTaskID (Response, Task_ID);
       Set_OperatingRegion  (Response, Region_ID);
       Set_VehicleID  (Response, Vehicles_ID);
-      Set_ResponseID (Response, Get_RequestID (Route_Plan_Request));
+      Set_ResponseID (Response, Request_ID);
+      pragma Assert (All_Requests_Valid (This));
+      -- move it here for Check_Route_Plan
+      -- m_routePlanResponses[response->getResponseID ()] = response;
+      Int64_Route_Plan_Responses_Maps.Insert (Container => This.Route_Plan_Responses,
+                                              Key       => Get_ResponseID (Response),
+                                              New_Item  => Route_Plan_Responses_Holder'(Content => Response));
+      pragma Assert (Check_Route_Plan_Response (This));
+      
          
       -- for (size_t k = 0; k < request->getRouteRequests ().size (); k++)
       for K in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request)) loop
+          
+         pragma Loop_Invariant (  (for all I in First_Index (Get_RouteRequests (Route_Plan_Request)) .. K - 1
+                                  => (Contains (This.Route_Plan,
+                                      Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request), I)))))
+                                  and Check_Route_Plan (This));
          declare
             
             -- uxas::messages::route::RouteConstraints* routeRequest = request->getRouteRequests ().at (k);
@@ -899,6 +913,8 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             Plan : My_RoutePlan;
          
             Line_Dist : Long_Float;
+            
+            Route_Plan_Pair : Pair_Int64_Route_Plan;
          
          
          begin
@@ -930,20 +946,32 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          
             pragma Assert (Speed > 0.02);
             Set_RouteCost (Plan, Int64( Line_Dist / Speed * 1000.0));
-         
+            
+            Route_Plan_Pair :=  Pair_Int64_Route_Plan'(Reponse_ID          => Request_ID ,
+                                                       Returned_Route_Plan => Plan );
+            
+            pragma Assert (Get_RouteID (Route_Plan_Pair.Returned_Route_Plan) = Route_ID );
+            pragma Assert (Contains (This.Pending_Route, Route_Plan_Pair.Reponse_ID));
+            pragma Assert (Contains (This.Route_Plan_Responses, Route_Plan_Pair.Reponse_ID));
+              
+            
+            pragma Assert (Check_Route_Plan (This));
             --  m_routePlans[routeId] = std::make_pair(request->getRequestID (), std::shared_ptr<uxas::messages::route::RoutePlan>(plan));
             Int64_Pair_Int64_Route_Plan_Maps.Insert
               (Container => This.Route_Plan,
                Key       => Route_ID,
-               New_Item  =>  Pair_Int64_Route_Plan'(Reponse_ID          => Get_RequestID (Route_Plan_Request) ,
-                                                    Returned_Route_Plan => Plan ));
+               New_Item  => Route_Plan_Pair);
+             pragma Assert (Contains (THis.Route_Plan, Route_ID));
+            pragma Assert (Contains (This.Pending_Route, Element (THis.Route_Plan, Route_ID).Reponse_ID));
+            pragma Assert (Contains (This.Route_Plan_Responses, Element (THis.Route_Plan, Route_ID).Reponse_ID));
+            
+            pragma Assert (Check_Route_Plan (This));
+            
+            
+           
          
          end;
       end loop;
-      -- m_routePlanResponses[response->getResponseID ()] = response;
-      Int64_Route_Plan_Responses_Maps.Insert (Container => This.Route_Plan_ResponseS,
-                                              Key       => Get_ResponseID (Response),
-                                              New_Item  => Route_Plan_Responses_Holder'(Content => Response));
          
    end Euclidean_Plan;
          
@@ -1072,6 +1100,10 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       
                   -- if (m_fastPlan)
                   if This.Fast_Plan then
+                     -- Replace here cause for proving Euclidean_Plan wee need to have a Pending_Route up to date
+                     Int64_Pending_Route_Matrix.Replace (Container => This.Pending_Route,
+                                                         Key       => Get_RequestID (Route_Request),
+                                                         New_Item  => Pending_Route_Request);
       
                      -- // short-circuit and just plan with straight line planner
                      -- EuclideanPlan(PlanRequest);
@@ -1098,6 +1130,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             end;
       
          end loop;
+                                    
          Int64_Pending_Route_Matrix.Replace (Container => This.Pending_Route,
                                              Key       => Get_RequestID (Route_Request),
                                              New_Item  => Pending_Route_Request);
