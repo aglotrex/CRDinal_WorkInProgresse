@@ -160,7 +160,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       UInt32_Lmcp_Message_Size_Max : UInt32 := 1000000;
       --   Sstr_Errors : Dynamic_String;
 
-      Str_Component_Type : String :=   Get_Attribute (XML_Node,Name => "STRING_XML_TYPE");
+      Str_Component_Type      : String :=   Get_Attribute (XML_Node,Name => "STRING_XML_TYPE");
       Str_Component_Fast_Plan : String :=   Get_Attribute (XML_Node,Name => "STRING_XML_FAST_PLAN");
       Unused : Boolean;
       use Afrl.Cmasi.EntityConfiguration.String_Vectors;

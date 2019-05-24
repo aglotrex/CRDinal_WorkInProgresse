@@ -1,40 +1,40 @@
-with Ada.Numerics.Long_Elementary_Functions; use  Ada.Numerics.Long_Elementary_Functions;
-with Common_Formal_Containers; use Common_Formal_Containers;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Containers; use Ada.Containers;
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Numerics.Long_Elementary_Functions;                     use Ada.Numerics.Long_Elementary_Functions;
+with Common_Formal_Containers;                                   use Common_Formal_Containers;
+with Ada.Strings.Unbounded;                                      use Ada.Strings.Unbounded;
+with Ada.Containers;                                             use Ada.Containers;
+with Ada.Text_IO;                                                use Ada.Text_IO;
 with Ada.Containers.Formal_Vectors;
 
-with UxAS.Messages.Lmcptask.TaskOption;     use UxAS.Messages.Lmcptask.TaskOption;
-with UxAS.Messages.Lmcptask.TaskOptionCost; use UxAS.Messages.Lmcptask.TaskOptionCost;
-with UxAS.Messages.Lmcptask.AssignmentCostMatrix; use UxAS.Messages.Lmcptask.AssignmentCostMatrix;
-with UxAs.Messages.Lmcptask.PlanningState.SPARK_Boundary; use UxAs.Messages.Lmcptask.PlanningState.SPARK_Boundary;
+with UxAS.Messages.Lmcptask.TaskOption;                          use UxAS.Messages.Lmcptask.TaskOption;
+with UxAS.Messages.Lmcptask.TaskOptionCost;                      use UxAS.Messages.Lmcptask.TaskOptionCost;
+with UxAS.Messages.Lmcptask.AssignmentCostMatrix;                use UxAS.Messages.Lmcptask.AssignmentCostMatrix;
+with UxAs.Messages.Lmcptask.PlanningState.SPARK_Boundary;        use UxAs.Messages.Lmcptask.PlanningState.SPARK_Boundary;
 
 with UxAS.Messages.Route.RoutePlan;
 
-with UxAS.Messages.Route.RouteResponse;    use UxAS.Messages.Route.RouteResponse;
-with UxAS.Messages.Route.RouteResponse.SPARK_Boundary;    use UxAS.Messages.Route.RouteResponse.SPARK_Boundary;
-with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary; use UxAS.Messages.Route.RouteConstraints.SPARK_Boundary;
-with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects; use UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects;
+with UxAS.Messages.Route.RouteResponse;                          use UxAS.Messages.Route.RouteResponse;
+with UxAS.Messages.Route.RouteResponse.SPARK_Boundary;           use UxAS.Messages.Route.RouteResponse.SPARK_Boundary;
+with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary;        use UxAS.Messages.Route.RouteConstraints.SPARK_Boundary;
+with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects;  use UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects;
 
 
-with Uxas.Messages.Lmcptask.TaskOption.Spark_Boundary;      use Uxas.Messages.Lmcptask.TaskOption.Spark_Boundary;
-with Uxas.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary; use Uxas.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary;
-with UxAS.Messages.Lmcptask.TAskOptionCost.SPARK_Boundary;  use UxAS.Messages.Lmcptask.TAskOptionCost.SPARK_Boundary;
+with Uxas.Messages.Lmcptask.TaskOption.Spark_Boundary;           use Uxas.Messages.Lmcptask.TaskOption.Spark_Boundary;
+with Uxas.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary;      use Uxas.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary;
+with UxAS.Messages.Lmcptask.TAskOptionCost.SPARK_Boundary;       use UxAS.Messages.Lmcptask.TAskOptionCost.SPARK_Boundary;
 with UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary; use UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary;
-with UxAS.Common.Utilities.Unit_Conversions; use UxAS.Common.Utilities.Unit_Conversions; 
+with UxAS.Common.Utilities.Unit_Conversions;                     use UxAS.Common.Utilities.Unit_Conversions; 
                
      
-with UxAS.Common.String_Constant.Message_Group; use UxAS.Common.String_Constant.Message_Group;
+with UxAS.Common.String_Constant.Message_Group;                  use UxAS.Common.String_Constant.Message_Group;
 
 
-with Afrl.Cmasi.Enumerations;  use Afrl.Cmasi.Enumerations;
-with Afrl.Cmasi.ServiceStatus; use Afrl.Cmasi.ServiceStatus;
-with Afrl.Cmasi.KeyValuePair;  use Afrl.Cmasi.KeyValuePair;
-with Afrl.Cmasi.Location3D;    use Afrl.Cmasi.Location3D;
-with Afrl.Cmasi.AutomationRequest; use Afrl.Cmasi.AutomationRequest;
-with Afrl.Cmasi.Location3D.Spark_Boundary; use Afrl.Cmasi.Location3D.Spark_Boundary;
-with Afrl.Cmasi.ServiceStatus.SPARK_Boundary; use Afrl.Cmasi.ServiceStatus.SPARK_Boundary;
+with Afrl.Cmasi.Enumerations;                                    use Afrl.Cmasi.Enumerations;
+with Afrl.Cmasi.ServiceStatus;                                   use Afrl.Cmasi.ServiceStatus;
+with Afrl.Cmasi.KeyValuePair;                                    use Afrl.Cmasi.KeyValuePair;
+with Afrl.Cmasi.Location3D;                                      use Afrl.Cmasi.Location3D;
+with Afrl.Cmasi.AutomationRequest;                               use Afrl.Cmasi.AutomationRequest;
+with Afrl.Cmasi.Location3D.Spark_Boundary;                       use Afrl.Cmasi.Location3D.Spark_Boundary;
+with Afrl.Cmasi.ServiceStatus.SPARK_Boundary;                    use Afrl.Cmasi.ServiceStatus.SPARK_Boundary;
 use Afrl.Cmasi.AutomationRequest.Vect_Int64;
 
 
@@ -84,6 +84,26 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
      --      //  3. Send requests to proper planners
 
    is
+      
+       procedure My_Send_Shared_LMCP_Object_Limited_Cast_Message
+        (This : in out Route_Aggregator_Service;
+         Cast_Address : String;
+         Request : My_RoutePlanRequest) with 
+        Post => (if All_Requests_Valid (This)'Old then All_Requests_Valid (This)) ;
+
+      procedure My_Send_Shared_LMCP_Object_Limited_Cast_Message
+        (This : in out Route_Aggregator_Service;
+         Cast_Address : String;
+         Request : My_RoutePlanRequest) with
+        SPARK_Mode => Off
+      is
+         Request_Acc : constant RoutePlanRequest_Acc := new RoutePlanRequest;
+      begin
+         Request_Acc.all := Unwrap (Request);
+         This.Send_Shared_LMCP_Object_Limited_Cast_Message (Cast_Address,
+                                                            Object_Any (Request_Acc)); 
+      end My_Send_Shared_LMCP_Object_Limited_Cast_Message;
+      
 
       package My_Plan_Request_Vects is new Ada.Containers.Formal_Vectors
         (Index_Type   => Natural,
@@ -98,24 +118,6 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       Send_Air_Plan_Request    : My_Plan_Request_Vect := My_Plan_Request_Vects.Empty_Vector;
       Send_Ground_Plan_Request : My_Plan_Request_Vect := My_Plan_Request_Vects.Empty_Vector;
       use Int64_Vects;
-
-      procedure My_Send_Shared_LMCP_Object_Limited_Cast_Message
-        (This : in out Route_Aggregator_Service;
-         Cast_Address : String;
-         Request : My_RoutePlanRequest);
-
-      procedure My_Send_Shared_LMCP_Object_Limited_Cast_Message
-        (This : in out Route_Aggregator_Service;
-         Cast_Address : String;
-         Request : My_RoutePlanRequest) with
-        SPARK_Mode => Off
-      is
-         Request_Acc : constant RoutePlanRequest_Acc := new RoutePlanRequest;
-      begin
-         Request_Acc.all := Unwrap (Request);
-         This.Send_Shared_LMCP_Object_Limited_Cast_Message (Cast_Address,
-                                                            Object_Any (Request_Acc)); 
-      end My_Send_Shared_LMCP_Object_Limited_Cast_Message;
 
       Entity_List : Int64_Vect := Get_EntityList_From_OriginalRequest (Request => Areq);
    begin
@@ -429,7 +431,6 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          --  if (plan != m_routePlanResponses.end ())
          
          -- verify by contrustion / call
-         --------------------------------
          -- if Int64_Route_Plan_Responses_Maps.Contains (This.Route_Plan_Responses,
          --                                             Plan_Reponse_Id) then     
          
@@ -883,16 +884,21 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       Int64_Route_Plan_Responses_Maps.Insert (Container => This.Route_Plan_Responses,
                                               Key       => Get_ResponseID (Response),
                                               New_Item  => Route_Plan_Responses_Holder'(Content => Response));
+      pragma Assert (Contains (This.Route_Plan_Responses, Request_ID)
+                     and then Get_ResponseID ( Element (This.Route_Plan_Responses, Request_ID).Content) = Request_ID);
+                       
       pragma Assert (Check_Route_Plan_Response (This));
+      pragma Assert (All_Requests_Valid (This));
       
          
       -- for (size_t k = 0; k < request->getRouteRequests ().size (); k++)
       for K in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request)) loop
           
-         pragma Loop_Invariant (  (for all I in First_Index (Get_RouteRequests (Route_Plan_Request)) .. K - 1
-                                  => (Contains (This.Route_Plan,
-                                      Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request), I)))))
-                                  and Check_Route_Plan (This));
+         pragma Loop_Invariant ((for all I in First_Index (Get_RouteRequests (Route_Plan_Request)) .. K - 1
+                                => (Contains (This.Route_Plan,
+                                    Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request), I)))))
+                                and (Check_Route_Plan (This)
+                                  and then All_Requests_Valid (This)));
          declare
             
             -- uxas::messages::route::RouteConstraints* routeRequest = request->getRouteRequests ().at (k);
@@ -961,7 +967,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
               (Container => This.Route_Plan,
                Key       => Route_ID,
                New_Item  => Route_Plan_Pair);
-             pragma Assert (Contains (THis.Route_Plan, Route_ID));
+            pragma Assert (Contains (THis.Route_Plan, Route_ID));
             pragma Assert (Contains (This.Pending_Route, Element (THis.Route_Plan, Route_ID).Reponse_ID));
             pragma Assert (Contains (This.Route_Plan_Responses, Element (THis.Route_Plan, Route_ID).Reponse_ID));
             

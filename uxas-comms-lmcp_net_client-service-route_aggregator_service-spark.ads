@@ -285,8 +285,10 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                                     ReqID : in Int64;
                                     Areq  : in My_UniqueAutomationRequest) with
      Pre => not Int64_Pending_Auto_Req_Matrix.Contains(This.Pending_Auto_Req,
-                                                       ReqID),
-     Post => This.Unique_Automation_Request'Old = This.Unique_Automation_Request;
+                                                       ReqID)
+     and All_Requests_Valid (This),
+     Post => This.Unique_Automation_Request'Old = This.Unique_Automation_Request
+     and All_Requests_Valid (This);
 
    -- void SendRouteResponse(int64_t);
    procedure Send_Route_Reponse (This     : in out Route_Aggregator_Service;
@@ -381,6 +383,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    --       and This.Route_Request_ID = This.Route_Request_ID'Old
    --       and Check_Same_Pending_Route (This.Pending_Route, This.Pending_Route'Old);
 
+
    --  Void SendMatrix(Int64_T);
    procedure Send_Matrix (This    : in out Route_Aggregator_Service;
                           AutoKey : Int64) with
@@ -395,24 +398,6 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
         => Contains (Container => This.Route_Plan,
                      Key       => Response_ID));
 
-
-   --       Post => This.Route_Id   = This.Route_Id'Old
-   --       and This.Fast_Plan  = This.Fast_Plan'Old
-   --       and This.Route_Plan = This.Route_Plan'Old
-   --       and This.Entity_State  = This.Entity_State'Old
-   --       and This.Air_Vehicules = This.Air_Vehicules'Old
-   --       and This.Pending_Route = This.Pending_Route'Old
-   --       and This.Pending_Route = This.Pending_Route'Old
-   --       and This.Ground_Vehicles = This.Ground_Vehicles'Old
-   --       and This.Auto_Request_Id = This.Auto_Request_Id'Old
-   --       and This.Surface_Vehicles = This.Surface_Vehicles'Old
-   --       and This.Pending_Auto_Req = This.Pending_Auto_Req'Old
-   --       and This.Route_Request_ID = This.Route_Request_ID'Old
-   --       and This.Task_Plan_Options  = THis.Task_Plan_Options'Old
-   --       and This.Route_Task_Pairing = This.Route_Task_Pairing'Old
-   --       and This.Entity_Configuration = This.Entity_Configuration'Old
-   --       and This.Route_Plan_Responses = This.Route_Plan_Responses'Old
-   --       and This.Unique_Automation_Request = This.Unique_Automation_Request'Old;
 
 
 

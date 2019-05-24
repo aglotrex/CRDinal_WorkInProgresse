@@ -6,29 +6,29 @@ with AFRL.CMASI.LmcpTask;
 with UxAS.Messages.LmcpTask;
 with UxAS.Messages.LmcpTask.UniqueAutomationResponse;
 
-with Afrl.Cmasi.EntityState; use Afrl.Cmasi.EntityState;
-with Afrl.Cmasi.EntityConfiguration; use Afrl.Cmasi.EntityConfiguration;
-with Afrl.Cmasi.EntityState.SPARK_Boundary; use Afrl.Cmasi.EntityState.SPARK_Boundary;
-with Afrl.Cmasi.EntityConfiguration.SPARK_Boundary; use Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;
+with Afrl.Cmasi.EntityState;                                        use Afrl.Cmasi.EntityState;
+with Afrl.Cmasi.EntityConfiguration;                                use Afrl.Cmasi.EntityConfiguration;
+with Afrl.Cmasi.EntityState.SPARK_Boundary;                         use Afrl.Cmasi.EntityState.SPARK_Boundary;
+with Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;                 use Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;
 
-with Uxas.Messages.Lmcptask.UniqueAutomationRequest; use Uxas.Messages.Lmcptask.UniqueAutomationRequest;
-with Uxas.Messages.Lmcptask.TaskPlanOptions; use Uxas.Messages.Lmcptask.TaskPlanOptions;
-with Uxas.Messages.Route.RoutePlan.SPARK_Boundary; use Uxas.Messages.Route.RoutePlan.SPARK_Boundary;
-with Uxas.Messages.Route.RoutePlanRequest; use Uxas.Messages.Route.RoutePlanRequest;
-with Uxas.Messages.Route.RoutePlanResponse; use Uxas.Messages.Route.RoutePlanResponse;
-with UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary; use UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary;
-with Uxas.Messages.Route.RouteRequest.SPARK_Boundary; use Uxas.Messages.Route.RouteRequest.SPARK_Boundary;
-with Uxas.Messages.Route.RouteRequest; use Uxas.Messages.Route.RouteRequest;
+with Uxas.Messages.Lmcptask.UniqueAutomationRequest;                use Uxas.Messages.Lmcptask.UniqueAutomationRequest;
+with Uxas.Messages.Lmcptask.TaskPlanOptions;                        use Uxas.Messages.Lmcptask.TaskPlanOptions;
+with Uxas.Messages.Route.RoutePlan.SPARK_Boundary;                  use Uxas.Messages.Route.RoutePlan.SPARK_Boundary;
+with Uxas.Messages.Route.RoutePlanRequest;                          use Uxas.Messages.Route.RoutePlanRequest;
+with Uxas.Messages.Route.RoutePlanResponse;                         use Uxas.Messages.Route.RoutePlanResponse;
+with UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary;          use UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary;
+with Uxas.Messages.Route.RouteRequest.SPARK_Boundary;               use Uxas.Messages.Route.RouteRequest.SPARK_Boundary;
+with Uxas.Messages.Route.RouteRequest;                              use Uxas.Messages.Route.RouteRequest;
 
 with UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary; use UxAS.Messages.Lmcptask.UniqueAutomationRequest.SPARK_Boundary;
-with UxAS.Messages.Lmcptask.TaskPlanOptions; use UxAS.Messages.Lmcptask.TaskPlanOptions;
-with UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary; use UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary;
+with UxAS.Messages.Lmcptask.TaskPlanOptions;                        use UxAS.Messages.Lmcptask.TaskPlanOptions;
+with UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary;         use UxAS.Messages.Lmcptask.TaskPlanOptions.SPARK_Boundary;
 
 with Ada.Containers.Formal_Hashed_Maps;
 with Ada.Containers.Formal_Doubly_Linked_Lists;
-with AFRL.CMASI.OperatingRegion.SPARK_Boundary; use AFRL.CMASI.OperatingRegion.SPARK_Boundary;
+with AFRL.CMASI.OperatingRegion.SPARK_Boundary;                     use AFRL.CMASI.OperatingRegion.SPARK_Boundary;
 with Afrl.Cmasi.LmcpTask.SPARK_Boundary;
-with Common_Formal_Containers; use Common_Formal_Containers;
+with Common_Formal_Containers;                                      use Common_Formal_Containers;
 
 
 
@@ -212,9 +212,6 @@ private
    subtype Route_Plan_Responses_Map is Int64_Route_Plan_Responses_Maps.Map
      (Route_Plan_Responses_Max_Capacity,
       Int64_Route_Plan_Responses_Maps.Default_Modulus (Route_Plan_Responses_Max_Capacity));
-
-
-
 
 
    package Int64_Pending_Route_Matrix is new Ada.Containers.Formal_Hashed_Maps
