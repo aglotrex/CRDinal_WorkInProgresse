@@ -1,5 +1,8 @@
 package body UxAS.Messages.Route.RoutePlan.SPARK_Boundary with SPARK_Mode => Off is
+   
 
+   procedure Lemmma_Equal_RoutePlan (X,Y : in My_RoutePlan) is null;
+   
    -------------------
    --  Set_RouteID  --
    -------------------
@@ -24,5 +27,7 @@ package body UxAS.Messages.Route.RoutePlan.SPARK_Boundary with SPARK_Mode => Off
    begin
       This.Content.SetRouteCost (RouteCost);
    end Set_RouteCost; 
+   
+
    
 end UxAS.Messages.Route.RoutePlan.SPARK_Boundary;

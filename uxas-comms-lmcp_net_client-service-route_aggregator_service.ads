@@ -157,10 +157,19 @@ private
      (Task_Plan_Options_Max_Capacity,
       Int64_Task_Plan_Options_Maps.Default_Modulus (Task_Plan_Options_Max_Capacity));
 
+
+
+
+
    type Pair_Int64_Route_Plan is record
       Reponse_ID : Int64;
       Returned_Route_Plan : My_RoutePlan;
    end record;
+
+--     overriding function "=" (X, Y : Pair_Int64_Route_Plan) return Boolean is
+--       (X.Reponse_ID = Y.Reponse_ID
+--        and X.Returned_Route_Plan = Y.Returned_Route_Plan) with
+--       Global => null;
 
    package Int64_Pair_Int64_Route_Plan_Maps is new Ada.Containers.Formal_Hashed_Maps
      (Key_Type     => Int64,
@@ -270,7 +279,7 @@ private
       --  int64_t m_routeRequestId{1};
       Route_Request_ID : Int64 := 1;
 
-       --  std::unordered_map<int64_t, std::shared_ptr<uxas::messages::route::RoutePlanResponse> > m_routePlanResponses;
+      --  std::unordered_map<int64_t, std::shared_ptr<uxas::messages::route::RoutePlanResponse> > m_routePlanResponses;
       Route_Plan_Responses : Route_Plan_Responses_Map;
 
       --                  Route_Request_ID        Route_Plan_Request_ID

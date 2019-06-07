@@ -17,6 +17,17 @@ package UxAS.Messages.Lmcptask.PlanningState.SPARK_Boundary with SPARK_Mode is
      (This : My_PlanningState) return Real32
      with Global => null;
    
+   function Same_Requests (X,Y : My_PlanningState) return Boolean is
+     (Get_EntityId (X) = Get_EntityId (Y)
+      and Get_PlanningPosition (X) = Get_PlanningPosition (Y)
+      and Get_PlanningHeading (X) = Get_PlanningHeading (Y))
+       with Global => null;
+   
+   overriding
+   function "=" (X,Y : My_PlanningState) return Boolean with
+     Global => null,
+     Post   => (if "="'Result then Same_Requests (X, Y));
+   
    function Unwrap (This : My_PlanningState) return PlanningState;
 
    function Wrap (This : PlanningState) return My_PlanningState;
@@ -26,6 +37,9 @@ private
    type My_PlanningState is record
       Content : PlanningState;
    end record;
+   
+    overriding function "=" (X, Y : My_PlanningState) return Boolean is
+     (X.Content = Y.Content);
    
    function Unwrap (This : My_PlanningState) return PlanningState is
      (This.Content);

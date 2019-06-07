@@ -175,7 +175,6 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       end if;
 
 
-
       -- // track states and configurations for assignment cost matrix calculation
       -- // [EntityStates] are used to calculate costs from current position to first task
       -- // [EntityConfigurations] are used for nominal speed values (all costs are in terms of time to arrive)
@@ -272,7 +271,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       -- if (uxas::messages::route::isRoutePlanResponse(receivedLmcpMessage->m_object.get()))
       if    Received_Message.Payload.all in RoutePlanResponse'Class           then
          This.Handle_Route_Plan_Response_Msg(Received_Message);
-         SPARK.Check_All_Route_Plans(This);
+        -- SPARK.Check_All_Route_Plans(This);
 
          --  else if (uxas::messages::route::isRouteRequest(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in RouteRequest'Class                then
@@ -307,17 +306,17 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          -- else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object.get())
       elsif Received_Message.Payload.all in UniqueAutomationRequest'Class     then
          This.Handle_Unique_Automation_Request_Msg(Received_Message);
-         SPARK.Check_All_Task_Option_Received(This => This);
+        -- SPARK.Check_All_Task_Option_Received(This => This);
 
          --  else if (afrl::impact::isImpactAutomationRequest(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in ImpactAutomationRequest'Class     then
          This.Handle_Impact_Automation_Request_Msg(Received_Message);
-         SPARK.Check_All_Task_Option_Received(This => This);
+         -- SPARK.Check_All_Task_Option_Received(This => This);
 
          -- else if (uxas::messages::task::isTaskPlanOptions(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in TaskPlanOptions'Class             then
          This.Handle_Task_Plan_Options_Msg(Received_Message);
-         SPARK.Check_All_Task_Option_Received(This => This);
+        -- SPARK.Check_All_Task_Option_Received(This => This);
 
       end if;
       Result := False;
@@ -335,9 +334,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       Route_Request : My_RouteRequest := Wrap( RouteRequest_Acc(RouteRequest_Any(Msg.Payload)).all);
 
    begin
-
-      Spark.Handle_Route_Request(This          => This,
-                                 Route_Request => Route_Request);
+      This.Entity_Id := ThiS.Entity_Id;
+     -- Spark.Handle_Route_Request(This          => This,
+       --                          Route_Request => Route_Request);
    end Handle_Route_Request_Msg;
 
 

@@ -24,7 +24,8 @@ package uxas.Messages.Route.RouteResponse.SPARK_Boundary with SPARK_Mode is
 
    function Get_ResponseID
      (This : My_RouteResponse) return Int64 with
-     Global => null;
+     Global => null,
+     Annotate => (GNATprove,Terminating);
 
    function Same_Requests (X, Y : My_RouteResponse) return Boolean is
      (Get_ResponseID (X) = Get_ResponseID (Y)
@@ -36,7 +37,8 @@ package uxas.Messages.Route.RouteResponse.SPARK_Boundary with SPARK_Mode is
 
    overriding function "=" (X, Y : My_RouteResponse) return Boolean with
      Global => null,
-     Post => (if "="'Result then Same_Requests (X, Y));
+     Post => (if "="'Result then Same_Requests (X, Y)),
+     Annotate => (GNATprove,Terminating);
 
    procedure Set_ResponseID
      (This : in out My_RouteResponse;
