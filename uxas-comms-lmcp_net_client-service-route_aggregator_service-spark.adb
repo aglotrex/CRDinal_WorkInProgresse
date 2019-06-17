@@ -1028,46 +1028,31 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             Line_Dist : Long_Float;
                      
             
-          --  Earth_Circumference_M : constant Int64 :=  40_075_000 with Ghost;
+            --  Earth_Circumference_M : constant Int64 :=  40_075_000 with Ghost;
             
              
                   
          begin
             Set_RouteID (Plan, Route_ID);
-                  
             -- flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getStartLocation()->getLatitude (), routeRequest->getStartLocation()->getLongitude (), north, east);
-            Convert_Lat_Long_DEG_To_North_East_M
-              (Latitude_DEG  => Long_Float (Get_Latitude  (Get_StartLocation(Route_Request))),
-               Longitude_DEG => Long_Float (Get_Longitude (Get_StartLocation(Route_Request))),
-               North_M       => Start_North,
-               East_M        => Start_East);
             -- Start_Point.set_X (Start_East);
             -- Start_Point.set_Y(Start_North);
-          --  pragma Assume( - Earth_Circumference_M <= Start_North and Start_North <= Earth_Circumference_M );
-           -- pragma Assume( - Earth_Circumference_M <= Start_East  and Start_East <= Earth_Circumference_M  );
-                  
+             
             -- flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getEndLocation()->getLatitude (), routeRequest->getEndLocation()->getLongitude (), north, east);
-            Convert_Lat_Long_DEG_To_North_East_M
-              (Latitude_DEG  => Long_Float (Get_Latitude  (Get_EndLocation(Route_Request))),
-               Longitude_DEG => Long_Float (Get_Longitude (Get_EndLocation(Route_Request))),
-               North_M       => End_North,
-               East_M        => End_East);
             -- End_Point.Set_X (End_East );
             -- End_Point.Set_Y(End_North);
-           -- pragma Assume( - Earth_Circumference_M <= End_North and End_North <= Earth_Circumference_M);
-           -- pragma Assume( - Earth_Circumference_M <= End_East  and End_East  <= Earth_Circumference_M);
-                             
-            -- -- double linedist = VisiLibity::distance (startPt, endPt);
-            -- Line_Dist := Distance (Start_Point , End_Point);
-             
-               
-            
+           
+            -- double linedist = VisiLibity::distance (startPt, endPt);
+           
+            Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG (Latitude_1_DEG    => Normalize_Angle_DEG (Get_Latitude  (Get_StartLocation(Route_Request))),
+                                                                    Longitude_1_DEG   => Normalize_Angle_DEG (Get_Longitude (Get_StartLocation(Route_Request))),
+                                                                    Latitude_2_DEG    => Normalize_Angle_DEG (Get_Latitude  (Get_EndLocation  (Route_Request))),
+                                                                    Longitude_2_DEG   => Normalize_Angle_DEG (Get_Longitude (Get_EndLocation  (Route_Request))),
+                                                                    Linear_Distance_M => Line_Dist);
+          
             pragma Assert ( Speed > 0.02);
             declare
-               Dist_Tmp : constant Int64 := ((End_North - Start_North)*(End_North - Start_North)) + ((End_East - Start_East)*(End_East - Start_East));
-
-               
-               Line_Dist : constant Int64 :=  Sqrt (Dist );
+              
                -- Line_Dist_Max : constant Int64 := 120_000_000 with Ghost; -- sqrt (12 848 045 000 000 000 ) = 113 349 217.0242035681614554
                -- Vitesse_Max : constant Int64 := 6_000_000_000_000 with Ghost; -- (Line_Dist_Max * 1 000) /0.02
                Vitesse : constant Int64 := Int64( (Line_Dist / Speed) * 1000.0);

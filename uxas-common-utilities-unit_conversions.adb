@@ -1,14 +1,14 @@
 with UxAS.Common.Utilities.Unit_Conversions; use UxAS.Common.Utilities.Unit_Conversions;
 with Ada.Numerics.Long_Elementary_Functions; use  Ada.Numerics.Long_Elementary_Functions;
-with Convert;                                use Convert;
+
 
 package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
 
-   procedure Initialize (Latitude_Init_RAD : in Long_Float;
-                         Longitude_Init_RAD : in Long_Float)
+   procedure Initialize (Latitude_Init_RAD  : in RAD_Latitude;
+                         Longitude_Init_RAD : in RAD_Angle)
    is
    begin
-      if B_Initilized then
+      if not B_Initilized then
 
          --  m_dLatitudeInitial_rad  = dLatitudeInit_rad;
          --  m_dLongitudeInitial_rad = dLongitudeInit_rad;
@@ -21,27 +21,40 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
 
             Sin_Sqrt_Latitude : constant Long_Float := Sin (Latitude_Init_RAD) * Sin (Latitude_Init_RAD);
 
-            Temp : constant Long_Float := 1.0 - Eccentricity_Squared * Sin_Sqrt_Latitude;
-            pragma Assert (0.5 < Temp and Temp <= 1.0);
+            Temp : constant Long_Float := 1.0 - (Eccentricity_Squared * Sin_Sqrt_Latitude);
+            pragma Assume (0.98 < Temp and Temp <= 1.0);
 
-            Denominator_Meridional : constant Long_Float := Temp**(3.0 / 2.0);
-            Denominator_Transverse : constant Long_Float := Temp**(0.5);
-            pragma Assume (Denominator_Meridional > 0.0);
-            pragma Assume (Denominator_Transverse > 0.0);
+            Denominator_Meridional : constant Long_Float := Temp**(3.0 / 2.0); -- 0.3535533905932738 <= Denominator_Meridional <= 1.0
+            Denominator_Transverse : constant Long_Float := Temp**(0.5);       -- 0.7071067811865475 <= Denominator_Transverse <= 1.0
+            pragma Assume (0.8  <= Denominator_Meridional and Denominator_Meridional <= 1.0);
+            pragma Assume (0.95 <= Denominator_Transverse and Denominator_Transverse <= 1.0);
+
+            Temp2 : constant Long_Float := Radius_Equatorial_M * (1.0 - Eccentricity_Squared);
+            pragma Assert (6300000.0 < Temp2 and Temp2 < 6350000.0);
 
          begin
             --  assert(dDenominatorMeridional > 0.0);
             --  assert(dDenominatorTransverse > 0.0);
 
             --  m_dRadiusMeridional_m = (dDenominatorMeridional <= 0.0) ? (0.0) : (m_dRadiusEquatorial_m * (1.0 - m_dEccentricitySquared) / dDenominatorMeridional);
-            Radius_Meridional_M := Radius_Equatorial_M * (1.0 - Eccentricity_Squared) / Denominator_Meridional;
+
+            pragma Assume (6300000.0 < Temp2 / Denominator_Meridional and Temp2 / Denominator_Meridional < 8000000.0);
+            Radius_Meridional_M := Temp2 / Denominator_Meridional;
 
             --  m_dRadiusTransverse_m = (dDenominatorTransverse <= 0.0) ? (0.0) : (m_dRadiusEquatorial_m / dDenominatorTransverse);
+
+             pragma Assume (6300000.0 < Radius_Equatorial_M / Denominator_Transverse and Radius_Equatorial_M / Denominator_Transverse < 6700000.0);
             Radius_Transverse_M := Radius_Equatorial_M / Denominator_Transverse;
 
+             pragma Assume (0.0 <= (Radius_Transverse_M * Cos (Latitude_Init_RAD)) and (Radius_Transverse_M * Cos (Latitude_Init_RAD)) < 6700000.0);
             --  m_dRadiusSmallCircleLatitude_m = m_dRadiusTransverse_m * cos(dLatitudeInit_rad);
-            Radius_Small_Circle_Latitude_M := (Radius_Transverse_M
-                                               * Cos (X => Latitude_Init_RAD));
+            -- minimized to 0.001 for overflow issue
+            if (Radius_Transverse_M * Cos (Latitude_Init_RAD)) < 0.001 then
+               Radius_Small_Circle_Latitude_M := 0.001;
+            else
+               Radius_Small_Circle_Latitude_M := (Radius_Transverse_M * Cos (Latitude_Init_RAD));
+            end if;
+
 
             B_Initilized := True;
          end;
@@ -49,8 +62,8 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
       end if;
    end Initialize;
 
-   procedure Re_Initialize (Latitude_Init_RAD  : in Long_Float;
-                            Longitude_Init_RAD : in Long_Float)
+   procedure Re_Initialize (Latitude_Init_RAD  : in RAD_Latitude;
+                            Longitude_Init_RAD : in RAD_Angle)
    is null;
    --  begin
 
@@ -67,10 +80,10 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
    --  ///////    FROM LAT/LONG TO NORTH/EAST
 
    procedure Convert_Lat_Long_RAD_To_North_East_M
-     (Latitude_RAD  : in Long_Float;
-      Longitude_RAD : in Long_Float;
-      North_M      : out Long_Float;
-      East_M       : out Long_Float)
+     (Latitude_RAD  : in RAD_Latitude;
+      Longitude_RAD : in RAD_Angle;
+      North_M      : out Earth_Coordonate_M;
+      East_M       : out Earth_Coordonate_M)
    is
    begin
 
@@ -79,21 +92,23 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
          Initialize (Latitude_RAD,Longitude_RAD);
       end if;
 
+
       --  dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
       --  dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
-      North_M := Radius_Meridional_M * (Latitude_RAD - Latitude_Initial_RAD);
-      East_M  := Radius_Small_Circle_Latitude_M * (Longitude_RAD - Longitude_Initial_RAD);
+      -- add Normalize for be sure it will not return inversed result
+      North_M := Radius_Meridional_M * Normalize_Angle_RAD (RAD_Angle (Latitude_RAD) - RAD_Angle (Latitude_Initial_RAD));
+      East_M  := Radius_Small_Circle_Latitude_M * Normalize_Angle_RAD (Longitude_RAD - Longitude_Initial_RAD);
 
    end Convert_Lat_Long_RAD_To_North_East_M;
 
    procedure Convert_Lat_Long_RAD_To_North_East_FT
-     (Latitude_RAD  : in Long_Float;
-      Longitude_RAD : in Long_Float;
-      North_FT     : out Long_Float;
-      East_FT      : out Long_Float)
+     (Latitude_RAD  : in RAD_Latitude;
+      Longitude_RAD : in RAD_Angle;
+      North_FT     : out Earth_Coordonate_FT;
+      East_FT      : out Earth_Coordonate_FT)
    is
-      North_M : Long_Float;
-      East_M  : Long_Float;
+      North_M : Earth_Coordonate_M;
+      East_M  : Earth_Coordonate_M;
    begin
 
       Convert_Lat_Long_RAD_To_North_East_M (Latitude_RAD  => Latitude_RAD,
@@ -101,23 +116,23 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
                                             North_M       => North_M,
                                             East_M        => East_M);
 
-      North_FT := North_M * Meters_To_Feet;
-      East_FT  := East_M  * Meters_To_Feet;
+      North_FT := To_FT_Coordonate (North_M);
+      East_FT  := To_FT_Coordonate (East_M );
 
    end Convert_Lat_Long_RAD_To_North_East_FT;
 
    procedure Convert_Lat_Long_DEG_To_North_East_M
      (
-      Latitude_DEG  : in Long_Float;
-      Longitude_DEG : in Long_Float;
-      North_M      : out Long_Float;
-      East_M       : out Long_Float)
+      Latitude_DEG  : in DEG_Latitude;
+      Longitude_DEG : in DEG_Angle;
+      North_M      : out Earth_Coordonate_M;
+      East_M       : out Earth_Coordonate_M)
    is
       --  double dLatitude_rad = dLatitude_deg * n_Const::c_Convert::dDegreesToRadians();
       --  double dLongitude_rad = dLongitude_deg * n_Const::c_Convert::dDegreesToRadians();
 
-      Latitude_RAD  : constant Long_Float := Latitude_DEG * Degrees_To_Radians;
-      Longitude_RAD : constant Long_Float := Longitude_DEG * Degrees_To_Radians;
+      Latitude_RAD  : constant RAD_Latitude := To_Radians (Latitude_DEG);
+      Longitude_RAD : constant RAD_Angle := To_Radians (Longitude_DEG);
    begin
       Convert_Lat_Long_RAD_To_North_East_M (Latitude_RAD  => Latitude_RAD,
                                             Longitude_RAD => Longitude_RAD,
@@ -127,26 +142,26 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
    end Convert_Lat_Long_DEG_To_North_East_M;
 
    procedure Convert_Lat_Long_DEG_To_North_East_FT
-     (Latitude_DEG  : in Long_Float;
-      Longitude_DEG : in Long_Float;
-      North_FT     : out Long_Float;
-      East_FT      : out Long_Float)
+     (Latitude_DEG  : in DEG_Latitude;
+      Longitude_DEG : in DEG_Angle;
+      North_FT     : out Earth_Coordonate_FT;
+      East_FT      : out Earth_Coordonate_FT)
    is
       --  double dLatitude_rad = dLatitude_deg * n_Const::c_Convert::dDegreesToRadians();
       --  double dLongitude_rad = dLongitude_deg * n_Const::c_Convert::dDegreesToRadians();
-      Latitude_RAD  : constant Long_Float := Latitude_DEG * Degrees_To_Radians;
-      Longitude_RAD : constant Long_Float := Longitude_DEG * Degrees_To_Radians;
+      Latitude_RAD  : constant RAD_Latitude := To_Radians (Latitude_DEG );
+      Longitude_RAD : constant RAD_Angle := To_Radians (Longitude_DEG);
 
-      North_M : Long_Float;
-      East_M  : Long_Float;
+      North_M : Earth_Coordonate_M;
+      East_M  : Earth_Coordonate_M;
    begin
       Convert_Lat_Long_RAD_To_North_East_M (Latitude_RAD  => Latitude_RAD,
                                             Longitude_RAD => Longitude_RAD,
                                             North_M       => North_M,
                                             East_M        => East_M);
 
-      North_FT := North_M * Meters_To_Feet;
-      East_FT  := East_M  * Meters_To_Feet;
+      North_FT := To_FT_Coordonate (North_M);
+      East_FT  := To_FT_Coordonate (East_M );
 
    end Convert_Lat_Long_DEG_To_North_East_FT;
 
@@ -154,41 +169,50 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
    --  ///////     FROM NORTH/EAST TO LAT/LONG
 
    procedure Convert_North_East_M_To_Lat_Long_RAD
-     (North_M       : in  Long_Float;
-      East_M        : in  Long_Float;
-      Latitude_RAD  : out Long_Float;
-      Longitude_RAD : out Long_Float)
+     (North_M       : in  Earth_Coordonate_M;
+      East_M        : in  Earth_Coordonate_M;
+      Latitude_RAD  : out RAD_Latitude;
+      Longitude_RAD : out RAD_Angle)
    is
+      Latitude_Angle : constant RAD_Angle := Normalize_Angle_RAD ((North_M / Radius_Meridional_M) + Latitude_Initial_RAD);
+
    begin
-      Latitude_RAD  := (North_M / Radius_Meridional_M) + Latitude_Initial_RAD;
-      Longitude_RAD := (East_M / Radius_Small_Circle_Latitude_M) + Longitude_Initial_RAD;
+      -- for being sure that the latitude is in the rigth borne
+      if Latitude_Angle > Pi_O2 then
+         Latitude_RAD  := Pi - Latitude_Angle;
+      elsif Latitude_Angle < - Pi_O2 then
+         Latitude_RAD := - Pi - Latitude_Angle;
+      else
+         Latitude_RAD := Latitude_Angle;
+      end if;
+      Longitude_RAD := Normalize_Angle_RAD ((East_M / Radius_Small_Circle_Latitude_M) + Longitude_Initial_RAD);
    end Convert_North_East_M_To_Lat_Long_RAD;
 
    procedure Convert_North_East_M_To_Lat_Long_DEG
-     (North_M       : in  Long_Float;
-      East_M        : in  Long_Float;
-      Latitude_DEG  : out Long_Float;
-      Longitude_DEG : out Long_Float)
+     (North_M       : in  Earth_Coordonate_M;
+      East_M        : in  Earth_Coordonate_M;
+      Latitude_DEG  : out DEG_Latitude;
+      Longitude_DEG : out DEG_Angle)
    is
-      Latitude_RAD  : Long_Float;
-      Longitude_RAD : Long_Float;
+      Latitude_RAD  : RAD_Latitude;
+      Longitude_RAD : RAD_Angle;
    begin
 
       Convert_North_East_M_To_Lat_Long_RAD (North_M, East_M,
                                             Latitude_RAD, Longitude_RAD);
 
-      Latitude_DEG  := Latitude_RAD  * Radians_To_Degrees;
-      Longitude_DEG := Longitude_RAD * Radians_To_Degrees;
+      Latitude_DEG  := Latitude_To_Degrees (Latitude_RAD);
+      Longitude_DEG := To_Degrees (Longitude_RAD);
    end  Convert_North_East_M_To_Lat_Long_DEG;
 
    procedure Convert_North_East_FT_To_Lat_Long_RAD
-     (North_FT      : in Long_Float;
-      East_FT       : in Long_Float;
-      Latitude_RAD  : out Long_Float;
-      Longitude_RAD : out Long_Float)
+     (North_FT      : in Earth_Coordonate_FT;
+      East_FT       : in Earth_Coordonate_FT;
+      Latitude_RAD  : out RAD_Latitude;
+      Longitude_RAD : out RAD_Angle)
    is
-      North_M : constant Long_Float := North_FT * Feet_To_Meters;
-      East_M  : constant Long_Float := East_FT  * Feet_To_Meters;
+      North_M : constant Earth_Coordonate_M := North_FT * Feet_To_Meters;
+      East_M  : constant Earth_Coordonate_M := East_FT  * Feet_To_Meters;
    begin
 
       Convert_North_East_M_To_Lat_Long_RAD (North_M, East_M,
@@ -196,38 +220,38 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
    end Convert_North_East_FT_To_Lat_Long_RAD;
 
    procedure Convert_North_East_FT_To_Lat_Long_DEG
-     (North_FT      : in  Long_Float;
-      East_FT       : in  Long_Float;
-      Latitude_DEG  : out Long_Float;
-      Longitude_DEG : out Long_Float)
+     (North_FT      : in  Earth_Coordonate_FT;
+      East_FT       : in  Earth_Coordonate_FT;
+      Latitude_DEG  : out DEG_Latitude;
+      Longitude_DEG : out DEG_Angle)
    is
-      North_M : constant Long_Float := North_FT * Feet_To_Meters;
-      East_M  : constant Long_Float := East_FT  * Feet_To_Meters;
-      Latitude_RAD  : Long_Float;
-      Longitude_RAD : Long_Float;
+      North_M : constant Earth_Coordonate_M := North_FT * Feet_To_Meters;
+      East_M  : constant Earth_Coordonate_M := East_FT  * Feet_To_Meters;
+      Latitude_RAD  : RAD_Latitude;
+      Longitude_RAD : RAD_Angle;
    begin
 
       Convert_North_East_M_To_Lat_Long_RAD (North_M, East_M,
                                             Latitude_RAD, Longitude_RAD);
 
-      Latitude_DEG  := Latitude_RAD  * Radians_To_Degrees;
-      Longitude_DEG := Longitude_RAD * Radians_To_Degrees;
+      Latitude_DEG  := Latitude_To_Degrees (Latitude_RAD);
+      Longitude_DEG := To_Degrees (Longitude_RAD);
    end Convert_North_East_FT_To_Lat_Long_DEG;
 
    --  ////////////////////////////////////////////////////////////////////////////
    --  ///////     LINEAR DISTANCES
 
    procedure Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD
-     (Latitude_1_RAD    : in  Long_Float;
-      Longitude_1_RAD   : in  Long_Float;
-      Latitude_2_RAD    : in  Long_Float;
-      Longitude_2_RAD   : in  Long_Float;
+     (Latitude_1_RAD    : in  RAD_Latitude;
+      Longitude_1_RAD   : in  RAD_Angle;
+      Latitude_2_RAD    : in  RAD_Latitude;
+      Longitude_2_RAD   : in  RAD_Angle;
       Linear_Distance_M : out Long_Float)
    is
-      North_1_M : Long_Float;
-      East_1_M  : Long_Float;
-      North_2_M : Long_Float;
-      East_2_M  : Long_Float;
+      North_1_M : Earth_Coordonate_M;
+      East_1_M  : Earth_Coordonate_M;
+      North_2_M : Earth_Coordonate_M;
+      East_2_M  : Earth_Coordonate_M;
 
    begin
       --  ConvertLatLong_radToNorthEast_m(dLatitude1_rad, dLongitude1_rad, dNorth1_m, dEast1_m);
@@ -237,29 +261,28 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
                                             East_1_M);
 
       --  ConvertLatLong_radToNorthEast_m(dLatitude2_rad, dLongitude2_rad, dNorth2_m, dEast2_m);
-      Convert_Lat_Long_RAD_To_North_East_M (
-                                            Latitude_2_RAD,
+      Convert_Lat_Long_RAD_To_North_East_M (Latitude_2_RAD,
                                             Longitude_2_RAD,
                                             North_2_M,
                                             East_2_M);
 
       --  double dReturn = std::pow((std::pow((dNorth2_m - dNorth1_m), 2.0) + std::pow((dEast2_m - dEast1_m), 2.0)), 0.5);
+      pragma Assert ((((Earth_Coordonate_M'Last*2.0)**2)*2.0) < Long_Float'Last);
       Linear_Distance_M := (Long_Float'((North_2_M - North_1_M) ** 2) + ((East_2_M * East_1_M) **2))**0.5;
 
    end Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD;
 
    procedure Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG
-     (Latitude_1_DEG    : in  Long_Float;
-      Longitude_1_DEG   : in  Long_Float;
-      Latitude_2_DEG    : in  Long_Float;
-      Longitude_2_DEG   : in  Long_Float;
+     (Latitude_1_DEG    : in  DEG_Latitude;
+      Longitude_1_DEG   : in  DEG_Angle;
+      Latitude_2_DEG    : in  DEG_Latitude;
+      Longitude_2_DEG   : in  DEG_Angle;
       Linear_Distance_M : out Long_Float)
    is
-      Latitude_1_RAD  : constant Long_Float := Latitude_1_DEG  * Degrees_To_Radians;
-      Longitude_1_RAD : constant Long_Float := Longitude_1_DEG * Degrees_To_Radians;
-      Latitude_2_RAD  : constant Long_Float := Latitude_2_DEG  * Degrees_To_Radians;
-      Longitude_2_RAD : constant Long_Float := Longitude_2_DEG * Degrees_To_Radians;
-
+      Latitude_1_RAD  : constant RAD_Latitude := To_Radians (Latitude_1_DEG );
+      Longitude_1_RAD : constant RAD_Angle    := To_Radians (Longitude_1_DEG);
+      Latitude_2_RAD  : constant RAD_Latitude := To_Radians (Latitude_2_DEG );
+      Longitude_2_RAD : constant RAD_Angle    := To_Radians (Longitude_2_DEG);
    begin
 
       Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD (Latitude_1_RAD    => Latitude_1_RAD,

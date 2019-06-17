@@ -3,6 +3,15 @@ package body Convert with SPARK_Mode is
      (Saturate(Radians * Radians_To_Degrees,
                DEG_Angle'First,
                DEG_Angle'Last));
+   function To_M_Coordonate ( FT_Coordonate : Earth_Coordonate_FT) return Earth_Coordonate_M is
+     (Saturate(FT_Coordonate * Feet_To_Meters,
+               Earth_Coordonate_M'First,
+               Earth_Coordonate_M'Last));
+ 
+   function Latitude_To_Degrees (Radians : RAD_Latitude) return DEG_Latitude is 
+     (Saturate(Radians * Radians_To_Degrees,
+               DEG_Latitude'First,
+               DEG_Latitude'Last));
    
    procedure Divide
      (Dividend : in Dividend_Float;
@@ -20,7 +29,6 @@ package body Convert with SPARK_Mode is
       pragma Assert(Divisor >= 1.0);
       pragma Assert(Dividend_Float'First / Divisor in Dividend_Float'First .. 0.0 );
       pragma Assert(Dividend_Float'Last  / Divisor in 0.0 .. Dividend_Float'Last );
-      pragma Assert(Dividend'Valid);
       pragma Assert(Dividend / Divisor in Dividend_Float'First .. Dividend_Float'Last);
       Quot   := Dividend_Float'Floor (Dividend / Divisor);
       Modulo := Saturate (Value => Dividend - Divisor * Quot,
@@ -50,7 +58,6 @@ package body Convert with SPARK_Mode is
       pragma Assert(Divisor >= 1.0);
       pragma Assert(Dividend_Long_Float'First / Divisor in Dividend_Long_Float'First .. 0.0 );
       pragma Assert(Dividend_Long_Float'Last  / Divisor in 0.0 .. Dividend_Long_Float'Last );
-      pragma Assert(Dividend'Valid);
       pragma Assert(Dividend / Divisor in Dividend_Long_Float'First .. Dividend_Long_Float'Last);
       Quot   := Dividend_Long_Float'Floor (Dividend / Divisor);
       Modulo := Saturate (Value => Dividend - Divisor * Quot,
