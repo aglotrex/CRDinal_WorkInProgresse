@@ -112,7 +112,7 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
    
    subtype Meridional_Radius_Unit   is Long_Float range 6300000.0 .. 8000000.0;
    subtype Transverse_Radius_Unit   is Long_Float range 6300000.0 .. 7090000.0;
-   subtype Small_Circle_Radius_Unit is Long_Float range 0.001       .. 7090000.0;
+   subtype Small_Circle_Radius_Unit is Long_Float range 0.001     .. 7090000.0;
 
    Latitude_Initial_RAD           : RAD_Latitude     := 0.0;   --  double CUnitConversions::m_dLatitudeInitial_rad{0.0};
    Longitude_Initial_RAD          : RAD_Angle        := 0.0;   --  double CUnitConversions::m_dLongitudeInitial_rad{0.0};

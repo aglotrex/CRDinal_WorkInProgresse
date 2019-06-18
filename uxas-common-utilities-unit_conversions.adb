@@ -96,7 +96,10 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
       --  dNorth_m = m_dRadiusMeridional_m * (dLatitude_rad - m_dLatitudeInitial_rad);
       --  dEast_m = m_dRadiusSmallCircleLatitude_m * (dLongitude_rad - m_dLongitudeInitial_rad);
       -- add Normalize for be sure it will not return inversed result
+      pragma Assert (RAD_Angle (Latitude_RAD) - RAD_Angle (Latitude_Initial_RAD) in Dividend_Long_Float'Range);
       North_M := Radius_Meridional_M * Normalize_Angle_RAD (RAD_Angle (Latitude_RAD) - RAD_Angle (Latitude_Initial_RAD));
+      pragma Assert ((Longitude_RAD - Longitude_Initial_RAD) <=  RAD_Angle'Last  - RAD_Angle'First);
+      pragma Assert ((Longitude_RAD - Longitude_Initial_RAD) >=  RAD_Angle'First - RAD_Angle'Last);
       East_M  := Radius_Small_Circle_Latitude_M * Normalize_Angle_RAD (Longitude_RAD - Longitude_Initial_RAD);
 
    end Convert_Lat_Long_RAD_To_North_East_M;
@@ -185,6 +188,7 @@ package body UxAS.Common.Utilities.Unit_Conversions with SPARK_Mode => On is
       else
          Latitude_RAD := Latitude_Angle;
       end if;
+      pragma Assert ((East_M / Radius_Small_Circle_Latitude_M) + Longitude_Initial_RAD in Dividend_Long_Float'Range  );
       Longitude_RAD := Normalize_Angle_RAD ((East_M / Radius_Small_Circle_Latitude_M) + Longitude_Initial_RAD);
    end Convert_North_East_M_To_Lat_Long_RAD;
 
