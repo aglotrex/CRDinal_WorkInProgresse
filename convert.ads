@@ -51,7 +51,7 @@ package Convert with SPARK_Mode is
 
    subtype RAD_Angle is Long_Float range -Two_Pi .. Two_Pi;
    subtype DEG_Angle is Long_Float range -360.00 .. 360.00;
-   subtype RAD_Angle_Float is Float range -Float(Two_Pi) .. Float(Two_Pi);
+   subtype RAD_Angle_Float is Float range -Float (Two_Pi) .. Float (Two_Pi);
    subtype DEG_Angle_Float is Float range -360.00 .. 360.00;
 
    --  /*! \brief Convert From Degrees To Radians  */
@@ -59,27 +59,25 @@ package Convert with SPARK_Mode is
 
    --  /*! \brief Convert From Radians To Degrees  */
    function To_Degrees (Radians : RAD_Angle) return DEG_Angle;
-   
+
    Earth_Circonference_M  : constant Long_Float := 40080000.0;
    Earth_Circonference_FT : constant Long_Float := Earth_Circonference_M * Feet_To_Meters;
-   subtype Earth_Coordonate_M  is Long_Float range  - Earth_Circonference_M  .. Earth_Circonference_M;
-   subtype Earth_Coordonate_FT is Long_Float range  - Earth_Circonference_FT .. Earth_Circonference_FT;
-   
-   subtype RAD_Latitude is RAD_Angle range - Pi_O2 .. Pi_O2;
-   subtype DEG_Latitude is DEG_Angle range - 90.0  .. 90.0;
-   
-  
-                                                                                            
-   
+   subtype Earth_Coordonate_M  is Long_Float range  -Earth_Circonference_M  .. Earth_Circonference_M;
+   subtype Earth_Coordonate_FT is Long_Float range  -Earth_Circonference_FT .. Earth_Circonference_FT;
+
+   subtype RAD_Latitude is RAD_Angle range -Pi_O2 .. Pi_O2;
+   subtype DEG_Latitude is DEG_Angle range -90.0  .. 90.0;
+
+   subtype Linear_Distance_M is Long_Float range 0.0 .. 120_000_000.0;
+
    function Latitude_To_Radians (Degrees : DEG_Latitude) return RAD_Latitude is (Degrees * Degrees_To_Radians);
-   
+
    function Latitude_To_Degrees (Radians : RAD_Latitude) return DEG_Latitude;
-   
-   function To_Ft_Coordonate ( M_Coordonate : Earth_Coordonate_M)  return Earth_Coordonate_FT is
+
+   function To_Ft_Coordonate (M_Coordonate : Earth_Coordonate_M)  return Earth_Coordonate_FT is
      (M_Coordonate * Feet_To_Meters);
-   function To_M_Coordonate ( FT_Coordonate : Earth_Coordonate_FT) return Earth_Coordonate_M;
- 
-   
+   function To_M_Coordonate (FT_Coordonate : Earth_Coordonate_FT) return Earth_Coordonate_M;
+
    type En_Relational_Operators is (EnGreater,
                                     EnGreaterEqual,
                                     EnLess,
@@ -98,7 +96,7 @@ package Convert with SPARK_Mode is
                      Epsilon      : Float := (10.0**(-9))) return Boolean;
 
    function IRound (Number : Long_Float) return Integer
-   is (Integer (Number+0.5))
+   is (Integer (Number + 0.5))
      with Pre => Number in Long_Float'First + 100.0 .. Long_Float'Last - 100.0;
 
    --
@@ -116,28 +114,27 @@ package Convert with SPARK_Mode is
    --
    --     -- Static Void VRound(Double& RdNumber,Const Double DDecimalPlace)
    --     procedure VRound(Number : in out Long_Float; Decimel_Place : in Long_Float);
-   
+
    Dividend_Max : constant := 100_000_000_000.0;
    subtype Dividend_Long_Float is Long_Float range -Dividend_Max .. Dividend_Max;
    subtype Dividend_FLoat is Float range -Dividend_Max .. Dividend_Max;
    Divisor_Max : constant := 500.0;
    subtype Divisor_Long_Float is Long_Float range 1.0 .. Divisor_Max;
    subtype Divisor_Float is Float range 1.0 .. Divisor_Max;
-   
+
    function Normalize_Angle (Angle           : Dividend_Long_Float;
                              Angle_Reference : Long_Float;
                              Full_Turn_Unit  : Divisor_Long_Float) return Long_Float with
      Pre => Angle_Reference in  -Full_Turn_Unit .. 0.0,
      Post => Angle_Reference <= Normalize_Angle'Result
      and Normalize_Angle'Result < Angle_Reference + Full_Turn_Unit;
-   
-   function Normalize_Angle (Angle           : Dividend_Float;
+
+   function Normalize_Angle (Angle           : Dividend_FLoat;
                              Angle_Reference : Float;
                              Full_Turn_Unit  : Divisor_Float) return Float with
      Pre => Angle_Reference in  -Full_Turn_Unit .. 0.0,
      Post => Angle_Reference <= Normalize_Angle'Result
      and Normalize_Angle'Result < Angle_Reference + Full_Turn_Unit;
-   
 
    function Normalize_Angle_RAD (Angle_RAD       : Dividend_Long_Float;
                                  Angle_Reference : RAD_Angle := -Pi) return RAD_Angle
@@ -156,10 +153,10 @@ package Convert with SPARK_Mode is
                         Angle_Reference => Angle_Reference,
                         Full_Turn_Unit => Divisor_Float (Two_Pi)))
      with
-       Pre =>  Angle_Reference in -Divisor_Float(Two_Pi) .. 0.0,
+       Pre =>  Angle_Reference in -Divisor_Float (Two_Pi) .. 0.0,
 
      Post =>  Angle_Reference <= Normalize_Angle_RAD'Result
-     and Normalize_Angle_RAD'Result < Angle_Reference + Divisor_Float(Two_Pi);
+     and Normalize_Angle_RAD'Result < Angle_Reference + Divisor_Float (Two_Pi);
 
    function Normalize_Angle_DEG (Angle_DEG       : Dividend_Long_Float;
                                  Angle_Reference : DEG_Angle := -180.0) return DEG_Angle
@@ -181,12 +178,12 @@ package Convert with SPARK_Mode is
 
        Post =>  Angle_Reference <= Normalize_Angle_DEG'Result
        and Normalize_Angle_DEG'Result < Angle_Reference + 360.0;
-   
-    function RAD_Angle_To_Latitude_Projection (Radian : RAD_Angle) return RAD_Latitude is 
+
+   function RAD_Angle_To_Latitude_Projection (Radian : RAD_Angle) return RAD_Latitude is
      (if    Normalize_Angle_RAD (Radian) >  Pi_O2 then ( Pi - Normalize_Angle_RAD (Radian))
       elsif Normalize_Angle_RAD (Radian) < -Pi_O2 then (-Pi - Normalize_Angle_RAD (Radian))
       else  Normalize_Angle_RAD (Radian));
-   function DEG_Angle_To_Latitude_Projection (Degrees : DEG_Angle) return DEG_Latitude is 
+   function DEG_Angle_To_Latitude_Projection (Degrees : DEG_Angle) return DEG_Latitude is
      (if    Normalize_Angle_DEG (Degrees) >  90.0 then ( 180.0 - Normalize_Angle_DEG (Degrees))
       elsif Normalize_Angle_DEG (Degrees) < -90.0 then (-180.0 - Normalize_Angle_DEG (Degrees))
       else  Normalize_Angle_DEG (Degrees));
@@ -201,8 +198,6 @@ private
       elsif Value > Max then Max
       else Value);
 
- 
-   
    procedure Divide
      (Dividend : Dividend_Long_Float;
       Divisor  : Divisor_Long_Float;
@@ -217,8 +212,5 @@ private
       Modulo   : out Float)
      with
        Post => 0.0 <= Modulo and Modulo < Divisor;
-   
-  
-  
 
 end Convert;

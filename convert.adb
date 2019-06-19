@@ -1,50 +1,50 @@
 package body Convert with SPARK_Mode is
-   function To_Degrees (Radians : RAD_Angle) return DEG_Angle is 
-     (Saturate(Radians * Radians_To_Degrees,
+   function To_Degrees (Radians : RAD_Angle) return DEG_Angle is
+     (Saturate (Radians * Radians_To_Degrees,
                DEG_Angle'First,
                DEG_Angle'Last));
-   function To_M_Coordonate ( FT_Coordonate : Earth_Coordonate_FT) return Earth_Coordonate_M is
-     (Saturate(FT_Coordonate * Feet_To_Meters,
+   function To_M_Coordonate (FT_Coordonate : Earth_Coordonate_FT) return Earth_Coordonate_M is
+     (Saturate (FT_Coordonate * Feet_To_Meters,
                Earth_Coordonate_M'First,
                Earth_Coordonate_M'Last));
- 
-   function Latitude_To_Degrees (Radians : RAD_Latitude) return DEG_Latitude is 
-     (Saturate(Radians * Radians_To_Degrees,
+
+   function Latitude_To_Degrees (Radians : RAD_Latitude) return DEG_Latitude is
+     (Saturate (Radians * Radians_To_Degrees,
                DEG_Latitude'First,
                DEG_Latitude'Last));
-   
+
    procedure Divide
-     (Dividend : in Dividend_Float;
-      Divisor  : in Divisor_Float;
+     (Dividend : Dividend_FLoat;
+      Divisor  : Divisor_Float;
       Quotient : out Float;
       Modulo   : out Float)
    is
-      Quot : Dividend_Float;
+      Quot : Dividend_FLoat;
    begin
       if 0.0 <=  Dividend and Dividend < Divisor then
          Quotient := 0.0;
          Modulo := Dividend;
          return;
       end if;
-      pragma Assert(Divisor >= 1.0);
-      pragma Assert(Dividend_Float'First / Divisor in Dividend_Float'First .. 0.0 );
-      pragma Assert(Dividend_Float'Last  / Divisor in 0.0 .. Dividend_Float'Last );
-      pragma Assert(Dividend / Divisor in Dividend_Float'First .. Dividend_Float'Last);
-      Quot   := Dividend_Float'Floor (Dividend / Divisor);
+      pragma Assert (Divisor >= 1.0);
+      pragma Assert (Dividend_FLoat'First / Divisor in Dividend_FLoat'First .. 0.0);
+      pragma Assert (Dividend_FLoat'Last  / Divisor in 0.0 .. Dividend_FLoat'Last);
+      pragma Assert (Dividend / Divisor in Dividend_FLoat'First .. Dividend_FLoat'Last);
+      Quot   := Dividend_FLoat'Floor (Dividend / Divisor);
       Modulo := Saturate (Value => Dividend - Divisor * Quot,
                           Min   => 0.0,
                           Max   => Divisor);
       Quotient := Quot;
       if Modulo = Divisor then
-        
+
          Quotient   := Quotient + 1.0;
          Modulo := 0.0;
       end if;
    end Divide;
-   
+
    procedure Divide
-     (Dividend : in Dividend_Long_Float;
-      Divisor  : in Divisor_Long_Float;
+     (Dividend : Dividend_Long_Float;
+      Divisor  : Divisor_Long_Float;
       Quotient : out Long_Float;
       Modulo   : out Long_Float)
    is
@@ -55,22 +55,21 @@ package body Convert with SPARK_Mode is
          Modulo := Dividend;
          return;
       end if;
-      pragma Assert(Divisor >= 1.0);
-      pragma Assert(Dividend_Long_Float'First / Divisor in Dividend_Long_Float'First .. 0.0 );
-      pragma Assert(Dividend_Long_Float'Last  / Divisor in 0.0 .. Dividend_Long_Float'Last );
-      pragma Assert(Dividend / Divisor in Dividend_Long_Float'First .. Dividend_Long_Float'Last);
+      pragma Assert (Divisor >= 1.0);
+      pragma Assert (Dividend_Long_Float'First / Divisor in Dividend_Long_Float'First .. 0.0);
+      pragma Assert (Dividend_Long_Float'Last  / Divisor in 0.0 .. Dividend_Long_Float'Last);
+      pragma Assert (Dividend / Divisor in Dividend_Long_Float'First .. Dividend_Long_Float'Last);
       Quot   := Dividend_Long_Float'Floor (Dividend / Divisor);
       Modulo := Saturate (Value => Dividend - Divisor * Quot,
                           Min   => 0.0,
                           Max   => Divisor);
       Quotient := Quot;
       if Modulo = Divisor then
-        
+
          Quotient   := Quotient + 1.0;
          Modulo := 0.0;
       end if;
 
-     
    end Divide;
 
    function Compare (Argument1    : Long_Float;
@@ -147,7 +146,7 @@ package body Convert with SPARK_Mode is
               Divisor  => Full_Turn_Unit,
               Quotient => N,
               Modulo   => Mod_Angle);
-      pragma Assert(0.0 <= Mod_Angle and Mod_Angle < Full_Turn_Unit);
+      pragma Assert (0.0 <= Mod_Angle and Mod_Angle < Full_Turn_Unit);
 
       --  assert( dAngleReference <= 0.0 && dAngleReference >= /Full_Turn/ );
       --  if( bCompareDouble(dModAngle, dAngleReference, enLess) )
@@ -170,17 +169,16 @@ package body Convert with SPARK_Mode is
       else
          Result := Mod_Angle;
          pragma Assert (Angle_Reference  > Result - Full_Turn_Unit);
-         pragma Assert (0.0 <= Result );
+         pragma Assert (0.0 <= Result);
 
       end if;
-
 
       Result :=  Saturate (Result, Angle_Reference, Angle_Reference +  Full_Turn_Unit);
       Result := (if Result = Angle_Reference + Full_Turn_Unit then Angle_Reference else Result);
 
       return Result;
    end Normalize_Angle;
-   function Normalize_Angle (Angle           : Dividend_Float;
+   function Normalize_Angle (Angle           : Dividend_FLoat;
                              Angle_Reference : Float;
                              Full_Turn_Unit  : Divisor_Float) return Float is
       --  Full_Turn_Unit : Long_Float := Two_Pi;
@@ -194,7 +192,7 @@ package body Convert with SPARK_Mode is
               Divisor  => Full_Turn_Unit,
               Quotient => N,
               Modulo   => Mod_Angle);
-      pragma Assert(0.0 <= Mod_Angle and Mod_Angle < Full_Turn_Unit);
+      pragma Assert (0.0 <= Mod_Angle and Mod_Angle < Full_Turn_Unit);
 
       --  assert( dAngleReference <= 0.0 && dAngleReference >= /Full_Turn/ );
       --  if( bCompareDouble(dModAngle, dAngleReference, enLess) )
@@ -217,10 +215,9 @@ package body Convert with SPARK_Mode is
       else
          Result := Mod_Angle;
          pragma Assert (Angle_Reference  > Result - Full_Turn_Unit);
-         pragma Assert (0.0 <= Result );
+         pragma Assert (0.0 <= Result);
 
       end if;
-
 
       Result :=  Saturate (Result, Angle_Reference, Angle_Reference +  Full_Turn_Unit);
       Result := (if Result = Angle_Reference + Full_Turn_Unit then Angle_Reference else Result);

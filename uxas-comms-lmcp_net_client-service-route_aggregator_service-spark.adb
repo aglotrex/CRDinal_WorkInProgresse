@@ -35,7 +35,7 @@ with Afrl.Cmasi.Location3D.Spark_Boundary;                       use Afrl.Cmasi.
 with Afrl.Cmasi.ServiceStatus.SPARK_Boundary;                    use Afrl.Cmasi.ServiceStatus.SPARK_Boundary;
 use  Afrl.Cmasi.AutomationRequest.Vect_Int64;
 
-
+with Convert;   
 
 
 
@@ -898,7 +898,6 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       declare
          RoutePlanResponses_Holder : constant Route_Plan_Responses_Holder := Route_Plan_Responses_Holder'(Content => Response);
          This_Route_Plan_Responses_Old : constant Route_Plan_Responses_Map:= This.Route_Plan_Responses with Ghost;
-         use Int64_Route_Plan_Responses_Maps.Formal_Model;
       begin
          
          pragma Assert (if All_Requests_Valid (This) then
@@ -1017,21 +1016,18 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                   
             -- Start_Point : Visibility.Point;
             -- End_Point : Visibility.Point;
-            Start_North  : Long_Float;
-            Start_East   : Long_Float;
-            End_North    : Long_Float;
-            End_East     : Long_Float;
                   
             -- uxas::messages::route::RoutePlan* plan = new uxas::messages::route::RoutePlan;
             Plan : My_RoutePlan;
                   
-            Line_Dist : Long_Float;
                      
             
             --  Earth_Circumference_M : constant Int64 :=  40_075_000 with Ghost;
             
-             
-                  
+            use Convert;
+            
+            
+            Line_Dist : Linear_Distance_M;
          begin
             Set_RouteID (Plan, Route_ID);
             -- flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getStartLocation()->getLatitude (), routeRequest->getStartLocation()->getLongitude (), north, east);
@@ -1044,18 +1040,31 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
            
             -- double linedist = VisiLibity::distance (startPt, endPt);
            
-            Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG (Latitude_1_DEG    => Normalize_Angle_DEG (Get_Latitude  (Get_StartLocation(Route_Request))),
-                                                                    Longitude_1_DEG   => Normalize_Angle_DEG (Get_Longitude (Get_StartLocation(Route_Request))),
-                                                                    Latitude_2_DEG    => Normalize_Angle_DEG (Get_Latitude  (Get_EndLocation  (Route_Request))),
-                                                                    Longitude_2_DEG   => Normalize_Angle_DEG (Get_Longitude (Get_EndLocation  (Route_Request))),
-                                                                    Linear_Distance_M => Line_Dist);
+            Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG (Latitude_1_DEG  => DEG_Angle_To_Latitude_Projection (Normalize_Angle_DEG (Long_Float (Get_Latitude  (Get_StartLocation(Route_Request))))),
+                                                                    Longitude_1_DEG => Normalize_Angle_DEG (Long_Float  (Get_Longitude (Get_StartLocation(Route_Request)))),
+                                                                    Latitude_2_DEG  => DEG_Angle_To_Latitude_Projection (Normalize_Angle_DEG (Long_Float (Get_Latitude  (Get_EndLocation  (Route_Request))))),
+                                                                    Longitude_2_DEG => Normalize_Angle_DEG (Long_Float  (Get_Longitude (Get_EndLocation  (Route_Request)))),
+                                                                    Linear_Distance => Line_Dist);
           
             pragma Assert ( Speed > 0.02);
             declare
               
                -- Line_Dist_Max : constant Int64 := 120_000_000 with Ghost; -- sqrt (12 848 045 000 000 000 ) = 113 349 217.0242035681614554
                -- Vitesse_Max : constant Int64 := 6_000_000_000_000 with Ghost; -- (Line_Dist_Max * 1 000) /0.02
-               Vitesse : constant Int64 := Int64( (Line_Dist / Speed) * 1000.0);
+               pragma Assert ((Line_Dist / Speed) * 1000.0 in 0.0 .. 6_000_000_000_000.0);
+               pragma Assert (Int64 (6_000_000_000_000.0) in Int64'Range);
+               pragma Assert (Long_Float (Int64'First) < (Line_Dist / Speed) * 1000.0);
+               pragma Assert (Long_Float (Int64'Last)  > (Line_Dist / Speed) * 1000.0);
+               
+               pragma Assert (Int64'First < Int64 ((Line_Dist / Speed) * 1000.0));
+               pragma Assert (Int64'Last  > Int64 ((Line_Dist / Speed) * 1000.0));
+               
+               pragma Assert (if (Line_Dist / Speed) * 1000.0 in 0.0 .. 6_000_000_000_000.0
+                              and Int64 (6_000_000_000_000.0) in Int64'Range
+                              and Int64 (0.0) in Int64'Range then
+                                  Int64 ((Line_Dist / Speed) * 1000.0) in Int64'Range);
+               pragma Assume (Int64 ((Line_Dist / Speed) * 1000.0) in Int64'Range);
+               Vitesse : constant Int64 := Int64 ((Line_Dist / Speed) * 1000.0);
             begin
                   
                Set_RouteCost (Plan, Vitesse);
@@ -1075,7 +1084,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                pragma Assert (Contains (This.Pending_Route,        Route_Plan_Pair.Reponse_ID));
                pragma Assert (Contains (This.Route_Plan_Responses, Route_Plan_Pair.Reponse_ID));
       
-               pragma Assert (Check_Route_Plan (LlThis.Route_Plan, This.Pending_Route, This.Route_Plan_Responses));   
+               pragma Assert (Check_Route_Plan (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses));   
                pragma Assert (for all C in This.Route_Plan 
                               => Get_RouteID ( Element (This.Route_Plan, C).Returned_Route_Plan) = Key ( THis.Route_Plan, C)
                               and Contains (This.Pending_Route,        Element (This.Route_Plan, C).Reponse_ID)
