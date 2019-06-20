@@ -66,7 +66,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
      Pre => Radius_Meridional_M > 0.0
      and  Radius_Small_Circle_Latitude_M > 0.0;
 
-   --  void ConvertNorthEast_ftToLatLong_deg(const Long_float& dNorth_ft, const Long_float& dEast_ft, Long_float& dLatitude_deg, Long_float& dLongitude_deg);
+   --  void ConvertNorthEast_ftToLatLong_deg(const Long_float& dNorth_ft, const Long_float& dEast_ft,
+   --                                        Long_float& dLatitude_deg, Long_float& dLongitude_deg);
    procedure Convert_North_East_FT_To_Lat_Long_RAD
      (North_FT      : Earth_Coordonate_FT;
       East_FT       : Earth_Coordonate_FT;
@@ -80,7 +81,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
    --  ////////////////////////////////////////////////////////////////////////////
    --  ///////     LINEAR DISTANCES
 
-   --  Long_float dGetLinearDistance_m_Lat1Long1_RAD_To_Lat2Long2_rad(const Long_float& dLatitude1_rad, const Long_float& dLongitude1_rad, const Long_float& dLatitude2_rad, const Long_float& dLongitude2_rad);
+   --  Long_float dGetLinearDistance_m_Lat1Long1_RAD_To_Lat2Long2_rad(const Long_float& dLatitude1_rad, const Long_float& dLongitude1_rad,
+   --                                                                 Const Long_float& dLatitude2_rad, const Long_float& dLongitude2_rad);
    procedure Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD
      (Latitude_1_RAD  : RAD_Latitude;
       Longitude_1_RAD : RAD_Angle;
@@ -88,7 +90,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       Longitude_2_RAD : RAD_Angle;
       Linear_Distance : out Linear_Distance_M);
 
-   --  Long_float dGetLinearDistance_m_Lat1Long1_deg_To_Lat2Long2_deg(const Long_float& dLatitude1_deg, const Long_float& dLongitude1_deg, const Long_float& dLatitude2_deg, const Long_float& dLongitude2_deg);
+   --  Long_float dGetLinearDistance_m_Lat1Long1_deg_To_Lat2Long2_deg(const Long_float& dLatitude1_deg, const Long_float& dLongitude1_deg,
+   --                                                                 const Long_float& dLatitude2_deg, const Long_float& dLongitude2_deg);
    procedure Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG
      (Latitude_1_DEG  : DEG_Latitude;
       Longitude_1_DEG : DEG_Angle;

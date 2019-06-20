@@ -286,7 +286,10 @@ private
       --  std::unordered_map<int64_t, std::unordered_set<int64_t> > m_pendingRoute;
       Pending_Route : Pending_Route_Matrix;
    end record;
-
+--
+--      procedure XML_Write (this  : Route_Aggregator_Service;
+--                          S     : access Ada.Streams.Root_Stream_Type'Class;
+--                          Level : Natural)
 
 
 end UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;

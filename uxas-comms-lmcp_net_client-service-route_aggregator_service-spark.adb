@@ -35,25 +35,21 @@ with Afrl.Cmasi.Location3D.Spark_Boundary;                       use Afrl.Cmasi.
 with Afrl.Cmasi.ServiceStatus.SPARK_Boundary;                    use Afrl.Cmasi.ServiceStatus.SPARK_Boundary;
 use  Afrl.Cmasi.AutomationRequest.Vect_Int64;
 
-with Convert;   
+with Convert;
 
+package body uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
 
+   procedure Lemma_Check_Same_Entity_State_Identity (This : Entity_State_Map) is null;
+   procedure Lemma_Check_Same_Entity_State_Commutativity (X, Y : Entity_State_Map) is null;
+   procedure Lemma_Check_Same_Entity_State_Associativity (X, Y, Z : Entity_State_Map) is null;
 
-
-package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
-   
-   
-   procedure Lemma_Check_Same_Entity_State_Identity (This : in Entity_State_Map ) is null;
-   procedure Lemma_Check_Same_Entity_State_Commutativity (X, Y : in Entity_State_Map ) is null;
-   procedure Lemma_Check_Same_Entity_State_Associativity (X, Y, Z : in Entity_State_Map ) is null;
-   
-   procedure Lemma_Same_Route_Aggregator_Identity (This : in Route_Aggregator_Service ) is null;   
-   procedure Lemma_Same_Route_Aggregator_Validity (X, Y : in Route_Aggregator_Service ) is null;
-   procedure Lemma_Same_Route_Aggregator_Commutativity (X, Y    : in Route_Aggregator_Service ) is null;
-   procedure Lemma_Same_Route_Aggregator_Associativity (X, Y, Z : in Route_Aggregator_Service ) is null;
-   procedure Lemma_Ceck_Route_Plan_Reference_Insert ( Route_Plan : in Pair_Int64_Route_Plan_Map;
-                                                      Old_Pending_Route, New_Pending_Route : in Pending_Route_Matrix;
-                                                      Old_Route_Plan_Rep, New_Route_Plan_Rep : in Route_Plan_Responses_Map) 
+   procedure Lemma_Same_Route_Aggregator_Identity (This : Route_Aggregator_Service) is null;   
+   procedure Lemma_Same_Route_Aggregator_Validity (X, Y : Route_Aggregator_Service) is null;
+   procedure Lemma_Same_Route_Aggregator_Commutativity (X, Y    : Route_Aggregator_Service) is null;
+   procedure Lemma_Same_Route_Aggregator_Associativity (X, Y, Z : Route_Aggregator_Service) is null;
+   procedure Lemma_Ceck_Route_Plan_Reference_Insert (Route_Plan : Pair_Int64_Route_Plan_Map;
+                                                      Old_Pending_Route, New_Pending_Route : Pending_Route_Matrix;
+                                                      Old_Route_Plan_Rep, New_Route_Plan_Rep : Route_Plan_Responses_Map)
    is
    begin
       pragma Assert (for all Cursor in Route_Plan
@@ -62,26 +58,21 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                      and Contains (New_Route_Plan_Rep, Element (Route_Plan, Cursor).Reponse_ID)
                      and Check_Route_Plan_Sub (Element (Route_Plan, Cursor), New_Pending_Route, New_Route_Plan_Rep, Key (Route_Plan, Cursor)));
    end Lemma_Ceck_Route_Plan_Reference_Insert;
-   procedure Lemma_Same_Route_Aggregator (X : in Route_Aggregator_Service) is null;
-                       
-   
+   procedure Lemma_Same_Route_Aggregator (X : Route_Aggregator_Service) is null;
 
-
-
-     
    --     package My_Task_Option_Vects is new Ada.Containers.Formal_Vectors
    --       (Index_Type   => Natural,
    --        Element_Type => My_TaskOption);
-   --  
+   --
    --     ---------------------------
    --     -- Build_Matrix_Requests --
    --     ---------------------------
-   --  
-   --  
+   --
+   --
    --     procedure Build_Matrix_Requests (This  : in out Route_Aggregator_Service;
    --                                      ReqID : Int64;
    --                                      Areq  : My_UniqueAutomationRequest)
-   --  
+   --
    --       --      // All options corresponding to current automation request have been received
    --       --      // now make 'matrix' requests (all task options to all other task options)
    --       --      // [but only if options haven't already been sent??]
@@ -842,28 +833,28 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    --                                                      Position  => C);
    --        end loop;
    --     end Check_All_Task_Option_Received;
-   --        
-      
+   --
+
    --------------------
    -- Euclidean_Plan --
    --------------------
-            
-   -- void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
-   procedure Euclidean_Plan(This             : in out Route_Aggregator_Service;
-                            Route_Plan_Request : in My_RoutePlanRequest)
-                    
+
+   --  void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
+   procedure Euclidean_Plan (This             : in out Route_Aggregator_Service;
+                            Route_Plan_Request : My_RoutePlanRequest)
+
    is
-      -- uxas::common::utilities::CUnitConversions flatEarth;
-      -- int64_t regionId = request->getOperatingRegion();
-      -- int64_t vehicleId = request->getVehicleID ();
-      -- int64_t taskId = request->getAssociatedTaskID ();
+      --  uxas::common::utilities::CUnitConversions flatEarth;
+      --  int64_t regionId = request->getOperatingRegion();
+      --  int64_t vehicleId = request->getVehicleID ();
+      --  int64_t taskId = request->getAssociatedTaskID ();
       Region_ID   : constant Int64 := Get_OperatingRegion (Route_Plan_Request);
       Vehicles_ID : constant Int64 := Get_VehicleID (Route_Plan_Request);
       Task_ID     : constant Int64 := Get_AssociatedTaskID (Route_Plan_Request);
       Request_ID  : constant Int64 := Get_RequestID (Route_Plan_Request);
-      -- double speed = 1.0; // default if no speed available
+      --  double speed = 1.0; // default if no speed available
       Speed  : Long_Float := 1.0;
-                  
+
       --  auto response = std::shared_ptr<uxas::messages::route::RoutePlanResponse>(new uxas::messages::route::RoutePlanResponse);
       Response : My_RoutePlanResponse;
       use Vect_My_RouteConstraints_P;
@@ -872,20 +863,19 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       if Int64_Entity_Configuration_Maps.Contains (Container => This.Entity_Configuration,
                                                    Key       => Vehicles_ID)
       then
-                  
-                  
+
          --   double speed = m_entityConfigurations[vehicleId]->getNominalSpeed ();
          Speed := Long_Float (Get_NominalSpeed (Int64_Entity_Configuration_Maps.Element (Container => This.Entity_Configuration,
                                                                                          Key       => Vehicles_ID).Content));
-                  
-         -- if (speed < 1e-2)
-         if (Speed < 0.02) then
+
+         --  if (speed < 1e-2)
+         if Speed < 0.02 then
             --  speed = 1.0; // default to 1 if too small for division
             Speed := 1.0;
          end if;
       end if;
       pragma Assert (Speed > 0.02);
-                  
+
       Set_AssociatedTaskID (Response, Task_ID);
       Set_OperatingRegion  (Response, Region_ID);
       Set_VehicleID  (Response, Vehicles_ID);
@@ -893,62 +883,61 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       pragma Assert (Get_ResponseID (Response) = Request_ID);
       pragma Assert (Check_Route_Plan_Response (This.Route_Plan_Responses));
       pragma Assert (All_Requests_Valid (This));
-      -- move it here for Check_Route_Plan
-      -- m_routePlanResponses[response->getResponseID ()] = response;
+      --  move it here for Check_Route_Plan
+      --  m_routePlanResponses[response->getResponseID ()] = response;
       declare
          RoutePlanResponses_Holder : constant Route_Plan_Responses_Holder := Route_Plan_Responses_Holder'(Content => Response);
-         This_Route_Plan_Responses_Old : constant Route_Plan_Responses_Map:= This.Route_Plan_Responses with Ghost;
+         This_Route_Plan_Responses_Old : constant Route_Plan_Responses_Map := This.Route_Plan_Responses with Ghost;
       begin
-         
+
          pragma Assert (if All_Requests_Valid (This) then
                            Check_Route_Plan (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses));
-         pragma Assert (for all C in This.Route_Plan 
-                        => Get_RouteID ( Element (This.Route_Plan, C).Returned_Route_Plan) = Key ( THis.Route_Plan, C)
+         pragma Assert (for all C in This.Route_Plan
+                        => Get_RouteID (Element (This.Route_Plan, C).Returned_Route_Plan) = Key (This.Route_Plan, C)
                         and Contains (This.Pending_Route,        Element (This.Route_Plan, C).Reponse_ID)
                         and Contains (This.Route_Plan_Responses, Element (This.Route_Plan, C).Reponse_ID));
-         pragma Assert (for all C in This.Route_Plan_Responses 
-                        =>  Check_Route_Plan_Response_Sub (Element (This.Route_Plan_Responses, C).Content, Key ( This.Route_Plan_Responses, C)));
-         pragma Assert (for all Key in Int64 
+         pragma Assert (for all C in This.Route_Plan_Responses
+                        =>  Check_Route_Plan_Response_Sub (Element (This.Route_Plan_Responses, C).Content, Key (This.Route_Plan_Responses, C)));
+         pragma Assert (for all Key in Int64
                         => (if Contains (This.Route_Plan_Responses, Key) then
                                Int64_Route_Plan_Responses_Maps.Key (This.Route_Plan_Responses, Find (This.Route_Plan_Responses, Key)) = Key
-                            and Get_ResponseID (Element  (This.Route_Plan_Responses    , Find (This.Route_Plan_Responses, Key)).Content) =  Key
-                            and Check_Route_Plan_Response_Sub (Element (This.Route_Plan_Responses, Find (This.Route_Plan_Responses, Key)).Content,  Key )));
+                            and Get_ResponseID (Element  (This.Route_Plan_Responses, Find (This.Route_Plan_Responses, Key)).Content) =  Key
+                            and Check_Route_Plan_Response_Sub (Element (This.Route_Plan_Responses, Find (This.Route_Plan_Responses, Key)).Content,  Key)));
+         pragma Assert (Length (This.Route_Plan_Responses) < This.Route_Plan_Responses.Capacity);
 
-      
          Int64_Route_Plan_Responses_Maps.Insert
            (Container => This.Route_Plan_Responses,
             Key       => Get_ResponseID (RoutePlanResponses_Holder.Content),
             New_Item  => RoutePlanResponses_Holder);
          pragma Assert (Contains (This.Route_Plan_Responses, Get_ResponseID (RoutePlanResponses_Holder.Content))
-                        and then Check_Route_Plan_Response_Sub (Route_Plan_Response => Element ( This.Route_Plan_Responses, Get_ResponseID (RoutePlanResponses_Holder.Content)).Content,
+                        and then Check_Route_Plan_Response_Sub (Route_Plan_Response => Element (This.Route_Plan_Responses, Get_ResponseID (RoutePlanResponses_Holder.Content)).Content,
                                                                 Key                 =>  Get_ResponseID (RoutePlanResponses_Holder.Content)));
-                       
+
          Lemma_Ceck_Route_Plan_Reference_Insert (This.Route_Plan,
                                                  This.Pending_Route, This.Pending_Route,
                                                  This_Route_Plan_Responses_Old, This.Route_Plan_Responses);
          pragma Assert (Check_Route_Plan (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses));
-         
-         pragma Assert (if  Check_Route_Plan_Response   (This.Route_Plan_Responses) 
+
+         pragma Assert (if  Check_Route_Plan_Response   (This.Route_Plan_Responses)
                         then All_Requests_Valid (This));
-         pragma Assert ( Contains (This.Route_Plan_Responses, Get_ResponseID (Response)));
-         pragma Assert ( Model (This_Route_Plan_Responses_Old) <= Model (This.Route_Plan_Responses));
-         pragma Assert (Int64_Route_Plan_Responses_Maps.Formal_Model.M.Keys_Included_Except ( Model (This.Route_Plan_Responses),
+         pragma Assert (Contains (This.Route_Plan_Responses, Get_ResponseID (Response)));
+         pragma Assert (Model (This_Route_Plan_Responses_Old) <= Model (This.Route_Plan_Responses));
+         pragma Assert (Int64_Route_Plan_Responses_Maps.Formal_Model.M.Keys_Included_Except (Model (This.Route_Plan_Responses),
                         Model (This_Route_Plan_Responses_Old),
                         Get_ResponseID (Response)));
          pragma Assert (for all Key in Int64
                         => (if Contains (This_Route_Plan_Responses_Old, Key) then
                                Contains (This.Route_Plan_Responses,     Key)));
          pragma Assert (for all C in This.Route_Plan
-                        => Contains (This_Route_Plan_Responses_Old, Element (THis.Route_Plan, C).Reponse_ID)
-                        and Contains (This.Route_Plan_Responses,     Element (THis.Route_Plan, C).Reponse_ID));
-               
-       
+                        => Contains (This_Route_Plan_Responses_Old, Element (This.Route_Plan, C).Reponse_ID)
+                        and Contains (This.Route_Plan_Responses,    Element (This.Route_Plan, C).Reponse_ID));
+
          pragma Assert (for all Key of Model (This_Route_Plan_Responses_Old)
                         =>  (Contains (This.Route_Plan_Responses, Key)
                              and Contains (This_Route_Plan_Responses_Old, Key)
-                             and Int64_Route_Plan_Responses_Maps.Formal_Model.M.Has_Key ( Model (This.Route_Plan_Responses), Key))
+                             and Int64_Route_Plan_Responses_Maps.Formal_Model.M.Has_Key (Model (This.Route_Plan_Responses), Key))
                         and then
-                          (Int64_Route_Plan_Responses_Maps.Formal_Model.M.Get (Model (This.Route_Plan_Responses), Key) = 
+                          (Int64_Route_Plan_Responses_Maps.Formal_Model.M.Get (Model (This.Route_Plan_Responses), Key) =
                              Int64_Route_Plan_Responses_Maps.Formal_Model.M.Get (Model (This_Route_Plan_Responses_Old), Key)
                            and (if Int64_Route_Plan_Responses_Maps.Formal_Model.M.Get (Model (This.Route_Plan_Responses), Key) =
                                  Int64_Route_Plan_Responses_Maps.Formal_Model.M.Get (Model (This_Route_Plan_Responses_Old), Key) then
@@ -957,20 +946,20 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                                 Element (This.Route_Plan_Responses,  Key).Content = Element (This_Route_Plan_Responses_Old,  Key).Content)
                            and (if Element (This.Route_Plan_Responses,  Key).Content = Element (This_Route_Plan_Responses_Old,  Key).Content then
                                 Get_ResponseID (Element (This.Route_Plan_Responses,  Key).Content) = Get_ResponseID (Element (This_Route_Plan_Responses_Old,  Key).Content))
-                    
+
                            and (if   Get_ResponseID (Element (This.Route_Plan_Responses,  Key).Content) = Get_ResponseID (Element (This_Route_Plan_Responses_Old,  Key).Content)
                              and Get_ResponseID (Element  (This_Route_Plan_Responses_Old, Key).Content) =  Key then
-                                Get_ResponseID (Element  (This.Route_Plan_Responses    , Key).Content) =  Key)
-                           and (if   Get_ResponseID (Element  (This.Route_Plan_Responses    , Key).Content) =  Key then
-                                  Check_Route_Plan_Response_Sub (Element  (This.Route_Plan_Responses, Key).Content , Key))
-                           and Check_Route_Plan_Response_Sub (Element (This_Route_Plan_Responses_Old, Key).Content, Key )));
+                                Get_ResponseID (Element  (This.Route_Plan_Responses, Key).Content) =  Key)
+                           and (if   Get_ResponseID (Element  (This.Route_Plan_Responses, Key).Content) =  Key then
+                                  Check_Route_Plan_Response_Sub (Element  (This.Route_Plan_Responses, Key).Content, Key))
+                           and Check_Route_Plan_Response_Sub (Element (This_Route_Plan_Responses_Old, Key).Content, Key)));
          pragma Assert (for all C in This.Route_Plan_Responses
                         => (if  Key (This.Route_Plan_Responses, C) =  Get_ResponseID (Response)
                             then
                                Check_Route_Plan_Response_Sub (Element  (This.Route_Plan_Responses, C).Content, Key (This.Route_Plan_Responses, C))
                             else
                                Check_Route_Plan_Response_Sub (Element  (This.Route_Plan_Responses, C).Content, Key (This.Route_Plan_Responses, C))));
-        
+
          pragma Assert (for all C in This.Route_Plan_Responses
                         =>  Check_Route_Plan_Response_Sub (Element  (This.Route_Plan_Responses, C).Content, Key (This.Route_Plan_Responses, C)));
          pragma Assert (if (for all C in This.Route_Plan_Responses
@@ -979,252 +968,256 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          pragma Assert (if Check_Route_Plan_Response     (This.Route_Plan_Responses)
                         then  All_Requests_Valid (This));
       end;
-      
+
       pragma Assert (Contains (This.Route_Plan_Responses, Request_ID));
       pragma Assert (Contains (This.Pending_Route, Request_ID));
       pragma Assert (All_Requests_Valid (This));
-               
+
       pragma Assert (for all Ind in First_Index (Get_RouteRequests (Route_Plan_Request)) ..  Last_Index (Get_RouteRequests (Route_Plan_Request))
                      => (not Contains (Container => This.Route_Plan,
-                                       Key       => Get_RouteID ( Element (Get_RouteRequests (Route_Plan_Request), Ind)))));
-      
-      -- for (size_t k = 0; k < request->getRouteRequests ().size (); k++)
-      for K in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request)) loop
-                   
-         pragma Loop_Invariant ((for all I in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request)) 
-                                => (if I < K then
-                                       Contains (Container => This.Route_Plan,
-                                                 Key       => Get_RouteID (Element (Container => Get_RouteRequests (Route_Plan_Request),
-                                                                                    Index     => I)))
-                                    else 
-                                      not Contains (Container => This.Route_Plan,
+                                       Key       => Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request), Ind)))));
+      declare
+         Length_This_Route_Plan_Old : constant Capacity_Range := Length (This.Route_Plan) with Ghost;
+         Acc : Capacity_Range := 0 with Ghost;
+      begin
+         pragma Assert (Length (This.Route_Plan)   + Length (Get_RouteRequests (Route_Plan_Request)) <= This.Route_Plan.Capacity);
+         pragma Assert (Length_This_Route_Plan_Old + Length (Get_RouteRequests (Route_Plan_Request)) <= This.Route_Plan.Capacity);
+         --  for (size_t k = 0; k < request->getRouteRequests ().size (); k++)
+         for K in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request)) loop
+
+            pragma Loop_Invariant ((for all I in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request))
+                                   => (if I < K then
+                                          Contains (Container => This.Route_Plan,
                                                     Key       => Get_RouteID (Element (Container => Get_RouteRequests (Route_Plan_Request),
-                                                                                       Index     => I)))))
-                                and Check_Route_Plan (This.Route_Plan,This.Pending_Route,THis.Route_Plan_Responses)
-                                and All_Requests_Valid (This)
-                                and Contains (This.Pending_Route,         Request_ID)
-                                and Contains (This.Route_Plan_Responses,  Request_ID));
-         declare
-                     
-            -- uxas::messages::route::RouteConstraints* routeRequest = request->getRouteRequests ().at (k);
-            Route_Request : constant My_RouteConstraints := Element (Container => Get_RouteRequests (Route_Plan_Request),
-                                                                     Index  => K);
-                  
-            Route_ID : constant Int64 := Get_RouteID (Route_Request);
-            pragma Assert (Route_ID =  Get_RouteID (Element (Container => Get_RouteRequests (Route_Plan_Request),
-                                                             Index     => K)));
-                  
-            -- Start_Point : Visibility.Point;
-            -- End_Point : Visibility.Point;
-                  
-            -- uxas::messages::route::RoutePlan* plan = new uxas::messages::route::RoutePlan;
-            Plan : My_RoutePlan;
-                  
-                     
-            
-            --  Earth_Circumference_M : constant Int64 :=  40_075_000 with Ghost;
-            
-            use Convert;
-            
-            
-            Line_Dist : Linear_Distance_M;
-         begin
-            Set_RouteID (Plan, Route_ID);
-            -- flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getStartLocation()->getLatitude (), routeRequest->getStartLocation()->getLongitude (), north, east);
-            -- Start_Point.set_X (Start_East);
-            -- Start_Point.set_Y(Start_North);
-             
-            -- flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getEndLocation()->getLatitude (), routeRequest->getEndLocation()->getLongitude (), north, east);
-            -- End_Point.Set_X (End_East );
-            -- End_Point.Set_Y(End_North);
-           
-            -- double linedist = VisiLibity::distance (startPt, endPt);
-           
-            Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG (Latitude_1_DEG  => DEG_Angle_To_Latitude_Projection (Normalize_Angle_DEG (Long_Float (Get_Latitude  (Get_StartLocation(Route_Request))))),
-                                                                    Longitude_1_DEG => Normalize_Angle_DEG (Long_Float  (Get_Longitude (Get_StartLocation(Route_Request)))),
-                                                                    Latitude_2_DEG  => DEG_Angle_To_Latitude_Projection (Normalize_Angle_DEG (Long_Float (Get_Latitude  (Get_EndLocation  (Route_Request))))),
-                                                                    Longitude_2_DEG => Normalize_Angle_DEG (Long_Float  (Get_Longitude (Get_EndLocation  (Route_Request)))),
-                                                                    Linear_Distance => Line_Dist);
-          
-            pragma Assert ( Speed > 0.02);
+                                                                                       Index     => I)))
+                                       else
+                                         not Contains (Container => This.Route_Plan,
+                                                       Key       => Get_RouteID (Element (Container => Get_RouteRequests (Route_Plan_Request),
+                                                                                          Index     => I)))))
+                                   and Check_Route_Plan (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses)
+                                   and All_Requests_Valid (This)
+                                   and Contains (This.Pending_Route,         Request_ID)
+                                   and Contains (This.Route_Plan_Responses,  Request_ID)
+                                   and Length_This_Route_Plan_Old + Acc = Length (This.Route_Plan)
+                                   and Acc <=  Length (Get_RouteRequests (Route_Plan_Request))
+                                   and Integer (Acc) = K - First_Index (Get_RouteRequests (Route_Plan_Request)));
             declare
-              
-               -- Line_Dist_Max : constant Int64 := 120_000_000 with Ghost; -- sqrt (12 848 045 000 000 000 ) = 113 349 217.0242035681614554
-               -- Vitesse_Max : constant Int64 := 6_000_000_000_000 with Ghost; -- (Line_Dist_Max * 1 000) /0.02
-               pragma Assert ((Line_Dist / Speed) * 1000.0 in 0.0 .. 6_000_000_000_000.0);
-               pragma Assert (Int64 (6_000_000_000_000.0) in Int64'Range);
-               pragma Assert (Long_Float (Int64'First) < (Line_Dist / Speed) * 1000.0);
-               pragma Assert (Long_Float (Int64'Last)  > (Line_Dist / Speed) * 1000.0);
-               
-               pragma Assert (Int64'First < Int64 ((Line_Dist / Speed) * 1000.0));
-               pragma Assert (Int64'Last  > Int64 ((Line_Dist / Speed) * 1000.0));
-               
-               pragma Assert (if (Line_Dist / Speed) * 1000.0 in 0.0 .. 6_000_000_000_000.0
-                              and Int64 (6_000_000_000_000.0) in Int64'Range
-                              and Int64 (0.0) in Int64'Range then
-                                  Int64 ((Line_Dist / Speed) * 1000.0) in Int64'Range);
-               pragma Assume (Int64 ((Line_Dist / Speed) * 1000.0) in Int64'Range);
-               Vitesse : constant Int64 := Int64 ((Line_Dist / Speed) * 1000.0);
+
+               --  uxas::messages::route::RouteConstraints* routeRequest = request->getRouteRequests ().at (k);
+               Route_Request : constant My_RouteConstraints := Element (Container => Get_RouteRequests (Route_Plan_Request),
+                                                                        Index  => K);
+
+               Route_ID : constant Int64 := Get_RouteID (Route_Request);
+               pragma Assert (Route_ID =  Get_RouteID (Element (Container => Get_RouteRequests (Route_Plan_Request),
+                                                                Index     => K)));
+
+               --  Start_Point : Visibility.Point;
+               --  End_Point : Visibility.Point;
+
+               --  uxas::messages::route::RoutePlan* plan = new uxas::messages::route::RoutePlan;
+               Plan : My_RoutePlan;
             begin
-                  
-               Set_RouteCost (Plan, Vitesse);
+               declare
+
+                  use Convert;
+
+                  Borne_Min : constant Long_Float := 0.0;
+                  Borne_Max : constant Long_Float := 6_000_000_000_000.0;
+                  subtype Borne_Travel_Time is Long_Float range Borne_Min .. Borne_Max;
+
+                  Line_Dist : Linear_Distance_M;
+               begin
+                  Set_RouteID (Plan, Route_ID);
+                  --  flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getStartLocation()->getLatitude (), routeRequest->getStartLocation()->getLongitude (), north, east);
+                  --  Start_Point.set_X (Start_East);
+                  --  Start_Point.set_Y(Start_North);
+
+                  --  flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getEndLocation()->getLatitude (), routeRequest->getEndLocation()->getLongitude (), north, east);
+                  --  End_Point.Set_X (End_East );
+                  --  End_Point.Set_Y(End_North);
+
+                  --  double linedist = VisiLibity::distance (startPt, endPt);
+
+                  Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG (Latitude_1_DEG  => DEG_Angle_To_Latitude_Projection (Normalize_Angle_DEG (Long_Float (Get_Latitude  (Get_StartLocation (Route_Request))))),
+                                                                          Longitude_1_DEG => Normalize_Angle_DEG (Long_Float  (Get_Longitude (Get_StartLocation (Route_Request)))),
+                                                                          Latitude_2_DEG  => DEG_Angle_To_Latitude_Projection (Normalize_Angle_DEG (Long_Float (Get_Latitude  (Get_EndLocation  (Route_Request))))),
+                                                                          Longitude_2_DEG => Normalize_Angle_DEG (Long_Float  (Get_Longitude (Get_EndLocation  (Route_Request)))),
+                                                                          Linear_Distance => Line_Dist);
+
+                  pragma Assert (Speed > 0.02);
+                  declare
+
+                     Travel_Time : constant Borne_Travel_Time := (Line_Dist / Speed) * 1000.0;
+
+                     pragma Assert (Travel_Time in Borne_Min .. Borne_Max);
+
+                     pragma Assert (Int64 (Borne_Min) in Int64'Range);
+                     pragma Assert (Int64 (Borne_Max) in Int64'Range);
+
+                     pragma Assert (Long_Float (Int64'First) < Travel_Time);
+                     pragma Assert (Long_Float (Int64'Last)  > Travel_Time);
+
+                     Route_Cost : constant Int64 := Int64 (Travel_Time);
+
+                  begin
+                     Set_RouteCost (Plan, Route_Cost);
+                  end;
+               end;
+
+               declare
+                  Route_Plan_Pair : constant Pair_Int64_Route_Plan := Pair_Int64_Route_Plan'(Reponse_ID          => Request_ID,
+                                                                                             Returned_Route_Plan => Plan);
+                  Position_Route_Plan : Int64_Pair_Int64_Route_Plan_Maps.Cursor;
+                  This_Route_Plan_Old : constant Pair_Int64_Route_Plan_Map := This.Route_Plan with Ghost;
+                  use Int64_Pair_Int64_Route_Plan_Maps.Formal_Model;
+               begin
+
+                  pragma Assert (Route_Plan_Pair.Reponse_ID = Request_ID);
+                  pragma Assert (Contains (This.Pending_Route,        Route_Plan_Pair.Reponse_ID));
+                  pragma Assert (Contains (This.Route_Plan_Responses, Route_Plan_Pair.Reponse_ID));
+
+                  pragma Assert (Check_Route_Plan (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses));
+                  pragma Assert (for all C in This.Route_Plan
+                                 => Get_RouteID (Element (This.Route_Plan, C).Returned_Route_Plan) = Key (This.Route_Plan, C)
+                                 and Contains (This.Pending_Route,        Element (This.Route_Plan, C).Reponse_ID)
+                                 and Contains (This.Route_Plan_Responses, Element (This.Route_Plan, C).Reponse_ID));
+                  pragma Assert (for all Key in Int64
+                                 => (if Contains (This.Route_Plan, Key) then
+                                        Int64_Pair_Int64_Route_Plan_Maps.Key (This.Route_Plan, Find (This.Route_Plan, Key)) = Key
+                                     and Get_RouteID (Element (This.Route_Plan,  Find (This.Route_Plan, Key)).Returned_Route_Plan) = Key
+                                     and Contains (This.Pending_Route,        Element (This.Route_Plan,  Find (This.Route_Plan, Key)).Reponse_ID)
+                                     and Contains (This.Route_Plan_Responses, Element (This.Route_Plan,  Find (This.Route_Plan, Key)).Reponse_ID)
+                                     and Check_Route_Plan_Sub (Element (This.Route_Plan,  Find (This.Route_Plan, Key)), This.Pending_Route, This.Route_Plan_Responses, Key)));
+
+                  pragma Assert (for all Key of Model (This.Route_Plan)
+                                 => Check_Route_Plan_Sub (Element (This.Route_Plan, Key), This.Pending_Route, This.Route_Plan_Responses, Key));
+
+                  Int64_Pair_Int64_Route_Plan_Maps.Insert
+                    (Container => This.Route_Plan,
+                     Key       => Get_RouteID (Route_Plan_Pair.Returned_Route_Plan),
+                     New_Item  => Route_Plan_Pair);
+                  Position_Route_Plan := Find (Container => This.Route_Plan,
+                                               Key       => Get_RouteID (Route_Plan_Pair.Returned_Route_Plan));
+                  Acc := Acc + 1;
+                  pragma Assert (Length (This.Route_Plan) = Length (This_Route_Plan_Old) + 1);
+                  pragma Assert (Length_This_Route_Plan_Old + Acc = Length (This.Route_Plan));
+
+                  Lemmma_Equal_RoutePlan (Element (This.Route_Plan, Position_Route_Plan).Returned_Route_Plan, Route_Plan_Pair.Returned_Route_Plan);
+                  pragma Assert (Has_Element (This.Route_Plan, Position_Route_Plan)
+                                 and Key (This.Route_Plan, Position_Route_Plan) = Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)
+                                 and Key (This.Route_Plan, Position_Route_Plan) = Get_RouteID (Element (This.Route_Plan, Position_Route_Plan).Returned_Route_Plan)
+                                 and Contains (This.Pending_Route,        Element (This.Route_Plan, Position_Route_Plan).Reponse_ID)
+                                 and Contains (This.Route_Plan_Responses, Element (This.Route_Plan, Position_Route_Plan).Reponse_ID));
+                  pragma Assert (Contains (This.Route_Plan, Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)));
+                  pragma Assert (Check_Route_Plan_Sub (Element (This.Route_Plan, Position_Route_Plan), This.Pending_Route, This.Route_Plan_Responses, Key (This.Route_Plan, Position_Route_Plan)));
+                  --                    pragma Assert (for all C in This.Route_Plan
+                  --                                   =>  Contains (This.Pending_Route,        Element (This.Route_Plan, C).Reponse_ID)
+                  --                                   and Contains (This.Route_Plan_Responses, Element (This.Route_Plan, C).Reponse_ID));
+                  pragma Assert (if (for all Cursor in This.Route_Plan
+                                 => Check_Route_Plan_Sub (Element (This.Route_Plan, Cursor), This.Pending_Route, This.Route_Plan_Responses, Key (This.Route_Plan, Cursor)))
+                                 then Check_Route_Plan   (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses));
+                  pragma Assert (if Check_Route_Plan   (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses)
+                                 then  All_Requests_Valid (This));
+
+                  pragma Assert (Check_Entity_State  (This.Entity_State, This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles));
+                  pragma Assert (Check_Pending_Route (This.Pending_Route, This.Route_Id));
+                  pragma Assert (Check_Task_Plan_Options    (This.Task_Plan_Options));
+                  pragma Assert (Check_Route_Task_Pairing   (This.Route_Task_Pairing, This.Entity_State, This.Route_Request_ID));
+                  pragma Assert (Check_Route_Plan_Response  (This.Route_Plan_Responses));
+                  pragma Assert (Check_Entity_Configuration (This.Entity_Configuration, This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles));
+                  pragma Assert (Check_List_Pending_Request (This.Pending_Auto_Req, This.Unique_Automation_Request, This.Route_Task_Pairing, This.Route_Request_ID));
+                  pragma Assert (Check_Unique_Automation_Request (This.Unique_Automation_Request, This.Auto_Request_Id));
+
+                  pragma Assert (Model (This_Route_Plan_Old) <= Model (This.Route_Plan));
+                  pragma Assert (Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Keys_Included_Except (Model (This.Route_Plan),
+                                  Model (This_Route_Plan_Old),
+                                  Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)));
+                  pragma Assert (Check_Route_Plan   (This_Route_Plan_Old, This.Pending_Route, This.Route_Plan_Responses));
+                  pragma Assert  (for all Key of Model (This_Route_Plan_Old)
+                                  =>  (Contains (This.Route_Plan, Key)
+                                       and Contains (This_Route_Plan_Old, Key)
+                                       and Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Has_Key (Model (This.Route_Plan), Key))
+                                  and then
+                                    (Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Get (Model (This.Route_Plan), Key) =
+                                       Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Get (Model (This_Route_Plan_Old), Key)
+                                     and (if Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Get (Model (This.Route_Plan), Key) =
+                                           Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Get (Model (This_Route_Plan_Old), Key) then
+                                          Element (This.Route_Plan,  Key) = Element (This_Route_Plan_Old,  Key))
+                                     and (if  Element (This.Route_Plan,  Key) = Element (This_Route_Plan_Old,  Key) then
+                                          Element (This.Route_Plan,  Key).Reponse_ID = Element (This_Route_Plan_Old,  Key).Reponse_ID
+                                       and Element (This.Route_Plan,  Key).Returned_Route_Plan = Element (This_Route_Plan_Old,  Key).Returned_Route_Plan)
+                                     and (if  Element (This.Route_Plan,  Key).Returned_Route_Plan = Element (This_Route_Plan_Old,  Key).Returned_Route_Plan then
+                                          Same_Requests (Element (This.Route_Plan,  Key).Returned_Route_Plan, Element (This_Route_Plan_Old,  Key).Returned_Route_Plan))
+                                     and (if Same_Requests (Element (This.Route_Plan,  Key).Returned_Route_Plan, Element (This_Route_Plan_Old,  Key).Returned_Route_Plan) then
+                                            Get_RouteID (Element (This.Route_Plan,  Key).Returned_Route_Plan) = Get_RouteID (Element (This_Route_Plan_Old,  Key).Returned_Route_Plan))
+                                     and Check_Route_Plan_Sub (Element (This_Route_Plan_Old,  Key), This.Pending_Route, This.Route_Plan_Responses, Key)
+                                     and (if Check_Route_Plan_Sub (Element (This_Route_Plan_Old,  Key), This.Pending_Route, This.Route_Plan_Responses, Key) then
+                                            Get_RouteID (Element  (This_Route_Plan_Old, Key).Returned_Route_Plan) =  Key
+                                       and Contains (This.Pending_Route,        Element (This_Route_Plan_Old, Key).Reponse_ID)
+                                       and Contains (This.Route_Plan_Responses, Element (This_Route_Plan_Old, Key).Reponse_ID))
+
+                                     and (if Contains (This.Pending_Route,        Element (This_Route_Plan_Old, Key).Reponse_ID)
+                                       and Contains (This.Route_Plan_Responses, Element (This_Route_Plan_Old, Key).Reponse_ID)
+                                       and Element (This.Route_Plan,  Key).Reponse_ID = Element (This_Route_Plan_Old,  Key).Reponse_ID
+                                       then Contains (This.Pending_Route,        Element (This.Route_Plan, Key).Reponse_ID)
+                                       and Contains (This.Route_Plan_Responses, Element (This.Route_Plan, Key).Reponse_ID))
+
+                                     and (if  Get_RouteID (Element  (This_Route_Plan_Old, Key).Returned_Route_Plan) =  Get_RouteID (Element  (This.Route_Plan, Key).Returned_Route_Plan)
+                                       and Get_RouteID (Element  (This_Route_Plan_Old, Key).Returned_Route_Plan) =  Key then
+                                          Get_RouteID (Element  (This.Route_Plan, Key).Returned_Route_Plan) =  Key)
+
+                                     and (if Element (This.Route_Plan,  Key).Reponse_ID = Element (This_Route_Plan_Old,  Key).Reponse_ID
+                                       and Contains (This.Pending_Route,        Element (This_Route_Plan_Old, Key).Reponse_ID)
+                                       and Contains (This.Route_Plan_Responses, Element (This_Route_Plan_Old, Key).Reponse_ID) then
+                                          Contains (This.Pending_Route,        Element  (This.Route_Plan,    Key).Reponse_ID)
+                                       and Contains (This.Route_Plan_Responses, Element  (This.Route_Plan,    Key).Reponse_ID))
+
+                                     and (if Get_RouteID (Element  (This.Route_Plan, Key).Returned_Route_Plan) =  Key
+                                       and Contains (This.Pending_Route,        Element (This.Route_Plan, Key).Reponse_ID)
+                                       and Contains (This.Route_Plan_Responses, Element (This.Route_Plan, Key).Reponse_ID)
+                                       then Check_Route_Plan_Sub (Element (This.Route_Plan, Key), This.Pending_Route, This.Route_Plan_Responses, Key)
+                                       and  Check_Route_Plan_Sub (Element (This_Route_Plan_Old, Key), This.Pending_Route, This.Route_Plan_Responses, Key))));
+
+                  pragma Assert  (for all C in This.Route_Plan
+                                  => (if  Key (This.Route_Plan, C) = Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)
+                                      then
+                                         Check_Route_Plan_Sub (Element  (This.Route_Plan, Key (This.Route_Plan, C)), This.Pending_Route, This.Route_Plan_Responses, Key (This.Route_Plan, C))
+                                      else
+                                         Check_Route_Plan_Sub (Element  (This.Route_Plan, Key (This.Route_Plan, C)), This.Pending_Route, This.Route_Plan_Responses, Key (This.Route_Plan, C))));
+
+                  pragma Assert  (for all Cursor in This.Route_Plan
+                                  => Check_Route_Plan_Sub (Element (This.Route_Plan, Cursor), This.Pending_Route, This.Route_Plan_Responses, Key (This.Route_Plan, Cursor)));
+                  pragma Assert  (if (for all Cursor in This.Route_Plan
+                                  => Check_Route_Plan_Sub (Element (This.Route_Plan, Cursor), This.Pending_Route, This.Route_Plan_Responses, Key (This.Route_Plan, Cursor)))
+                                  then Check_Route_Plan     (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses));
+                  pragma Assert  (if Check_Route_Plan   (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses)
+                                  then  All_Requests_Valid (This));
+
+               end;
+               pragma Assert (All_Requests_Valid (This));
+
             end;
-               
-                  
-                  
-            declare
-               Route_Plan_Pair : constant Pair_Int64_Route_Plan := Pair_Int64_Route_Plan'(Reponse_ID          => Request_ID,
-                                                                                          Returned_Route_Plan => Plan);
-               Position_Route_Plan : Int64_Pair_Int64_Route_Plan_Maps.Cursor;
-               This_Route_Plan_Old : constant Pair_Int64_Route_Plan_Map := THis.Route_Plan with Ghost;
-               use Int64_Pair_Int64_Route_Plan_Maps.Formal_Model;
-            begin
-                      
-               pragma Assert (Route_Plan_Pair.Reponse_ID = Request_ID);
-               pragma Assert (Contains (This.Pending_Route,        Route_Plan_Pair.Reponse_ID));
-               pragma Assert (Contains (This.Route_Plan_Responses, Route_Plan_Pair.Reponse_ID));
-      
-               pragma Assert (Check_Route_Plan (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses));   
-               pragma Assert (for all C in This.Route_Plan 
-                              => Get_RouteID ( Element (This.Route_Plan, C).Returned_Route_Plan) = Key ( THis.Route_Plan, C)
-                              and Contains (This.Pending_Route,        Element (This.Route_Plan, C).Reponse_ID)
-                              and Contains (This.Route_Plan_Responses, Element (This.Route_Plan, C).Reponse_ID));
-               pragma Assert (for all Key in Int64 
-                              => (if Contains (This.Route_Plan, Key) then
-                                     Int64_Pair_Int64_Route_Plan_Maps.Key (THis.Route_Plan, Find (This.Route_Plan, Key)) = Key 
-                                  and Get_RouteID ( Element (This.Route_Plan,  Find (This.Route_Plan, Key)).Returned_Route_Plan) = Key
-                                  and Contains (This.Pending_Route,        Element (This.Route_Plan,  Find (This.Route_Plan, Key)).Reponse_ID)
-                                  and Contains (This.Route_Plan_Responses, Element (This.Route_Plan,  Find (This.Route_Plan, Key)).Reponse_ID)
-                                  and Check_Route_Plan_Sub (Element (This.Route_Plan,  Find (This.Route_Plan, Key)), This.Pending_Route, This.Route_Plan_Responses, Key)));
-                       
-               pragma Assert (for all Key of Model (This.Route_Plan)
-                              => Check_Route_Plan_Sub (Element (This.Route_Plan, Key), This.Pending_Route, This.Route_Plan_Responses, Key));
-      
-               Int64_Pair_Int64_Route_Plan_Maps.Insert
-                 (Container => This.Route_Plan,
-                  Key       => Get_RouteID (Route_Plan_Pair.Returned_Route_Plan),
-                  New_Item  => Route_Plan_Pair);
-               Position_Route_Plan := Find (Container => This.Route_Plan,
-                                            Key       => Get_RouteID (Route_Plan_Pair.Returned_Route_Plan));
-        
-               Lemmma_Equal_RoutePlan (Element (This.Route_Plan, Position_Route_Plan).Returned_Route_Plan, Route_Plan_Pair.Returned_Route_Plan);
-               pragma Assert (Has_Element (This.Route_Plan, Position_Route_Plan)
-                              and Key (This.Route_Plan,Position_Route_Plan) = Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)
-                              and Key (This.Route_Plan,Position_Route_Plan) = Get_RouteID (Element (This.Route_Plan,Position_Route_Plan).Returned_Route_Plan)
-                              and Contains (This.Pending_Route,        Element (This.Route_Plan,Position_Route_Plan).Reponse_ID)
-                              and Contains (This.Route_Plan_Responses, Element (This.Route_Plan,Position_Route_Plan).Reponse_ID));
-               pragma Assert (Contains (This.Route_Plan, Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)));
-               pragma Assert (Check_Route_Plan_Sub (Element (This.Route_Plan,Position_Route_Plan), This.Pending_Route,This.Route_Plan_Responses, Key ( This.Route_Plan,Position_Route_Plan)));
-               --                    pragma Assert (for all C in This.Route_Plan 
-               --                                   =>  Contains (This.Pending_Route,        Element (This.Route_Plan, C).Reponse_ID)
-               --                                   and Contains (This.Route_Plan_Responses, Element (This.Route_Plan, C).Reponse_ID));
-               pragma Assert (if (for all Cursor in This.Route_Plan
-                              => Check_Route_Plan_Sub (Element (This.Route_Plan, Cursor),This.Pending_Route, This.Route_Plan_Responses, Key (This.Route_Plan , Cursor)))
-                              then Check_Route_Plan   (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses));
-               pragma Assert (if Check_Route_Plan   (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses) 
-                              then  All_Requests_Valid (This));
-         
-               pragma Assert (Check_Entity_State  (This.Entity_State, This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles));
-               pragma Assert (Check_Pending_Route (This.Pending_Route,This.Route_Id));
-               pragma Assert (Check_Task_Plan_Options    (This.Task_Plan_Options));
-               pragma Assert (Check_Route_Task_Pairing   (This.Route_Task_Pairing, This.Entity_State, This.Route_Request_ID ));
-               pragma Assert (Check_Route_Plan_Response  (This.Route_Plan_Responses));
-               pragma Assert (Check_Entity_Configuration (This.Entity_Configuration, This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles));
-               pragma Assert (Check_List_Pending_Request (This.Pending_Auto_Req, This.Unique_Automation_Request, This.Route_Task_Pairing, This.Route_Request_ID));
-               pragma Assert (Check_Unique_Automation_Request (This.Unique_Automation_Request, This.Auto_Request_Id));
-       
-               pragma Assert ( Model (This_Route_Plan_Old) <= Model (This.Route_Plan));
-               pragma Assert ( Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Keys_Included_Except(Model (This.Route_Plan),
-                               Model (This_Route_Plan_Old),
-                               Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)));
-               pragma Assert ( Check_Route_Plan   (This_Route_Plan_Old,This.Pending_Route,THis.Route_Plan_Responses));
-               pragma Assert  (for all Key of Model (This_Route_Plan_Old)
-                               =>  (Contains (This.Route_Plan, Key)
-                                    and Contains (This_Route_Plan_Old, Key)
-                                    and Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Has_Key ( Model (This.Route_Plan), Key))
-                               and then
-                                 (Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Get (Model (This.Route_Plan), Key) = 
-                                    Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Get (Model (This_Route_Plan_Old), Key)
-                                  and (if Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Get (Model (This.Route_Plan), Key) = 
-                                        Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Get (Model (This_Route_Plan_Old), Key) then
-                                       Element (This.Route_Plan,  Key) = Element (This_Route_Plan_Old,  Key))
-                                  and (if  Element (This.Route_Plan,  Key) = Element (This_Route_Plan_Old,  Key) then 
-                                       Element (This.Route_Plan,  Key).Reponse_ID = Element (This_Route_Plan_Old,  Key).Reponse_ID
-                                    and Element (This.Route_Plan,  Key).Returned_Route_Plan = Element (This_Route_Plan_Old,  Key).Returned_Route_Plan)
-                                  and (if  Element (This.Route_Plan,  Key).Returned_Route_Plan = Element (This_Route_Plan_Old,  Key).Returned_Route_Plan then
-                                       Same_Requests ( Element (This.Route_Plan,  Key).Returned_Route_Plan, Element (This_Route_Plan_Old,  Key).Returned_Route_Plan))
-                                  and (if Same_Requests ( Element (This.Route_Plan,  Key).Returned_Route_Plan, Element (This_Route_Plan_Old,  Key).Returned_Route_Plan) then
-                                         Get_RouteID ( Element (This.Route_Plan,  Key).Returned_Route_Plan) = Get_RouteID (Element (This_Route_Plan_Old,  Key).Returned_Route_Plan))
-                                  and Check_Route_Plan_Sub (  Element (This_Route_Plan_Old,  Key) , This.Pending_Route, This.Route_Plan_Responses, Key)
-                                  and (if Check_Route_Plan_Sub (  Element (This_Route_Plan_Old,  Key) , This.Pending_Route, This.Route_Plan_Responses, Key) then
-                                         Get_RouteID (Element  (This_Route_Plan_Old, Key).Returned_Route_Plan) =  Key
-                                    and Contains (This.Pending_Route,        Element (This_Route_Plan_Old, Key).Reponse_ID)
-                                    and Contains (This.Route_Plan_Responses, Element (This_Route_Plan_Old, Key).Reponse_ID))
-                                       
-                                  and (if Contains (This.Pending_Route,        Element (This_Route_Plan_Old, Key).Reponse_ID)
-                                    and Contains (This.Route_Plan_Responses, Element (This_Route_Plan_Old, Key).Reponse_ID)
-                                    and Element (This.Route_Plan,  Key).Reponse_ID = Element (This_Route_Plan_Old,  Key).Reponse_ID
-                                    then Contains (This.Pending_Route,        Element (This.Route_Plan, Key).Reponse_ID)
-                                    and Contains (This.Route_Plan_Responses, Element (This.Route_Plan, Key).Reponse_ID))
-                                       
-                                  and (if  Get_RouteID (Element  (This_Route_Plan_Old, Key).Returned_Route_Plan) =  Get_RouteID (Element  (This.Route_Plan, Key).Returned_Route_Plan)
-                                    and Get_RouteID (Element  (This_Route_Plan_Old, Key).Returned_Route_Plan) =  Key then
-                                       Get_RouteID (Element  (This.Route_Plan    , Key).Returned_Route_Plan) =  Key)
-                    
-                                  and (if Element (This.Route_Plan,  Key).Reponse_ID = Element (This_Route_Plan_Old,  Key).Reponse_ID
-                                    and Contains (This.Pending_Route,        Element (This_Route_Plan_Old, Key).Reponse_ID)
-                                    and Contains (This.Route_Plan_Responses, Element (This_Route_Plan_Old, Key).Reponse_ID) then
-                                       Contains (This.Pending_Route,        Element  (This.Route_Plan,    Key).Reponse_ID)
-                                    and Contains (This.Route_Plan_Responses, Element  (This.Route_Plan,    Key).Reponse_ID))
-                  
-                                  and (if (Get_RouteID (Element  (This.Route_Plan, Key).Returned_Route_Plan) =  Key
-                                    and Contains (This.Pending_Route,        Element (This.Route_Plan, Key).Reponse_ID)
-                                    and Contains (This.Route_Plan_Responses, Element (This.Route_Plan, Key).Reponse_ID))
-                                    then Check_Route_Plan_Sub( Element (This.Route_Plan, Key),This.Pending_Route, This.Route_Plan_Responses, Key)        
-                                    and  Check_Route_Plan_Sub( Element (This_Route_Plan_Old, Key),This.Pending_Route, This.Route_Plan_Responses, Key))));
-     
-               pragma Assert  (for all C in This.Route_Plan
-                               => (if  Key (This.Route_Plan, C) = Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)
-                                   then
-                                      Check_Route_Plan_Sub (Element  (This.Route_Plan, Key (This.Route_Plan, C)),This.Pending_Route,This.Route_Plan_Responses, Key (This.Route_Plan, C))
-                                   else
-                                      Check_Route_Plan_Sub (Element  (This.Route_Plan, Key (This.Route_Plan, C)),This.Pending_Route,This.Route_Plan_Responses, Key (This.Route_Plan, C))));
-   
-      
-   
-               pragma Assert  (for all Cursor in This.Route_Plan
-                               => Check_Route_Plan_Sub (Element (This.Route_Plan, Cursor),This.Pending_Route, This.Route_Plan_Responses, Key (This.Route_Plan , Cursor)));
-               pragma Assert  (if (for all Cursor in This.Route_Plan
-                               => Check_Route_Plan_Sub (Element (This.Route_Plan, Cursor),This.Pending_Route, This.Route_Plan_Responses, Key (This.Route_Plan , Cursor)))
-                               then Check_Route_Plan     (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses));
-               pragma Assert  (if Check_Route_Plan   (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses)
-                               then  All_Requests_Valid (This));
-           
-               
-            end;
-            pragma Assert ( All_Requests_Valid (This));
-                 
-         end;
-                     
-         -- loop invariant
-         pragma Assert (Contains (Container => This.Route_Plan,
-                                  Key       => Get_RouteID (Element (Container => Get_RouteRequests (Route_Plan_Request),
-                                                                     Index     => K)))); 
-                     
-         pragma Assert (for all I in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request)) 
-                        => (if I <= K  then
-                               Contains (Container => This.Route_Plan,
-                                         Key       => Get_RouteID (Element (Container => Get_RouteRequests (Route_Plan_Request),
-                                                                            Index     => I)))
-                            else 
-                              not Contains (Container => This.Route_Plan,
+
+            --  loop invariant
+            pragma Assert (Contains (Container => This.Route_Plan,
+                                     Key       => Get_RouteID (Element (Container => Get_RouteRequests (Route_Plan_Request),
+                                                                        Index     => K))));
+
+            pragma Assert (for all I in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request))
+                           => (if I <= K  then
+                                  Contains (Container => This.Route_Plan,
                                             Key       => Get_RouteID (Element (Container => Get_RouteRequests (Route_Plan_Request),
-                                                                               Index     => I)))));
-                  
-      end loop;
-                  
+                                                                               Index     => I)))
+                               else
+                                 not Contains (Container => This.Route_Plan,
+                                               Key       => Get_RouteID (Element (Container => Get_RouteRequests (Route_Plan_Request),
+                                                                                  Index     => I)))));
+
+         end loop;
+      end;
+
    end Euclidean_Plan;
-         
+
    --     --------------------------
    --     -- Handle_Route_Request --
    --     --------------------------

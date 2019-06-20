@@ -84,7 +84,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                                   Pending_Route   : Pending_Route_Matrix;
                                   Route_Plan_Responses : Route_Plan_Responses_Map;
                                   Key : Int64) return Boolean is
-     (Key = Get_RouteID ( Route_Plan_Pair.Returned_Route_Plan)
+     (Key = Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)
       and Contains (Pending_Route,        Route_Plan_Pair.Reponse_ID)
       and Contains (Route_Plan_Responses, Route_Plan_Pair.Reponse_ID))
        with Ghost;
@@ -93,7 +93,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                                  Pending_Route : Pending_Route_Matrix;
                                  Route_Plan_Responses : Route_Plan_Responses_Map) return Boolean is
      (for all Cursor in Route_Plan
-      => Check_Route_Plan_Sub (Element (Route_Plan, Cursor), Pending_Route, Route_Plan_Responses, Key (Route_Plan , Cursor)))
+      => Check_Route_Plan_Sub (Element (Route_Plan, Cursor), Pending_Route, Route_Plan_Responses, Key (Route_Plan, Cursor)))
      with Ghost;
 
    use all type Task_Plan_Options_Map;
@@ -166,7 +166,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
 
               -- check id unicity in other set
                 (for all Cursor_Request_ID_2 in Pending_Route
-                 => ( if Key (Pending_Route, Cursor_Request_ID_1) /= Key (Pending_Route, Cursor_Request_ID_2) then
+                 => (if Key (Pending_Route, Cursor_Request_ID_1) /= Key (Pending_Route, Cursor_Request_ID_2) then
                        not Contains (Element (Pending_Route, Cursor_Request_ID_2),
                                      Element (Element (Pending_Route, Cursor_Request_ID_1), Cursor_Route_Plan_1)))))))
      with Ghost;
@@ -193,7 +193,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                  and
                  -- check ID unicity over other set
                    (for all Cursor_Request_ID_2 in Pending_Auto_Req
-                    => ( if Key (Pending_Auto_Req, Cursor_Request_ID_1) /= Key (Pending_Auto_Req, Cursor_Request_ID_2) then
+                    => (if Key (Pending_Auto_Req, Cursor_Request_ID_1) /= Key (Pending_Auto_Req, Cursor_Request_ID_2) then
                           not Contains (Element (Pending_Auto_Req, Cursor_Request_ID_2),
                                         Element (Element (Pending_Auto_Req, Cursor_Request_ID_1), Cursor_Response_ID_1))))))))
      with Ghost;
@@ -460,10 +460,10 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                     Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request), Ind_2)))))
 
      -- invariant check
-     and All_Requests_Valid (This),
+     and All_Requests_Valid (This)
+     and Length (This.Route_Plan_Responses) < This.Route_Plan_Responses.Capacity
+     and Length (This.Route_Plan) + Length (Get_RouteRequests (Route_Plan_Request)) <= This.Route_Plan.Capacity,
 
-   --   and Int64_Route_Plan_Responses_Maps.Length (This.Route_Plan) < This.Route_Plan.Capacity + Get_RouteRequests (Route_Plan_Request).Capacity
-   --   and Int64_Pending_Route_Matrix.Length (This.Route_Plan_Responses) < This.Route_Plan_Responses.Capacity,
      Post => All_Requests_Valid (This)
 
      and Contains (This.Route_Plan_Responses,

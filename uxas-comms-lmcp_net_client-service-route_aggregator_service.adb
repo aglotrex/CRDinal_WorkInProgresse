@@ -714,5 +714,21 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
           Position  => C,
           Inserted  => Inserted);
    end Handle_Task_Plan_Options_Msg;
+--
+--       overriding
+--     procedure XML_Write (this  : Route_Aggregator_Service;
+--                          S     : access Ada.Streams.Root_Stream_Type'Class;
+--                          Level : Natural) is
+--     begin
+--         String'Write (S, LeftPad ("<FastPlan>" & Boolean'Image (This.Fast_Plan) & "</FastPlan>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<EntityState>" & ASCII.LF, Level));
+--        for element of this.Entity_State.all loop
+--           XML_Output (element.all, S, Level + 1);
+--        end loop;
+--        String'Write (S, LeftPad ("</EntityState>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<StatusType>" & this.StatusType'Image & "</StatusType>" & ASCII.LF, Level));
+--     end XML_Write;
 
 end UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;
