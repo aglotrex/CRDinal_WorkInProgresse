@@ -8,68 +8,11 @@ with Ada.Containers; use Ada.Containers;
 private
 package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
 
-   use Int64_Pending_Route_Matrix.Formal_Model;
-   use Int64_Route_Plan_Responses_Maps.Formal_Model;
-   procedure Lemma_Ceck_Route_Plan_Reference_Insert (Route_Plan : Pair_Int64_Route_Plan_Map;
-                                                     Old_Pending_Route,  New_Pending_Route : Pending_Route_Matrix;
-                                                     Old_Route_Plan_Rep, New_Route_Plan_Rep : Route_Plan_Responses_Map)
-     with Ghost,
-     Global => null,
-     Pre => Check_Route_Plan (Route_Plan, Old_Pending_Route, Old_Route_Plan_Rep)
-     and K_Keys_Included (Keys (Old_Pending_Route),  Keys (New_Pending_Route))
-     and K_Keys_Included (Keys (Old_Route_Plan_Rep), Keys (New_Route_Plan_Rep)),
-     PosT => Check_Route_Plan (Route_Plan, New_Pending_Route, New_Route_Plan_Rep);
 
-   --     use Int64_Route_Plan_Responses_Maps.Formal_Model;
-   --     procedure Add_Route_Plan_Request (This : in out Route_Aggregator_Service;
-   --                                       Route_Plan_Response : in My_RoutePlanResponse) with
-   --       Pre => All_Requests_Valid (This)
-   --       and not Contains (This.Route_Plan_Responses, Get_ResponseID (Route_Plan_Response)),
-   --       Post => All_Requests_Valid (This)
-   --       and Model (This.Route_Plan_Responses)'Old <= Model (This.Route_Plan_Responses)
-   --       and Int64_Route_Plan_Responses_Maps.Formal_Model.M.Keys_Included_Except (Model (This.Route_Plan_Responses),
-   --                                                                                Model (This.Route_Plan_Responses)'Old,
-   --                                                                                Get_ResponseID (Route_Plan_Response))
-   --       and Contains (This.Route_Plan_Responses, Get_ResponseID (Route_Plan_Response))
-   --
-   --       and This.Fast_Plan'Old = This.Fast_Plan
-   --       and This.Entity_State'Old = This.Entity_State
-   --       and This.Entity_Configuration'Old = This.Entity_Configuration
-   --       and This.Entity_State'Old = This.Entity_State
-   --       and This.Air_Vehicules'Old = This.Air_Vehicules
-   --       and This.Ground_Vehicles'Old = This.Ground_Vehicles
-   --       and This.Surface_Vehicles'Old = This.Surface_Vehicles
-   --       and This.Auto_Request_Id'Old = This.Auto_Request_Id
-   --       and This.Unique_Automation_Request'Old = This.Unique_Automation_Request
-   --       and This.Task_Plan_Options'Old = This.Task_Plan_Options
-   --       and This.Route_Id'Old = This.Route_Id
-   --       and This.Route_Plan'Old = This.Route_Plan
-   --       and This.Pending_Auto_Req'Old = This.Pending_Auto_Req
-   --       and This.Route_Task_Pairing'Old = This.Route_Task_Pairing
-   --       and This.Route_Request_ID'Old = This.Route_Request_ID
-   --       and This.Pending_Route'Old = This.Pending_Route;
-   --
-   --
-   --
-   --
-   --
-   --
-   --     use Int64_Pair_Int64_Route_Plan_Maps.Formal_Model;
-   --     procedure Add_Route_Plan (This : in out Route_Aggregator_Service;
-   --                               Route_Plan_Pair : in Pair_Int64_Route_Plan) with
-   --
-   --       Global => null,
-   --       Pre => All_Requests_Valid (This)
-   --       and Contains (This.Pending_Route,        Route_Plan_Pair.Reponse_ID)
-   --       and Contains (This.Route_Plan_Responses, Route_Plan_Pair.Reponse_ID)
-   --       and not Contains (This.Route_Plan, Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)),
-   --
-   --       Post => Contains (This.Route_Plan, Get_RouteID (Route_Plan_Pair.Returned_Route_Plan))
-   --       and  Model (This.Route_Plan)'Old <= Model (This.Route_Plan)
-   --       and  Int64_Pair_Int64_Route_Plan_Maps.Formal_Model.M.Keys_Included_Except (Model (This.Route_Plan),
-   --                                                                                  Model (This.Route_Plan)'Old,
-   --                                                                                  Get_RouteID (Route_Plan_Pair.Returned_Route_Plan))
-   --       and All_Requests_Valid (This);
+
+
+
+
 
    ------------------------------------------------
    -- Check of Route_Aggregator_Service Validity --
@@ -88,7 +31,8 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
       and Contains (Pending_Route,        Route_Plan_Pair.Reponse_ID)
       and Contains (Route_Plan_Responses, Route_Plan_Pair.Reponse_ID))
        with Ghost;
-
+   -- all Route Plan Pair in Route Plan are link to a Route Plan response
+   --
    function Check_Route_Plan    (Route_Plan    : Pair_Int64_Route_Plan_Map;
                                  Pending_Route : Pending_Route_Matrix;
                                  Route_Plan_Responses : Route_Plan_Responses_Map) return Boolean is
@@ -380,130 +324,35 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    --       (X, Y, Z : in Route_Aggregator_Service ) with Global => null,
    --       Pre => Same_Route_Aggretor(X,Y) and Same_Route_Aggretor(Y,Z),  Post => Same_Route_Aggretor(X,Z);
 
-   --
-   --
-   --
-   --     procedure Build_Matrix_Requests (This  : in out Route_Aggregator_Service;
-   --                                      ReqID : in Int64;
-   --                                      Areq  : in My_UniqueAutomationRequest) with
-   --       Pre => not Int64_Pending_Auto_Req_Matrix.Contains(This.Pending_Auto_Req,
-   --                                                         ReqID)
-   --       and All_Requests_Valid (This),
-   --       Post => This.Unique_Automation_Request'Old = This.Unique_Automation_Request
-   --       and All_Requests_Valid (This);
-   --
-   --     -- void SendRouteResponse(int64_t);
-   --     procedure Send_Route_Reponse (This     : in out Route_Aggregator_Service;
-   --                                   RouteKey : Int64) with
-   --       Pre =>
-   --         Int64_Pending_Route_Matrix.Contains(This.Pending_Route,
-   --                                             RouteKey)
-   --       and then
-   --         (for all Cursor in Element (This.Pending_Route, RouteKey)
-   --          =>( -- check of calculation
-   --                   Contains (This.Route_Plan_Responses,
-   --                             Element (Element (This.Pending_Route, RouteKey), Cursor))
-   --             and then
-   --               (for all J in  First_Index (Get_ID_From_RouteResponses ( Element (This.Route_Plan_Responses,
-   --                                                                                 Element (Element (This.Pending_Route, RouteKey) , Cursor)).Content)) ..
-   --                  Last_Index (Get_ID_From_RouteResponses ( Element (This.Route_Plan_Responses,
-   --                                                                    Element (Element (This.Pending_Route, RouteKey) , Cursor)).Content))
-   --                => Contains (This.Route_Plan,
-   --                             Element ( Get_ID_From_RouteResponses ( Element (This.Route_Plan_Responses,
-   --                                                                             Element (Element (This.Pending_Route, RouteKey) , Cursor)).Content),J)))))
-   --       ,
-   --       Post => ( Int64_Pending_Route_Matrix.Contains(This.Pending_Route,
-   --                 RouteKey)
-   --                 and This.Pending_Route = This.Pending_Route'Old);
-   --
-   --
-   --
-   --     -- void CheckAllRoutePlans();
-   --     procedure Check_All_Route_Plans (This : in out Route_Aggregator_Service);
-   --
-   --
-   --     --  void CheckAllTaskOptionsReceived();
-   --     procedure Check_All_Task_Option_Received (This : in out Route_Aggregator_Service);
-   --
-   --
-   --
-   --     -- For each vehicle target by Route_Resquest generate a corresponding My_RoutePlanRequests
-   --     --   (and initiate calculationin function of the vehicles types)
-   --     --
-   --     --
-   --     -- void HandleRouteRequest(std::shared_ptr<uxas::messages::route::RouteRequest>);
-   --     procedure Handle_Route_Request (This          : in out Route_Aggregator_Service;
-   --                                     Route_Request : My_RouteRequest) with
-   --       Pre => Contains (Container => This.Pending_Route,
-   --                        Key       => Get_RequestID (Route_Request)) ;
 
-   use all type Vect_My_RouteConstraints;
-   --  void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
-   procedure Euclidean_Plan (This               : in out Route_Aggregator_Service;
-                             Route_Plan_Request : My_RoutePlanRequest) with
 
-     Pre =>  -- the calculation was never done before
-       (not Contains (This.Route_Plan_Responses, Get_RequestID (Route_Plan_Request)))
-     -- none of the sub route calculation were not done
-     and (for all Ind in First_Index (Get_RouteRequests (Route_Plan_Request)) ..  Last_Index (Get_RouteRequests (Route_Plan_Request))
-          => not Contains (This.Route_Plan,
-                           Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request),
-                                                 Ind))))
-     -- check the fact that the request don't come from nowhere
-     and Contains (This.Pending_Route,
-                   Get_RequestID (Route_Plan_Request))
 
-       -- Check The Index unicity of sub calculation
-     and (for all Ind_1 in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request))
-          => (for all Ind_2 in Ind_1 + 1 .. Last_Index (Get_RouteRequests (Route_Plan_Request))
-              => (Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request), Ind_1)) /=
-                    Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request), Ind_2)))))
 
-     -- invariant check
-     and All_Requests_Valid (This)
-     and Length (This.Route_Plan_Responses) < This.Route_Plan_Responses.Capacity
-     and Length (This.Route_Plan) + Length (Get_RouteRequests (Route_Plan_Request)) <= This.Route_Plan.Capacity,
 
-     Post => All_Requests_Valid (This)
 
-     and Contains (This.Route_Plan_Responses,
-                   Get_RequestID (Route_Plan_Request))
 
-     and  (for all I in First_Index (Get_RouteRequests (Route_Plan_Request)) ..  Last_Index (Get_RouteRequests (Route_Plan_Request))
-           => Contains (This.Route_Plan, Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request), I))));
 
-   --       and This.Fast_Plan = This.Fast_Plan'Old
+   -- void CheckAllRoutePlans();
+   procedure Check_All_Route_Plans (This : in out Route_Aggregator_Service);
+
+
+   --  void CheckAllTaskOptionsReceived();
+   procedure Check_All_Task_Option_Received (This : in out Route_Aggregator_Service);
+
+
+
+   -- For each vehicle target by Route_Resquest generate a corresponding My_RoutePlanRequests
+   --   (and initiate calculationin function of the vehicles types)
    --
-   --       and Check_Same_Entity_State (This.Entity_State,This.Entity_State'Old)
-   --       and Check_Same_Entity_Configuration (This.Entity_Configuration, This.Entity_Configuration'Old)
    --
-   --       and This.Ground_Vehicles = This.Ground_Vehicles'Old
-   --       and This.Surface_Vehicles = This.Surface_Vehicles'Old
-   --       and This.Air_Vehicules = This.Air_Vehicules'Old
-   --
-   --       and This.Auto_Request_Id = This.Auto_Request_Id'Old
-   --       and Check_Same_Unique_Automation_Request (This.Unique_Automation_Request, This.Unique_Automation_Request'Old)
-   --       and Check_Same_Task_Plan_Options (This.Task_Plan_Options, This.Task_Plan_Options'Old)
-   --
-   --       and This.Route_Id = This.Route_Id'Old
-   --       and Check_Same_Pending_Auto_Req (This.Pending_Auto_Req, This.Pending_Auto_Req'Old)
-   --       and Check_Same_Route_Task_Pairing (This.Route_Task_Pairing, This.Route_Task_Pairing'Old)
-   --
-   --       and This.Route_Request_ID = This.Route_Request_ID'Old
-   --       and Check_Same_Pending_Route (This.Pending_Route, This.Pending_Route'Old);
+   -- void HandleRouteRequest(std::shared_ptr<uxas::messages::route::RouteRequest>);
+   procedure Handle_Route_Request (This          : in out Route_Aggregator_Service;
+                                   Route_Request : My_RouteRequest) with
+     Pre => Contains (Container => This.Pending_Route,
+                      Key       => Get_RequestID (Route_Request)) ;
 
-   --     --  Void SendMatrix(Int64_T);
-   --     procedure Send_Matrix (This    : in out Route_Aggregator_Service;
-   --                            AutoKey : Int64) with
-   --       Pre =>Contains (This.Pending_Auto_Req,
-   --                       AutoKey)
-   --       and then
-   --         Contains (ThiS.Unique_Automation_Request,
-   --                   AutoKey)
-   --       and then
-   --         (for all Response_ID of Element (Container => This.Pending_Auto_Req,
-   --                                          Key       => AutoKey)
-   --          => Contains (Container => This.Route_Plan,
-   --                       Key       => Response_ID));
+
+
+
 
 end  UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK;

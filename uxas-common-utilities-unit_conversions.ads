@@ -41,8 +41,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       East_M        : Earth_Coordonate_M;
       Latitude_RAD  : out RAD_Latitude;
       Longitude_RAD : out RAD_Angle) with
-     Global => (Radius_Meridional_M, Latitude_Initial_RAD
-                , Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
+     Global => (Radius_Meridional_M, Latitude_Initial_RAD,
+                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
      Pre => (Radius_Meridional_M > 0.0)
      and    (Radius_Small_Circle_Latitude_M > 0.0);
 
@@ -51,8 +51,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       East_M        : Earth_Coordonate_M;
       Latitude_DEG  : out DEG_Latitude;
       Longitude_DEG : out DEG_Angle) with
-     Global => (Radius_Meridional_M, Latitude_Initial_RAD
-                , Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
+     Global => (Radius_Meridional_M, Latitude_Initial_RAD,
+                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
      Pre => Radius_Meridional_M > 0.0
      and  Radius_Small_Circle_Latitude_M > 0.0;
 
@@ -61,8 +61,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       East_FT       : Earth_Coordonate_FT;
       Latitude_DEG  : out DEG_Latitude;
       Longitude_DEG : out DEG_Angle) with
-     Global => (Radius_Meridional_M, Latitude_Initial_RAD
-                , Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
+     Global => (Radius_Meridional_M, Latitude_Initial_RAD,
+                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
      Pre => Radius_Meridional_M > 0.0
      and  Radius_Small_Circle_Latitude_M > 0.0;
 
@@ -73,8 +73,8 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       East_FT       : Earth_Coordonate_FT;
       Latitude_RAD  : out RAD_Latitude;
       Longitude_RAD : out RAD_Angle) with
-     Global => (Radius_Meridional_M, Latitude_Initial_RAD
-                , Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
+     Global => (Radius_Meridional_M, Latitude_Initial_RAD,
+                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
      Pre => Radius_Meridional_M > 0.0
      and  Radius_Small_Circle_Latitude_M > 0.0;
 

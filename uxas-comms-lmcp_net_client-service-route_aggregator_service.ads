@@ -166,11 +166,6 @@ private
       Returned_Route_Plan : My_RoutePlan;
    end record;
 
---     overriding function "=" (X, Y : Pair_Int64_Route_Plan) return Boolean is
---       (X.Reponse_ID = Y.Reponse_ID
---        and X.Returned_Route_Plan = Y.Returned_Route_Plan) with
---       Global => null;
-
    package Int64_Pair_Int64_Route_Plan_Maps is new Ada.Containers.Formal_Hashed_Maps
      (Key_Type     => Int64,
       Element_Type => Pair_Int64_Route_Plan,
@@ -246,13 +241,16 @@ private
       --  std::unordered_map<int64_t, std::shared_ptr<afrl::cmasi::EntityConfiguration> > m_entityConfigurations;
       Entity_Configuration : Entity_Configuration_Map;
 
-      --   std::unordered_set<int64_t> m_airVehicles;
+      --   use for idetifi with vhehicls of Entity_State or Entity_Configuration
+      --   are Air Vehicules
       Air_Vehicules : Int64_Set;
 
-      --   std::unordered_set<int64_t> m_groundVehicles;
+      --   use for idetifi with vhehicls of Entity_State or Entity_Configuration
+      --   are Ground Vehicles
       Ground_Vehicles : Int64_Set;
 
-      --   std::unordered_set<int64_t> m_surfaceVehicles;
+      --   use for idetifi with vhehicls of Entity_State or Entity_Configuration
+      --   are Surface Vehicles
       Surface_Vehicles : Int64_Set;
 
       -- int64_t m_autoRequestId{1}
@@ -260,6 +258,8 @@ private
       Auto_Request_Id : Int64 := 1;
       Unique_Automation_Request : Unique_Automation_Request_Map;
 
+
+      -- store suplement data related to task use for buiding matrix
       -- std::unordered_map<int64_t, std::shared_ptr<uxas::messages::task::TaskPlanOptions> > m_taskOptions;
       Task_Plan_Options : Task_Plan_Options_Map;
 
@@ -268,6 +268,9 @@ private
 
       --  //                route id,    plan response id                 returned route plan
       --  std::unordered_map<int64_t, std::pair<int64_t, std::shared_ptr<uxas::messages::route::RoutePlan> > > m_routePlans;
+
+      -- contain all complete Route calculation
+      -- calculation are link to a request asking
       Route_Plan : Pair_Int64_Route_Plan_Map;
 
       --  std::unordered_map<int64_t, std::unordered_set<int64_t> > m_pendingAutoReq;
@@ -286,10 +289,10 @@ private
       --  std::unordered_map<int64_t, std::unordered_set<int64_t> > m_pendingRoute;
       Pending_Route : Pending_Route_Matrix;
    end record;
---
---      procedure XML_Write (this  : Route_Aggregator_Service;
---                          S     : access Ada.Streams.Root_Stream_Type'Class;
---                          Level : Natural)
+   --
+   --      procedure XML_Write (this  : Route_Aggregator_Service;
+   --                          S     : access Ada.Streams.Root_Stream_Type'Class;
+   --                          Level : Natural)
 
 
 end UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;
