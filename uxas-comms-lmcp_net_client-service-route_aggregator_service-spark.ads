@@ -172,28 +172,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    -------------------------------------------------
    -- Check of Route_Aggregator_Service evolution --
    -------------------------------------------------
-   function Same (X, Y : Route_Aggregator_Service) return Boolean is
-     (X.Fast_Plan = Y. Fast_Plan
-      and X.Entity_State = Y.Entity_State
-      and X.Entity_Configuration = Y.Entity_Configuration
-      and X.Entity_State = Y.Entity_State
-      and X.Air_Vehicules = Y.Air_Vehicules
-      and X.Ground_Vehicles = Y.Ground_Vehicles
-      and X.Surface_Vehicles = Y.Surface_Vehicles
-      and X.Auto_Request_Id = Y.Auto_Request_Id
-      and X.Unique_Automation_Request = Y.Unique_Automation_Request
-      and X.Task_Plan_Options = Y.Task_Plan_Options
-      and X.Route_Id = Y.Route_Id
-      and X.Route_Plan = Y.Route_Plan
-      and X.Pending_Auto_Req = Y.Pending_Auto_Req
-      and X.Route_Task_Pairing = Y.Route_Task_Pairing
-      and X.Route_Request_ID = Y.Route_Request_ID
-      and X.Route_Plan_Responses = Y.Route_Plan_Responses
-      and X.Pending_Route = Y.Pending_Route) with Global => null,
-     Ghost;
-   procedure Lemma_Same_Route_Aggregator (X : Route_Aggregator_Service) with Ghost,
-     Global => null,
-     Post => Same (X, X);
+
 
    --     function Check_Same_Entity_State
    --       (X, Y : Entity_State_Map) return Boolean is
@@ -332,11 +311,12 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
 
 
 
-   -- void CheckAllRoutePlans();
+   -- verify if all route plan relatif to a route request a reeive
+   -- and verify if all route plan ralatif to the matrix a receive
    procedure Check_All_Route_Plans (This : in out Route_Aggregator_Service);
 
 
-   --  void CheckAllTaskOptionsReceived();
+   -- verify if all the Task infomation relatif to a Unique Automation Request are receive
    procedure Check_All_Task_Option_Received (This : in out Route_Aggregator_Service);
 
 
@@ -344,8 +324,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    -- For each vehicle target by Route_Resquest generate a corresponding My_RoutePlanRequests
    --   (and initiate calculationin function of the vehicles types)
    --
-   --
-   -- void HandleRouteRequest(std::shared_ptr<uxas::messages::route::RouteRequest>);
+   --Emit a number of *RoutePlanRequest* messages equal to the number of vehicles in the `VehicleID` field of the original *RouteRequest*
    procedure Handle_Route_Request (This          : in out Route_Aggregator_Service;
                                    Route_Request : My_RouteRequest) with
      Pre => Contains (Container => This.Pending_Route,

@@ -337,7 +337,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
 
    begin
       Spark.Handle_Route_Request(This          => This,
-                                Route_Request => Route_Request);
+                                 Route_Request => Route_Request);
    end Handle_Route_Request_Msg;
 
 
@@ -348,7 +348,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -- Handle_Route_Plan_Response_Msg --
    ------------------------------------
 
-   --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
+   --  This message is the fulfillment of a single vehicle route  plan request which the *Aggregator* catalogues until the
+   --  until the complete set of expected responses is received
+
    procedure Handle_Route_Plan_Response_Msg
      (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
@@ -400,7 +402,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -- Handle_Air_Vehicule_State_Msg --
    -----------------------------------
 
-   --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
+   --  Describes the actual state of a vehicle in the system including position, speed, and fuel status. This message is
+   -- used to create routes and cost estimates from the associated vehicle position and heading to the task option start locations
+   -- as the vheclis is identify as a Air Vehicles store is id in the Air Vheicles Set
    procedure Handle_Air_Vehicule_State_Msg
      (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
@@ -439,7 +443,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -- Handle_Ground_Vehicles_State_Msg --
    --------------------------------------
 
-   --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
+   --  Describes the actual state of a vehicle in the system including position, speed, and fuel status. This message is
+   -- used to create routes and cost estimates from the associated vehicle position and heading to the task option start locations
+   -- as the vheclis is identify as a Ground Vehicles store is id in the Ground Vheicles Set
    procedure Handle_Ground_Vehicles_State_Msg
      (This :in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
@@ -477,7 +483,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -- Handle_Surface_Vehicle_State_Msg --
    --------------------------------------
 
-   --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
+   --  Describes the actual state of a vehicle in the system including position, speed, and fuel status. This message is
+   -- used to create routes and cost estimates from the associated vehicle position and heading to the task option start locations
+   -- as the vheclis is identify as a Surface Vehicles store is id in the Surface Vheicles Set
    procedure Handle_Surface_Vehicle_State_Msg
      (This :in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
@@ -516,7 +524,12 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -------------------------------------------
    -- Handle_Air_Vehicule_Configuration_Msg --
    -------------------------------------------
-   --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
+
+   -- Vehicle capabilities (e.g. allowable speeds) are described by entity configuration messages.
+   -- This service uses the *EntityConfiguration* to determine which type of vehicle
+   -- corresponds to a specific ID so that ground planners are used for ground vehicles and air planners are used for aircraft.
+   -- as the vheclis is identify as a Air Vehicles store is id in the Air Vheicles Set
+
    procedure Handle_Air_Vehicule_Configuration_Msg
      (This :in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
@@ -551,7 +564,11 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    ---------------------------------------------
    -- Handle_Ground_Vehicle_Configuration_Msg --
    ---------------------------------------------
-   --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
+
+   -- Vehicle capabilities (e.g. allowable speeds) are described by entity configuration messages.
+   -- This service uses the *EntityConfiguration* to determine which type of vehicle
+   -- corresponds to a specific ID so that ground planners are used for ground vehicles and air planners are used for aircraft.
+   -- as the vheclis is identify as a Ground Vehicles store is id in the Ground Vheicles Set
    procedure Handle_Ground_Vehicle_Configuration_Msg
      (This :in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
@@ -588,7 +605,10 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -- Handle_Surface_Vehicle_Configuration_Msg --
    ----------------------------------------------
 
-   --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
+   -- Vehicle capabilities (e.g. allowable speeds) are described by entity configuration messages.
+   -- This service uses the *EntityConfiguration* to determine which type of vehicle
+   -- corresponds to a specific ID so that ground planners are used for ground vehicles and air planners are used for aircraft.
+   -- as the vheclis is identify as a Surface Vehicles store is id in the Surface Vheicles Set
    procedure Handle_Surface_Vehicle_Configuration_Msg
      (This :in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
@@ -626,7 +646,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -- Handle_Unique_Automation_Request_Msg --
    ------------------------------------------
 
-   --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
+   -- Primary message that initiates the collection of options sent from each *Task* via the *TaskPlanOptions* message.
+   -- A list of all *Tasks* included in the *UniqueAutomationRequest* is made upon reception of this message and later used to ensure that
+   -- all included *Tasks* have responded.
    procedure Handle_Unique_Automation_Request_Msg
      (This :in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
@@ -653,7 +675,9 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -- Handle_Impact_Automation_Request_Msg --
    ------------------------------------------
 
-   --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
+   -- Primary message that initiates the collection of options sent from each *Task* via the *TaskPlanOptions* message.
+   -- A list of all *Tasks* included in the *UniqueAutomationRequest* is made upon reception of this message and later used to ensure that
+   -- all included *Tasks* have responded.
    procedure Handle_Impact_Automation_Request_Msg
      (This :in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
@@ -692,7 +716,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -- Handle_Task_Plan_Options_Msg --
    ----------------------------------
 
-   --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
+   --Store task options and check to see if this message completes
    procedure Handle_Task_Plan_Options_Msg
      (This :in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
@@ -904,7 +928,7 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Pending_Route_Matrix.Key (This.Pending_Route, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
 
          String'Write (S, LeftPad ("<PendingRoute>" & ASCII.LF, Level + 2 ));
-         for ID Of Int64_Pending_Route_Matrix.Element (This.Pending_Route, Cursor) loop
+         for ID of Int64_Pending_Route_Matrix.Element (This.Pending_Route, Cursor) loop
             String'Write (S, LeftPad ("<RouteID>" & Int64'Image (ID) & "</RouteID>" & ASCII.LF, Level + 3));
          end loop;
          String'Write (S, LeftPad ("</PendingRoute>" & ASCII.LF, Level + 2 ));

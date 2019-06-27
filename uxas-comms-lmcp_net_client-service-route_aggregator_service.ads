@@ -235,32 +235,32 @@ private
 
       Fast_Plan : Boolean := False;
 
-      --  std::unordered_map<int64_t, std::shared_ptr<afrl::cmasi::EntityState> > m_entityStates;
+      -- list of vheicles actual state in the system including position, speed, and fuel status.
+      -- used to create routes and cost estimates from the associated vehicle position and heading to the task option start locations
       Entity_State : Entity_State_Map;
 
-      --  std::unordered_map<int64_t, std::shared_ptr<afrl::cmasi::EntityConfiguration> > m_entityConfigurations;
+      --  No state change. Store to identify appropriate route planner by vehicle ID.
       Entity_Configuration : Entity_Configuration_Map;
 
-      --   use for idetifi with vhehicls of Entity_State or Entity_Configuration
-      --   are Air Vehicules
+      -- List of All Vehicles ID who corresponds to Air Vehicules
       Air_Vehicules : Int64_Set;
 
-      --   use for idetifi with vhehicls of Entity_State or Entity_Configuration
-      --   are Ground Vehicles
+      -- List of All Vehicles ID who corresponds to Ground Vehicles
       Ground_Vehicles : Int64_Set;
 
-      --   use for idetifi with vhehicls of Entity_State or Entity_Configuration
-      --   are Surface Vehicles
+     -- List of All Vehicles ID who corresponds to Surface Vehicles
       Surface_Vehicles : Int64_Set;
 
       -- int64_t m_autoRequestId{1}
       -- std::unordered_map<int64_t, std::shared_ptr<uxas::messages::task::UniqueAutomationRequest> > m_uniqueAutomationRequests;
       Auto_Request_Id : Int64 := 1;
+
+      -- create checklist of expected task options
       Unique_Automation_Request : Unique_Automation_Request_Map;
 
 
       -- store suplement data related to task use for buiding matrix
-      -- std::unordered_map<int64_t, std::shared_ptr<uxas::messages::task::TaskPlanOptions> > m_taskOptions;
+      -- Primary message from *Tasks* that prescribe available start
       Task_Plan_Options : Task_Plan_Options_Map;
 
       -- // Starting ID for uniquely identifying route plan
@@ -270,10 +270,10 @@ private
       --  std::unordered_map<int64_t, std::pair<int64_t, std::shared_ptr<uxas::messages::route::RoutePlan> > > m_routePlans;
 
       -- contain all complete Route calculation
-      -- calculation are link to a request asking
+      -- calculation are link to a request asking and end locations for each option as well as cost to complete the option.
       Route_Plan : Pair_Int64_Route_Plan_Map;
 
-      --  std::unordered_map<int64_t, std::unordered_set<int64_t> > m_pendingAutoReq;
+      -- Matrix of requst ID to Route ID to fulffly for a matrix request
       Pending_Auto_Req : Pending_Auto_Req_Matrix;
 
       --  std::unordered_map<int64_t, std::shared_ptr<AggregatorTaskOptionPair> > m_routeTaskPairing;
@@ -282,11 +282,11 @@ private
       --  int64_t m_routeRequestId{1};
       Route_Request_ID : Int64 := 1;
 
-      --  std::unordered_map<int64_t, std::shared_ptr<uxas::messages::route::RoutePlanResponse> > m_routePlanResponses;
+      --  list evry fulfy of a single vehicle route plan request
+      -- until the complete set of expected responses is received
       Route_Plan_Responses : Route_Plan_Responses_Map;
 
-      --                  Route_Request_ID        Route_Plan_Request_ID
-      --  std::unordered_map<int64_t, std::unordered_set<int64_t> > m_pendingRoute;
+    -- Matrix of requst ID to Route ID to fulffly for a route request
       Pending_Route : Pending_Route_Matrix;
    end record;
    --

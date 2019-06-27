@@ -41,19 +41,17 @@ with UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary;       use UxAS.Message
 
 package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
 
-
    package My_Task_Option_Vects is new Ada.Containers.Formal_Vectors
      (Index_Type   => Natural,
       Element_Type => My_TaskOption);
-   
-   
+
+
 
    package My_Plan_Request_Vects is new Ada.Containers.Formal_Vectors
      (Index_Type   => Natural,
       Element_Type => My_RoutePlanRequest);
    use My_Plan_Request_Vects;
 
-   
    --
    --     procedure Lemma_Check_Same_Entity_State_Identity (This : Entity_State_Map) is null;
    --     procedure Lemma_Check_Same_Entity_State_Commutativity (X, Y : Entity_State_Map) is null;
@@ -63,9 +61,10 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    --     procedure Lemma_Same_Route_Aggregator_Validity (X, Y : Route_Aggregator_Service) is null;
    --     procedure Lemma_Same_Route_Aggregator_Commutativity (X, Y    : Route_Aggregator_Service) is null;
    --     procedure Lemma_Same_Route_Aggregator_Associativity (X, Y, Z : Route_Aggregator_Service) is null;
+
    use Int64_Pending_Route_Matrix.Formal_Model;
    use Int64_Route_Plan_Responses_Maps.Formal_Model;
-   
+
    procedure Lemma_Ceck_Route_Plan_Reference_Insert (Route_Plan : Pair_Int64_Route_Plan_Map;
                                                      Old_Pending_Route,  New_Pending_Route : Pending_Route_Matrix;
                                                      Old_Route_Plan_Rep, New_Route_Plan_Rep : Route_Plan_Responses_Map)
@@ -75,12 +74,22 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
      and K_Keys_Included (Keys (Old_Pending_Route),  Keys (New_Pending_Route))
      and K_Keys_Included (Keys (Old_Route_Plan_Rep), Keys (New_Route_Plan_Rep)),
      PosT => Check_Route_Plan (Route_Plan, New_Pending_Route, New_Route_Plan_Rep);
-   
+
+
+   --  check that to see if all options from all tasks have been received for this request
+   function All_Task_Option_Receive (This    : Route_Aggregator_Service;
+                                     Request : My_UniqueAutomationRequest) return Boolean is
+     (for all T in Int64_Vects.First_Index (Get_TaskList_From_OriginalRequest (Request)) .. Int64_Vects.Last_Index (Get_TaskList_From_OriginalRequest (Request))
+      => Int64_Task_Plan_Options_Maps.Contains (Container => This.Task_Plan_Options,
+                                                Key       => Int64_Vects.Element (Container => Get_TaskList_From_OriginalRequest (Request),
+                                                                                  Index     => T))) with Global => null;
+
    procedure Lemma_Ceck_Route_Plan_Reference_Insert (Route_Plan : Pair_Int64_Route_Plan_Map;
                                                      Old_Pending_Route, New_Pending_Route : Pending_Route_Matrix;
                                                      Old_Route_Plan_Rep, New_Route_Plan_Rep : Route_Plan_Responses_Map)
    is
    begin
+      
       pragma Assert (for all Cursor in Route_Plan
                      => Check_Route_Plan_Sub (Element (Route_Plan, Cursor), Old_Pending_Route, Old_Route_Plan_Rep, Key (Route_Plan, Cursor))
                      and Contains (New_Pending_Route,  Element (Route_Plan, Cursor).Reponse_ID)
@@ -89,34 +98,40 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    end Lemma_Ceck_Route_Plan_Reference_Insert;
    procedure Lemma_Same_Route_Aggregator (X : Route_Aggregator_Service) is null;
 
+              
+
    ---------------------------
    -- Build_Matrix_Requests --
    ---------------------------
+
+
+
+   --      // All options corresponding to current automation request have been received
+   --      // now make 'matrix' requests (all task options to all other task options)
+   --      // [but only if options haven't already been sent??]
+   --
+   --      // Proceedure:
+   --      //  1. Create new 'pending' data structure for all routes that will fulfill this request
+   --      //  2. For each vehicle, create requests for:
+   --      //       a. initial position to each task option
+   --      //       b. task/option to task/option
+   --      //       c. associate routeID with task options in m_routeTaskPairing
+   --      //       d. push routeID onto pending list
+   --      //  3. Send requests to proper planners
+
    procedure Build_Matrix_Requests (This  : in out Route_Aggregator_Service;
                                     ReqID : Int64;
                                     Areq  : My_UniqueAutomationRequest) with
      Pre => not Int64_Pending_Auto_Req_Matrix.Contains (This.Pending_Auto_Req,
                                                         ReqID)
-     and All_Requests_Valid (This),
-     Post => This.Unique_Automation_Request'Old = This.Unique_Automation_Request
-     and All_Requests_Valid (This);
+     and All_Requests_Valid (This)
+     and All_Task_Option_Receive (This, Areq),
+     
+     Post => All_Requests_Valid (This); 
 
    procedure Build_Matrix_Requests (This  : in out Route_Aggregator_Service;
                                     ReqID : Int64;
                                     Areq  : My_UniqueAutomationRequest)
-
-     --      // All options corresponding to current automation request have been received
-     --      // now make 'matrix' requests (all task options to all other task options)
-     --      // [but only if options haven't already been sent??]
-     --
-     --      // Proceedure:
-     --      //  1. Create new 'pending' data structure for all routes that will fulfill this request
-     --      //  2. For each vehicle, create requests for:
-     --      //       a. initial position to each task option
-     --      //       b. task/option to task/option
-     --      //       c. associate routeID with task options in m_routeTaskPairing
-     --      //       d. push routeID onto pending list
-     --      //  3. Send requests to proper planners
 
    is
 
@@ -137,8 +152,9 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          Request_Acc.all := Unwrap (Request);
          This.Send_Shared_LMCP_Object_Limited_Cast_Message (Cast_Address,
                                                             Object_Any (Request_Acc));
+
       end My_Send_Shared_LMCP_Object_Limited_Cast_Message;
-      
+
       My_Plan_Request_Vects_Commun_Max_Capacity : constant := 200; -- arbitrary
 
       subtype My_Plan_Request_Vect is My_Plan_Request_Vects.Vector
@@ -150,12 +166,9 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
 
       Entity_List : Int64_Vect := Get_EntityList_From_OriginalRequest (Request => Areq);
    begin
-      Int64_Pending_Auto_Req_Matrix.Insert (Container => This.Pending_Auto_Req,
-                                            Key       => ReqID,
-                                            New_Item  => Int64_Sets.Empty_Set);
 
+      --  if the list of eligible vehicles is empty that mean they are all eligible
       if Is_Empty (Entity_List) then
-         --  if requeste are not constraint to only a small amont of vehicles that mean their are all concerne
 
          for State_Cursor in This.Entity_State loop
             Append (Entity_List,
@@ -206,11 +219,8 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                end;
             end loop;
 
-            --  collect all the Task_Option for each Task of the request where the vehicles is elligible
-            --  the req Areq contain ID of Task and a Task contain Task Option
-
+            --  if we got the information about vehicles we can processe calcultion
             if Is_Foud_Planning_State or Contains_Vehicles then
-               --  vehicle can be in Plannig state but not in liste of vehicles
 
                for  Index_Task_ID in  First_Index (Get_TaskList_From_OriginalRequest (Areq)) .. Last_Index (Get_TaskList_From_OriginalRequest (Areq)) loop
 
@@ -221,7 +231,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                                   Task_ID) then
                         declare
                            Tasks_List : constant Vect_My_TaskOption := Get_Options (Element (This.Task_Plan_Options,
-                                                                                       Task_ID).Content);
+                                                                                    Task_ID).Content);
                            use Vect_My_TaskOptions;
                         begin
 
@@ -393,31 +403,36 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    ------------------------
    -- Send_Route_Reponse --
    ------------------------
-   
+   function All_Route_Response_Receive (This : Route_Aggregator_Service;
+                                        Route_Id : Int64) return Boolean is
+     (for all Id_Request of Int64_Pending_Route_Matrix.Element (This.Pending_Route, Route_Id)
+      => Int64_Route_Plan_Responses_Maps.Contains (Container => This.Route_Plan_Responses,
+                                                   Key       => Id_Request)) with Global => null,
+     Pre => Int64_Pending_Route_Matrix.Contains (This.Pending_Route, Route_Id);
+
+
    procedure Send_Route_Reponse (This     : in out Route_Aggregator_Service;
                                  RouteKey : Int64) with
      Pre =>
        Int64_Pending_Route_Matrix.Contains (This.Pending_Route,
                                             RouteKey)
+     and then  All_Route_Response_Receive (This, RouteKey)
      and then
        (for all Cursor in Element (This.Pending_Route, RouteKey)
         => ( -- check of calculation
-                  Contains (This.Route_Plan_Responses,
-                            Element (Element (This.Pending_Route, RouteKey), Cursor))
-            and then
-              (for all J in  Int64_Vects.First_Index (Get_ID_From_RouteResponses (Int64_Route_Plan_Responses_Maps.Element (This.Route_Plan_Responses,
-                                                                                                                           Element (Element (This.Pending_Route, RouteKey), Cursor)).Content)) ..
-                 Int64_Vects.Last_Index (Get_ID_From_RouteResponses (Int64_Route_Plan_Responses_Maps.Element (This.Route_Plan_Responses,
-                                                                                                              Element (Element (This.Pending_Route, RouteKey), Cursor)).Content))
-               => Contains (This.Route_Plan,
-                            Int64_Vects.Element (Get_ID_From_RouteResponses (Int64_Route_Plan_Responses_Maps.Element (This.Route_Plan_Responses,
-                                                                                                                      Element (Element (This.Pending_Route, RouteKey), Cursor)).Content), J)))))
+                  for all J in  Int64_Vects.First_Index (Get_ID_From_RouteResponses (Int64_Route_Plan_Responses_Maps.Element (This.Route_Plan_Responses,
+                                                                                                                              Element (Element (This.Pending_Route, RouteKey), Cursor)).Content)) ..
+              Int64_Vects.Last_Index (Get_ID_From_RouteResponses (Int64_Route_Plan_Responses_Maps.Element (This.Route_Plan_Responses,
+                                                                                                           Element (Element (This.Pending_Route, RouteKey), Cursor)).Content))
+            => Contains (This.Route_Plan,
+                         Int64_Vects.Element (Get_ID_From_RouteResponses (Int64_Route_Plan_Responses_Maps.Element (This.Route_Plan_Responses,
+                                                                                                                   Element (Element (This.Pending_Route, RouteKey), Cursor)).Content), J))))
         ,
      Post => (Int64_Pending_Route_Matrix.Contains (This.Pending_Route,
               RouteKey)
               and This.Pending_Route = This.Pending_Route'Old);
 
-   -- create a response to the Request with RouteKey as ID
+   --  create a response to the Request with RouteKey as ID
    procedure Send_Route_Reponse (This : in out Route_Aggregator_Service;
                                  RouteKey : Int64)
    is
@@ -448,8 +463,8 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       --  response->setResponseID (routeKey);
       Set_ResponseID (Response, RouteKey);
 
-      --  add Each plan concerne by responce 
-      -- remove these plan and all the route constrain of it
+      --  add Each plan concerne by responce
+      --  remove these plan and all the route constrain of it
       for Plan_Reponse_Id of Exepcted_Plan_Response_IDs loop
 
          declare
@@ -491,6 +506,14 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    -- Send_Matrix --
    -----------------
 
+   function All_Matrix_Response_Receive (This   : Route_Aggregator_Service;
+                                         Req_ID : Int64) return Boolean is
+     (for all Id_Request of Int64_Pending_Auto_Req_Matrix.Element (This.Pending_Auto_Req, Req_ID)
+      => Int64_Pair_Int64_Route_Plan_Maps.Contains (Container => This.Route_Plan,
+                                                    Key       => Id_Request)) with Global => null,
+     Pre => Int64_Pending_Auto_Req_Matrix.Contains (This.Pending_Auto_Req, Req_ID);
+
+
    procedure Send_Matrix (This    : in out Route_Aggregator_Service;
                           AutoKey : Int64) with
      Pre => Contains (This.Pending_Auto_Req,
@@ -498,12 +521,9 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
      and then
        Contains (This.Unique_Automation_Request,
                  AutoKey)
-     and then
-       (for all Response_ID of Element (Container => This.Pending_Auto_Req,
-                                        Key       => AutoKey)
-        => Contains (Container => This.Route_Plan,
-                     Key       => Response_ID));
-   -- build the matrix response for the AutoKey request
+     and then All_Matrix_Response_Receive (This, AutoKey);
+
+   --  build the matrix response for the AutoKey request
    procedure Send_Matrix (This : in out Route_Aggregator_Service;
                           AutoKey : Int64)
    is
@@ -552,8 +572,8 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    begin
 
       Set_CorrespondingAutomationRequestID (Matrix, GetRequestID (Areq));
-      Set_OperatingRegion (Matrix, Get_OperatingRegion_From_OriginalRequest (Areq) );
-      Set_TaskLevelRelationship (Matrix, Get_TaskRelationship_From_OriginalRequest (Areq)) ;
+      Set_OperatingRegion (Matrix, Get_OperatingRegion_From_OriginalRequest (Areq));
+      Set_TaskLevelRelationship (Matrix, Get_TaskRelationship_From_OriginalRequest (Areq));
       Set_TaskList (Matrix, Get_TaskList_From_OriginalRequest (Areq));
 
       --   for (auto& rId : m_pendingAutoReq[autoKey])
@@ -648,8 +668,8 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    --------------------------
    -- Check_All_Route_Plans --
    --------------------------
-   
-   
+
+
    --  for each request see if all the responce are receve and then send them
    procedure Check_All_Route_Plans (This : in out Route_Aggregator_Service)
    is
@@ -676,21 +696,11 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             Route_Id : constant Int64 :=
               Int64_Pending_Route_Matrix.Key (Container => This.Pending_Route,
                                               Position  => C);
-
-            --  i->second ()
-            Liste_RouteRequest_ID : constant  Int64_Set :=
-              Int64_Pending_Route_Matrix.Element (Container => This.Pending_Route,
-                                                  Position  => C);
-
-            --  bool isFulfilled = true;
-            Is_Fulfilled : constant Boolean := (for all Id_Request of Liste_RouteRequest_ID =>
-                                                  Int64_Route_Plan_Responses_Maps.Contains (Container => This.Route_Plan_Responses,
-                                                                                            Key       => Id_Request));
          begin
 
             Int64_Pending_Route_Matrix.Next (Container => This.Pending_Route,
                                              Position  => C);
-            if Is_Fulfilled then
+            if All_Route_Response_Receive (This, Route_Id); then
 
                Send_Route_Reponse (This     => This,
                                    RouteKey => Route_Id);
@@ -711,19 +721,12 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             Req_Id : constant Int64 := Int64_Pending_Auto_Req_Matrix.Key (Container => This.Pending_Auto_Req,
                                                                           Position  => I);
 
-            --  k->second ()
-            All_Response_ID : constant Int64_Set := Int64_Pending_Auto_Req_Matrix.Element (Container => This.Pending_Auto_Req,
-                                                                                           Position  => I);
-
-            Is_Fulfilled : constant Boolean := (for all Response_ID of All_Response_ID =>
-                                                  Int64_Pair_Int64_Route_Plan_Maps.Contains (Container => This.Route_Plan,
-                                                                                             Key       => Response_ID));
          begin
 
             Int64_Pending_Auto_Req_Matrix.Next (Container => This.Pending_Auto_Req,
                                                 Position  => I);
 
-            if Is_Fulfilled then
+            if All_Matrix_Response_Receive (This, Req_Id); then
 
                --  SendMatrix (k->first);
                Send_Matrix (This, Req_Id);
@@ -748,8 +751,8 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    ------------------------------------
    -- Check_All_Task_Option_Received --
    ------------------------------------
-   
-   -- verify if all the information necesarie for matrix are receive and then send the fullfyl matrix
+
+   --  verify if all the Task infomation relatif to a Unique Automation Request are received
    procedure Check_All_Task_Option_Received (This : in out Route_Aggregator_Service)
    is
 
@@ -763,10 +766,6 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
 
          declare
 
-            --  // check that to see if all options from all tasks have been received for this request
-            --  bool isAllReceived{true};
-            Is_All_Received : Boolean := True;
-
             --  areqIter->second
             Request : constant My_UniqueAutomationRequest := Int64_Unique_Automation_Request_Maps.Element (Container => This.Unique_Automation_Request,
 
@@ -775,31 +774,11 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             --  areqIter->first
             Index_Request : constant Int64 := Int64_Unique_Automation_Request_Maps.Key (Container => This.Unique_Automation_Request,
                                                                                         Position  => C);
-            use Int64_Vects;
+
+
          begin
 
-            --  for (size_t t = 0; t < areqIter->second->getOriginalRequest ()->getTaskList ().size (); t++)
-            for T in First_Index (Get_TaskList_From_OriginalRequest (Request)) .. Last_Index (Get_TaskList_From_OriginalRequest (Request)) loop
-
-               declare
-                  --  int64_t taskId = areqIter->second->getOriginalRequest ()->getTaskList ().at (t);
-                  Task_ID : constant Int64 := Element (Container => Get_TaskList_From_OriginalRequest (Request),
-                                                       Index     => T);
-               begin
-
-                  --  if (m_taskOptions.find (taskId) == m_taskOptions.end ())
-                  if Int64_Task_Plan_Options_Maps.Contains (Container => This.Task_Plan_Options,
-                                                            Key       => Task_ID)
-                  then
-                     Is_All_Received := False;
-                     exit;
-                  end if;
-               end;
-
-            end loop;
-
-            --  if (isAllReceived)
-            if Is_All_Received then
+            if All_Task_Option_Receive (This, Request) then
 
                --  BuildMatrixRequests (areqIter->first, areqIter->second);
                Build_Matrix_Requests (This  => This,
@@ -808,7 +787,6 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             end if;
          end;
 
-         --  areqIter++;
          Int64_Unique_Automation_Request_Maps.Next (Container => This.Unique_Automation_Request,
                                                     Position  => C);
       end loop;
@@ -819,7 +797,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    --------------------
 
    use all type Vect_My_RouteConstraints;
-   --  void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
+   --  procces to the calculation of one Reoute Plan request
    procedure Euclidean_Plan (This               : in out Route_Aggregator_Service;
                              Route_Plan_Request : My_RoutePlanRequest) with
 
@@ -843,7 +821,11 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
      -- invariant check
      and All_Requests_Valid (This)
      and Length (This.Route_Plan_Responses) < This.Route_Plan_Responses.Capacity
-     and Length (This.Route_Plan) + Length (Get_RouteRequests (Route_Plan_Request)) <= This.Route_Plan.Capacity,
+     and Length (This.Route_Plan) + Length (Get_RouteRequests (Route_Plan_Request)) <= This.Route_Plan.Capacity
+
+   --  check it is call is legit
+     and This.Fast_Plan
+     and Contains (This.Ground_Vehicles, Get_VehicleID (Route_Plan_Request)),
 
      Post => All_Requests_Valid (This)
 
@@ -873,14 +855,10 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    --       and This.Route_Request_ID = This.Route_Request_ID'Old
    --       and Check_Same_Pending_Route (This.Pending_Route, This.Pending_Route'Old);
 
-   --  void EuclideanPlan(std::shared_ptr<uxas::messages::route::RoutePlanRequest>);
    procedure Euclidean_Plan (This             : in out Route_Aggregator_Service;
                              Route_Plan_Request : My_RoutePlanRequest)
 
    is
-      use Int64_Pending_Route_Matrix.Formal_Model;
-      use Int64_Route_Plan_Responses_Maps.Formal_Model;
-      use Int64_Route_Plan_Responses_Maps.Formal_Model;
       use Vect_My_RouteConstraints_P;
 
       --  uxas::common::utilities::CUnitConversions flatEarth;
@@ -921,8 +899,8 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       pragma Assert (Get_ResponseID (Response) = Request_ID);
       pragma Assert (Check_Route_Plan_Response (This.Route_Plan_Responses));
       pragma Assert (All_Requests_Valid (This));
-      
-      
+
+
       declare
          RoutePlanResponses_Holder : constant Route_Plan_Responses_Holder := Route_Plan_Responses_Holder'(Content => Response);
          This_Route_Plan_Responses_Old : constant Route_Plan_Responses_Map := This.Route_Plan_Responses with Ghost;
@@ -943,14 +921,14 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                             and Check_Route_Plan_Response_Sub (Element (This.Route_Plan_Responses, Find (This.Route_Plan_Responses, Key)).Content,  Key)));
          pragma Assert (Length (This.Route_Plan_Responses) < This.Route_Plan_Responses.Capacity);
 
-         -- Create a route plan response for the routePlan request ID
+         --  Create a route plan response for the routePlan request ID
          Int64_Route_Plan_Responses_Maps.Insert
            (Container => This.Route_Plan_Responses,
             Key       => Get_ResponseID (RoutePlanResponses_Holder.Content),
             New_Item  => RoutePlanResponses_Holder);
-         
-         
-         
+
+
+
          pragma Assert (Contains (This.Route_Plan_Responses, Get_ResponseID (RoutePlanResponses_Holder.Content))
                         and then Check_Route_Plan_Response_Sub (Route_Plan_Response => Element (This.Route_Plan_Responses, Get_ResponseID (RoutePlanResponses_Holder.Content)).Content,
                                                                 Key                 =>  Get_ResponseID (RoutePlanResponses_Holder.Content)));
@@ -958,9 +936,9 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          Lemma_Ceck_Route_Plan_Reference_Insert (This.Route_Plan,
                                                  This.Pending_Route, This.Pending_Route,
                                                  This_Route_Plan_Responses_Old, This.Route_Plan_Responses);
-         
-         
-         
+
+
+
          pragma Assert (Check_Route_Plan (This.Route_Plan, This.Pending_Route, This.Route_Plan_Responses));
 
          pragma Assert (if  Check_Route_Plan_Response   (This.Route_Plan_Responses)
@@ -1022,17 +1000,17 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                      => (not Contains (Container => This.Route_Plan,
                                        Key       => Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request), Ind)))));
       declare
-         Length_This_Route_Plan_Old : constant := Length (This.Route_Plan) with Ghost;
-         Acc : Capacity_Range := 0 with Ghost;
+         Length_This_Route_Plan_Old : constant Count_Type := Length (This.Route_Plan) with Ghost;
+         Acc : Count_Type := 0 with Ghost;
       begin
          pragma Assert (Length (This.Route_Plan)   + Length (Get_RouteRequests (Route_Plan_Request)) <= This.Route_Plan.Capacity);
          pragma Assert (Length_This_Route_Plan_Old + Length (Get_RouteRequests (Route_Plan_Request)) <= This.Route_Plan.Capacity);
          --  for (size_t k = 0; k < request->getRouteRequests ().size (); k++)
-         
-         
-         -- For each ROute requet contain by the the Route Plan 
-         -- create a Plan, made the calculation and and it to Route_Plan 
-         
+
+
+         --  For each ROute requet contain by the the Route Plan 
+         --  create a Plan, made the calculation and and it to Route_Plan 
+
          for K in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request)) loop
 
             pragma Loop_Invariant ((for all I in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request))
@@ -1141,12 +1119,12 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
 
                   pragma Assert (for all Key of Model (This.Route_Plan)
                                  => Check_Route_Plan_Sub (Element (This.Route_Plan, Key), This.Pending_Route, This.Route_Plan_Responses, Key));
-                 
+
                   Int64_Pair_Int64_Route_Plan_Maps.Insert
                     (Container => This.Route_Plan,
                      Key       => Get_RouteID (Route_Plan_Pair.Returned_Route_Plan),
                      New_Item  => Route_Plan_Pair);
-                  
+
                   Position_Route_Plan := Find (Container => This.Route_Plan,
                                                Key       => Get_RouteID (Route_Plan_Pair.Returned_Route_Plan));
                   Acc := Acc + 1;
@@ -1272,9 +1250,9 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
    --------------------------
    -- Handle_Route_Request --
    --------------------------
- 
-   -- create a croresponding RouteRequest for each elligibles vehicle 
-   -- then send them for calculation 
+
+   --  create a croresponding RouteRequest for each elligibles vehicle 
+   --  then send them for calculation 
    procedure Handle_Route_Request
      (This          : in out Route_Aggregator_Service;
       Route_Request : My_RouteRequest)
@@ -1303,7 +1281,6 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                                                      Msg         => Object_Any (Request_Acc));
       end My_Send_LMCP_Object_Limited_Cast_Message;
 
-
       Vect_VehiclesID : Int64_Vect := Get_VehicleID (Route_Request);
 
    begin
@@ -1331,8 +1308,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          end;
       end if;
 
-      
-      -- create the RoutePlanRequest for evry eligible vehicles 
+      --  create the RoutePlanRequest for evry eligible vehicles 
       for Id_Indx in First_Index (Vect_VehiclesID) .. Last_Index (Vect_VehiclesID)  loop
 
          declare
@@ -1342,6 +1318,10 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
 
             --  std::shared_ptr<uxas::messages::route::RoutePlanRequest> planRequest (new uxas::messages::route::RoutePlanRequest);
             Plan_Request : My_RoutePlanRequest;
+
+            List_Of_Request : Int64_Set := Element (Container => This.Pending_Route,
+                                                    Key       => Get_RequestID (Route_Request));
+
 
             use Vect_My_RouteConstraints_P;
          begin
@@ -1354,13 +1334,15 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             Set_RequestID         (Plan_Request, This.Route_Request_ID);
 
             --  m_pendingRoute[request->getRequestID ()].insert (m_routeRequestId);
-            Int64_Sets.Insert (Container => This.Pending_Route,
-                               New_Item  => This.Route_Request_ID);
+            Insert (List_Of_Request, This.Route_Request_ID);
+            Int64_Pending_Route_Matrix.Replace (Container => This.Pending_Route,
+                                                Key       => Get_RequestID (Route_Request),
+                                                New_Item  => List_Of_Request);
 
             --  m_routeRequestId++;
             This.Route_Request_ID := This.Route_Request_ID + 1;
 
-            -- add route request to the RoutePlan
+            --  add route request to the RoutePlan
             for Indx in First_Index (Get_RouteRequests (Route_Request)) .. Last_Index (Get_RouteRequests (Route_Request))  loop
                --  planRequest->getRouteRequests ().push_back(r->clone ());
                Append_RouteRequests (This          => Plan_Request,
@@ -1368,7 +1350,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                                                                Index     => Indx));
             end loop;
 
-            -- start calculation of the RoutePlan
+            --  start calculation of the RoutePlan
             if Int64_Sets.Contains (Container => This.Ground_Vehicles,
                                     Item      => Vehicles_Id)
             then
@@ -1398,14 +1380,14 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
          end;
 
       end loop;
-      
-      -- check if all the calculation are over 
-      -- for the case fast_Plan is true and all eligibles vehicles was ground one
+
+      --  check if all the calculation are over 
+      --  for the case fast_Plan is true and all eligibles vehicles was ground one
 
       if This.Fast_Plan then
          Check_All_Route_Plans (This);
       end if;
-      
+
    end Handle_Route_Request;
 
 end Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK;
