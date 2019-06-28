@@ -157,10 +157,6 @@ private
      (Task_Plan_Options_Max_Capacity,
       Int64_Task_Plan_Options_Maps.Default_Modulus (Task_Plan_Options_Max_Capacity));
 
-
-
-
-
    type Pair_Int64_Route_Plan is record
       Reponse_ID : Int64;
       Returned_Route_Plan : My_RoutePlan;
@@ -282,7 +278,7 @@ private
       --  int64_t m_routeRequestId{1};
       Route_Request_ID : Int64 := 1;
 
-      --  list evry fulfy of a single vehicle route plan request
+      -- list evry fulfy of a single vehicle route plan request
       -- until the complete set of expected responses is received
       Route_Plan_Responses : Route_Plan_Responses_Map;
 

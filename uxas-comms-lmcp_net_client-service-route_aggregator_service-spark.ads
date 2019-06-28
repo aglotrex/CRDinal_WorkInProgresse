@@ -1,18 +1,9 @@
 
-with UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service; use UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;
-with UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary;         use UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary;
-with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects;   use UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects;
-with Uxas.Messages.Route.RouteConstraints.SPARK_Boundary;         use Uxas.Messages.Route.RouteConstraints.SPARK_Boundary;
-with Uxas.Messages.Route.RoutePlan; use Uxas.Messages.Route.RoutePlan;
-with Ada.Containers; use Ada.Containers;
+with uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service; use uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;
+with uxas.messages.route.RouteConstraints.SPARK_Boundary;         use uxas.messages.route.RouteConstraints.SPARK_Boundary;
+with uxas.messages.route.RoutePlan; use uxas.messages.route.RoutePlan;
 private
-package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
-
-
-
-
-
-
+package uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
 
    ------------------------------------------------
    -- Check of Route_Aggregator_Service Validity --
@@ -31,7 +22,7 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
       and Contains (Pending_Route,        Route_Plan_Pair.Reponse_ID)
       and Contains (Route_Plan_Responses, Route_Plan_Pair.Reponse_ID))
        with Ghost;
-   -- all Route Plan Pair in Route Plan are link to a Route Plan response
+   --  all Route Plan Pair in Route Plan are link to a Route Plan response
    --
    function Check_Route_Plan    (Route_Plan    : Pair_Int64_Route_Plan_Map;
                                  Pending_Route : Pending_Route_Matrix;
@@ -173,7 +164,6 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    -- Check of Route_Aggregator_Service evolution --
    -------------------------------------------------
 
-
    --     function Check_Same_Entity_State
    --       (X, Y : Entity_State_Map) return Boolean is
    --       (Int64_Entity_State_Maps.Formal_Model.M.Same_Keys
@@ -303,35 +293,26 @@ package UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    --       (X, Y, Z : in Route_Aggregator_Service ) with Global => null,
    --       Pre => Same_Route_Aggretor(X,Y) and Same_Route_Aggretor(Y,Z),  Post => Same_Route_Aggretor(X,Z);
 
+   --  verify if all route plan relatif to a route request a reeive
+   --  and verify if all route plan ralatif to the matrix a receive
+   procedure Check_All_Route_Plans (This : in out Route_Aggregator_Service) with Global => null,
+     Pre  => All_Requests_Valid (This),
+     Post => All_Requests_Valid (This);
 
+   --  verify if all the Task infomation relatif to a Unique Automation Request are receive
+   procedure Check_All_Task_Option_Received (This : in out Route_Aggregator_Service) with Global => null,
+     Pre  => All_Requests_Valid (This),
+     Post => All_Requests_Valid (This);
 
-
-
-
-
-
-
-   -- verify if all route plan relatif to a route request a reeive
-   -- and verify if all route plan ralatif to the matrix a receive
-   procedure Check_All_Route_Plans (This : in out Route_Aggregator_Service);
-
-
-   -- verify if all the Task infomation relatif to a Unique Automation Request are receive
-   procedure Check_All_Task_Option_Received (This : in out Route_Aggregator_Service);
-
-
-
-   -- For each vehicle target by Route_Resquest generate a corresponding My_RoutePlanRequests
+   --  For each vehicle target by Route_Resquest generate a corresponding My_RoutePlanRequests
    --   (and initiate calculationin function of the vehicles types)
    --
-   --Emit a number of *RoutePlanRequest* messages equal to the number of vehicles in the `VehicleID` field of the original *RouteRequest*
+   --  Emit a number of *RoutePlanRequest* messages equal to the number of vehicles in the `VehicleID` field of the original *RouteRequest*
    procedure Handle_Route_Request (This          : in out Route_Aggregator_Service;
-                                   Route_Request : My_RouteRequest) with
-     Pre => Contains (Container => This.Pending_Route,
-                      Key       => Get_RequestID (Route_Request)) ;
+                                   Route_Request : My_RouteRequest) with Global => null,
+     Pre => All_Requests_Valid (This)
+     and Contains (Container => This.Pending_Route,
+                   Key       => Get_RequestID (Route_Request)),
+     Post => All_Requests_Valid (This);
 
-
-
-
-
-end  UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK;
+end  uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK;
