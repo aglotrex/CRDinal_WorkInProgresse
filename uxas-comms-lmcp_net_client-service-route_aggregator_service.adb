@@ -1,119 +1,108 @@
 
 
-with AVTAS.Lmcp.Object.SPARK_Boundary;              use AVTAS.Lmcp.Object.SPARK_Boundary;
+with avtas.lmcp.object.SPARK_Boundary;              use avtas.lmcp.object.SPARK_Boundary;
 
-with AFRl.CMASI.AutomationResponse;                 use AFRl.CMASI.AutomationResponse;
-with AFRL.CMASI.AutomationRequest;                  use AFRL.CMASI.AutomationRequest;
-with AFRL.CMASI.LmcpTask;                           use AFRL.CMASI.LmcpTask;
-with AFRL.CMASI.KeepInZone;                         use AFRL.CMASI.KeepInZone;
-with AFRL.CMASI.KeepOutZone;                        use AFRL.CMASI.KeepOutZone;
-with AFRL.CMASI.RemoveTasks;                        use AFRL.CMASI.RemoveTasks;
-with AFRL.CMASI.ServiceStatus;                      use AFRL.CMASI.ServiceStatus;
-with AFRL.CMASI.KeyValuePair;                       use AFRL.CMASI.KeyValuePair;
-with AFRL.CMASI.OperatingRegion;                    use AFRL.CMASI.OperatingRegion;
-with AFRL.CMASI.AirVehicleConfiguration;            use AFRL.CMASI.AirVehicleConfiguration;
-with AFRL.CMASI.AirVehicleState;                    use AFRL.CMASI.AirVehicleState;
-with AFRL.CMASI.EntityConfiguration;                use AFRL.CMASI.EntityConfiguration;
-with AFRL.CMASI.EntityState;                        use AFRL.CMASI.EntityState;
+with afrl.cmasi.AutomationResponse;                 use afrl.cmasi.AutomationResponse;
+with afrl.cmasi.AutomationRequest;                  use afrl.cmasi.AutomationRequest;
+with afrl.cmasi.lmcpTask;                           use afrl.cmasi.lmcpTask;
+with afrl.cmasi.KeepInZone;                         use afrl.cmasi.KeepInZone;
+with afrl.cmasi.KeepOutZone;                        use afrl.cmasi.KeepOutZone;
+with afrl.cmasi.RemoveTasks;                        use afrl.cmasi.RemoveTasks;
+with afrl.cmasi.ServiceStatus;                      use afrl.cmasi.ServiceStatus;
+with afrl.cmasi.KeyValuePair;                       use afrl.cmasi.KeyValuePair;
+with afrl.cmasi.OperatingRegion;                    use afrl.cmasi.OperatingRegion;
+with afrl.cmasi.AirVehicleConfiguration;            use afrl.cmasi.AirVehicleConfiguration;
+with afrl.cmasi.AirVehicleState;                    use afrl.cmasi.AirVehicleState;
 
+with afrl.impact.ImpactAutomationRequest;           use afrl.impact.ImpactAutomationRequest;
+with afrl.impact.PointOfInterest;                   use afrl.impact.PointOfInterest;
+with afrl.impact.LineOfInterest;                    use afrl.impact.LineOfInterest;
+with afrl.impact.AreaOfInterest;                    use afrl.impact.AreaOfInterest;
+with afrl.impact.ImpactAutomationResponse;          use afrl.impact.ImpactAutomationResponse;
 
-with AFRL.Impact.ImpactAutomationRequest;           use AFRL.Impact.ImpactAutomationRequest;
-with AFRL.Impact.PointOfInterest;                   use AFRL.Impact.PointOfInterest;
-with AFRL.Impact.LineOfInterest;                    use AFRL.Impact.LineOfInterest;
-with AFRL.Impact.AreaOfInterest;                    use AFRL.Impact.AreaOfInterest;
-with AFRL.Impact.ImpactAutomationResponse;          use AFRL.Impact.ImpactAutomationResponse;
+with afrl.vehicles.SurfaceVehicleConfiguration;     use afrl.vehicles.SurfaceVehicleConfiguration;
+with afrl.vehicles.SurfaceVehicleState;             use afrl.vehicles.SurfaceVehicleState;
+with afrl.vehicles.GroundVehicleConfiguration;      use afrl.vehicles.GroundVehicleConfiguration;
+with afrl.vehicles.GroundVehicleState;              use afrl.vehicles.GroundVehicleState;
 
-with Afrl.Vehicles.SurfaceVehicleConfiguration;     use AFRL.Vehicles.SurfaceVehicleConfiguration;
-with Afrl.Vehicles.SurfaceVehicleState;             use AFRL.Vehicles.SurfaceVehicleState;
-with Afrl.Vehicles.GroundVehicleConfiguration;      use AFRL.Vehicles.GroundVehicleConfiguration;
-with AFRL.Vehicles.GroundVehicleState;              use AFRL.Vehicles.GroundVehicleState;
+with avtas.lmcp.object;                             use avtas.lmcp.object;
 
-with Avtas.Lmcp.Object;                             use Avtas.Lmcp.Object;
+with uxas.messages.lmcptask.TaskAutomationRequest;  use uxas.messages.lmcptask.TaskAutomationRequest;
+with uxas.messages.lmcptask.TaskAutomationResponse; use uxas.messages.lmcptask.TaskAutomationResponse;
+with uxas.messages.lmcptask.TaskInitialized;        use uxas.messages.lmcptask.TaskInitialized;
+with uxas.messages.lmcptask.PlanningState;          use uxas.messages.lmcptask.PlanningState;
+with uxas.messages.lmcptask.TaskOption;             use uxas.messages.lmcptask.TaskOption;
+with uxas.messages.route.object;                    use uxas.messages.route.object;
+with uxas.messages.route.RouteConstraints;          use uxas.messages.route.RouteConstraints;
 
-with UxAS.Messages.Lmcptask.TaskAutomationRequest;  use UxAS.Messages.Lmcptask.TaskAutomationRequest;
-with UxAS.Messages.Lmcptask.TaskAutomationResponse; use UxAS.Messages.Lmcptask.TaskAutomationResponse;
-with UxAS.Messages.Lmcptask.TaskInitialized;        use UxAS.Messages.Lmcptask.TaskInitialized;
-with UxAS.Messages.Lmcptask.PlanningState;          use UxAS.Messages.Lmcptask.PlanningState;
-with UxAS.Messages.Lmcptask.TaskOption;             use UxAS.Messages.Lmcptask.TaskOption;
-with UxAS.Messages.Route.Object;                    use UxAS.Messages.Route.Object;
-with UxAS.Messages.Route.RouteConstraints;          use  UxAS.Messages.Route.RouteConstraints;
-
-with UxAS.Common.Utilities.Unit_Conversions;        use  UxAS.Common.Utilities.Unit_Conversions;
+with uxas.Common.Utilities.Unit_Conversions;        use  uxas.Common.Utilities.Unit_Conversions;
 
 with DOM.Core.Elements; use DOM.Core.Elements;
 with String_Utils; use String_Utils;
 
-with Ada.Containers.Indefinite_Vectors;
-
-with UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK;
+with uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK;
 with Ada.Streams;
+with uxas.messages.route.RouteRequest;
+use uxas.messages.route.RouteRequest;
+with uxas.messages.lmcptask.TaskPlanOptions; use uxas.messages.lmcptask.TaskPlanOptions;
+with uxas.messages.route.RouteRequest.SPARK_Boundary;
 
-package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
+package body uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
 
    --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
    procedure Handle_Route_Plan_Response_Msg
      (This : in out Route_Aggregator_Service;
-      Msg : Any_LMCP_Message);
+      Msg  : Any_LMCP_Message);
 
    --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
    procedure Handle_Air_Vehicule_State_Msg
      (This : in out Route_Aggregator_Service;
-      Msg : Any_LMCP_Message);
-
-
-
+      Msg  : Any_LMCP_Message);
 
    --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
    procedure Handle_Ground_Vehicles_State_Msg
-     (This :in out Route_Aggregator_Service;
-      Msg : Any_LMCP_Message);
-
+     (This : in out Route_Aggregator_Service;
+      Msg  : Any_LMCP_Message);
 
    --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
    procedure Handle_Surface_Vehicle_State_Msg
-     (This :in out Route_Aggregator_Service;
-      Msg : Any_LMCP_Message);
+     (This : in out Route_Aggregator_Service;
+      Msg  : Any_LMCP_Message);
 
    --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
    procedure Handle_Air_Vehicule_Configuration_Msg
-     (This :in out Route_Aggregator_Service;
-      Msg : Any_LMCP_Message);
-
+     (This : in out Route_Aggregator_Service;
+      Msg  : Any_LMCP_Message);
 
    --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
    procedure Handle_Ground_Vehicle_Configuration_Msg
-     (This :in out Route_Aggregator_Service;
-      Msg : Any_LMCP_Message);
-
+     (This : in out Route_Aggregator_Service;
+      Msg  : Any_LMCP_Message);
 
    --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
    procedure Handle_Surface_Vehicle_Configuration_Msg
-     (This :in out Route_Aggregator_Service;
-      Msg : Any_LMCP_Message);
-
+     (This : in out Route_Aggregator_Service;
+      Msg  : Any_LMCP_Message);
 
    --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
    procedure Handle_Unique_Automation_Request_Msg
-     (This :in out Route_Aggregator_Service;
-      Msg : Any_LMCP_Message);
+     (This : in out Route_Aggregator_Service;
+      Msg  : Any_LMCP_Message);
 
    --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
    procedure Handle_Impact_Automation_Request_Msg
-     (This :in out Route_Aggregator_Service;
-      Msg : Any_LMCP_Message);
-
+     (This : in out Route_Aggregator_Service;
+      Msg  : Any_LMCP_Message);
 
    --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
    procedure Handle_Task_Plan_Options_Msg
-     (This :in out Route_Aggregator_Service;
-      Msg : Any_LMCP_Message);
+     (This : in out Route_Aggregator_Service;
+      Msg  : Any_LMCP_Message);
 
    --  Refactored out of Process_Received_LMCP_Message for readability, comprehension, etc.
    procedure Handle_Route_Request_Msg
      (This : in out Route_Aggregator_Service;
-      Msg : Any_LMCP_Message);
-
-
+      Msg  : Any_LMCP_Message);
 
    ---------------
    -- Construct --
@@ -122,9 +111,11 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    procedure Construct
      (This : in out Route_Aggregator_Service)
    is
+      pragma Unreferenced (This);
       A : Integer;
+      pragma Unreferenced (A);
    begin
-      A := 0;
+      null;
    end Construct;
 
    ---------------------------------
@@ -162,13 +153,13 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       UInt32_Lmcp_Message_Size_Max : UInt32 := 1000000;
       --   Sstr_Errors : Dynamic_String;
 
-      Str_Component_Type      : String :=   Get_Attribute (XML_Node,Name => "STRING_XML_TYPE");
-      Str_Component_Fast_Plan : String :=   Get_Attribute (XML_Node,Name => "STRING_XML_FAST_PLAN");
+      Str_Component_Type      : String :=   Get_Attribute (XML_Node, Name => "STRING_XML_TYPE");
+      Str_Component_Fast_Plan : String :=   Get_Attribute (XML_Node, Name => "STRING_XML_FAST_PLAN");
       Unused : Boolean;
-      use Afrl.Cmasi.EntityConfiguration.String_Vectors;
+      use afrl.cmasi.EntityConfiguration.String_Vectors;
       EntityConfiguration_Descendants : Afrl.Cmasi.EntityConfiguration.String_Vectors.Vector := Afrl.Cmasi.EntityConfiguration.EntityConfiguration_Descendants;
-      use Afrl.Cmasi.EntityState.String_Vectors;
-      EntityState_Descendants : Afrl.Cmasi.EntityState.String_Vectors.Vector := Afrl.Cmasi.EntityState.EntityState_Descendants;
+      use afrl.cmasi.EntityState.String_Vectors;
+      EntityState_Descendants : afrl.cmasi.EntityState.String_Vectors.Vector := afrl.cmasi.EntityState.EntityState_Descendants;
 
    begin
 
@@ -176,55 +167,38 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          This.Fast_Plan := Boolean'Value (Str_Component_Fast_Plan);
       end if;
 
+      --  // track states and configurations for assignment cost matrix calculation
+      --  // [EntityStates] are used to calculate costs from current position to first task
+      --  // [EntityConfigurations] are used for nominal speed values (all costs are in terms of time to arrive)
 
-      -- // track states and configurations for assignment cost matrix calculation
-      -- // [EntityStates] are used to calculate costs from current position to first task
-      -- // [EntityConfigurations] are used for nominal speed values (all costs are in terms of time to arrive)
+      --  // ENTITY CONFIGURATIONS
 
-      -- // ENTITY CONFIGURATIONS
-      -- addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
-
-      This.Add_Subscription_Address (AFRL.CMASI.EntityConfiguration.Subscription, Unused);
-
-      -- std::vector< std::string > childconfigs = afrl::cmasi::EntityConfigurationDescendants();
-      -- for(auto child : childconfigs)
-      --    addSubscriptionAddress(child);
+      This.Add_Subscription_Address (afrl.cmasi.EntityConfiguration.Subscription, Unused);
 
       for Descendant of EntityConfiguration_Descendants loop
-         This.Add_Subscription_Address(Descendant, Unused);
+         This.Add_Subscription_Address (Descendant, Unused);
       end loop;
 
+      This.Add_Subscription_Address (afrl.cmasi.EntityState.Subscription, Unused);
 
-
-      -- addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
-      THis.Add_Subscription_Address (AFRL.CMASI.EntityState.Subscription, Unused);
-      -- std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
-      -- for(auto child : childstates)
-      --     addSubscriptionAddress(child);
       for Descendant of EntityState_Descendants loop
-         This.Add_Subscription_Address(Descendant, Unused);
+         This.Add_Subscription_Address (Descendant, Unused);
       end loop;
 
-      -- // track requests to kickoff matrix calculation
-      -- addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
-      This.Add_Subscription_Address(UxAS.Messages.LmcpTask.UniqueAutomationRequest.Subscription, Unused);
+      --  // track requests to kickoff matrix calculation
+      This.Add_Subscription_Address (uxas.messages.lmcptask.UniqueAutomationRequest.Subscription, Unused);
 
-      -- // subscribe to task plan options to build matrix
-      -- addSubscriptionAddress(uxas::messages::task::TaskPlanOptions::Subscription);
-      This.Add_Subscription_Address(UxAS.Messages.LmcpTask.TaskPlanOptions.Subscription, Unused);
+      --  // subscribe to task plan options to build matrix
+      This.Add_Subscription_Address (uxas.messages.lmcptask.TaskPlanOptions.Subscription, Unused);
 
-      -- // handle batch route requests
-      -- addSubscriptionAddress(uxas::messages::route::RouteRequest::Subscription);
-      This.Add_Subscription_Address(UxAS.Messages.Route.RouteRequest.Subscription, Unused);
+      --  // handle batch route requests
+      This.Add_Subscription_Address (uxas.messages.route.RouteRequest.Subscription, Unused);
 
-      -- // listen for responses to requests from route planner(s)
-      -- addSubscriptionAddress(uxas::messages::route::RoutePlanResponse::Subscription);
-      This.Add_Subscription_Address(UxAS.Messages.Route.RoutePlanResponse.Subscription, Unused);
-
+      --  // listen for responses to requests from route planner(s)
+      This.Add_Subscription_Address (uxas.messages.route.RoutePlanResponse.Subscription, Unused);
 
       Result := True;
    end Configure;
-
 
    ----------------
    -- Initialize --
@@ -245,12 +219,11 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -- Process_Received_Serialized_LMCP_Message --
    ----------------------------------------------
 
-
    overriding
    procedure Process_Received_Serialized_LMCP_Message
      (This             : in out Route_Aggregator_Service;
       Received_Message : not null Any_Addressed_Attributed_Message;
-      Result           : out Boolean )
+      Result           : out Boolean)
    is
       pragma Unreferenced (This, Received_Message, Result); -- unless we need to implement this
    begin
@@ -258,7 +231,6 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       --  pragma Compile_Time_Warning (Standard.True, "Process_Received_Serialized_LMCP_Message unimplemented");
       raise Program_Error with "Unimplemented procedure Process_Received_Serialized_LMCP_Message";
    end Process_Received_Serialized_LMCP_Message;
-
 
    -----------------------------------
    -- Process_Received_LMCP_Message --
@@ -270,55 +242,53 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       Result           : out Boolean)
    is
    begin
-      -- if (uxas::messages::route::isRoutePlanResponse(receivedLmcpMessage->m_object.get()))
+      --  if (uxas::messages::route::isRoutePlanResponse(receivedLmcpMessage->m_object.get()))
       if    Received_Message.Payload.all in RoutePlanResponse'Class           then
-         This.Handle_Route_Plan_Response_Msg(Received_Message);
-         SPARK.Check_All_Route_Plans(This);
+         This.Handle_Route_Plan_Response_Msg (Received_Message);
+         SPARK.Check_All_Route_Plans (This);
 
          --  else if (uxas::messages::route::isRouteRequest(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in RouteRequest'Class                then
-         This.Handle_Route_Request_Msg(Received_Message);
+         This.Handle_Route_Request_Msg (Received_Message);
 
          --  else if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleState>(receivedLmcpMessage->m_object))
       elsif Received_Message.Payload.all in AirVehicleState'Class             then
-         This.Handle_Air_Vehicule_State_Msg(Received_Message);
+         This.Handle_Air_Vehicule_State_Msg (Received_Message);
 
          --  else if (afrl::vehicles::isGroundVehicleState(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in GroundVehicleState'Class          then
-         This.Handle_Ground_Vehicles_State_Msg(Received_Message);
+         This.Handle_Ground_Vehicles_State_Msg (Received_Message);
 
          --  else if (afrl::vehicles::isSurfaceVehicleState(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in SurfaceVehicleState'Class         then
-         This.Handle_Surface_Vehicle_State_Msg(Received_Message);
+         This.Handle_Surface_Vehicle_State_Msg (Received_Message);
 
          --  else if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(receivedLmcpMessage->m_object))
       elsif Received_Message.Payload.all in AirVehicleConfiguration'Class     then
-         This.Handle_Air_Vehicule_Configuration_Msg(Received_Message);
+         This.Handle_Air_Vehicule_Configuration_Msg (Received_Message);
 
          --  else if (afrl::vehicles::isGroundVehicleConfiguration(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in GroundVehicleConfiguration'Class  then
-         This.Handle_Ground_Vehicle_Configuration_Msg(Received_Message);
+         This.Handle_Ground_Vehicle_Configuration_Msg (Received_Message);
 
-
-         -- else if (afrl::vehicles::isSurfaceVehicleConfiguration(receivedLmcpMessage->m_object.get()))
+         --  else if (afrl::vehicles::isSurfaceVehicleConfiguration(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in SurfaceVehicleConfiguration'Class then
-         This.Handle_Surface_Vehicle_Configuration_Msg(Received_Message);
+         This.Handle_Surface_Vehicle_Configuration_Msg (Received_Message);
 
-
-         -- else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object.get())
+         --  else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object.get())
       elsif Received_Message.Payload.all in UniqueAutomationRequest'Class     then
-         This.Handle_Unique_Automation_Request_Msg(Received_Message);
-         SPARK.Check_All_Task_Option_Received(This => This);
+         This.Handle_Unique_Automation_Request_Msg (Received_Message);
+         SPARK.Check_All_Task_Option_Received (This => This);
 
          --  else if (afrl::impact::isImpactAutomationRequest(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in ImpactAutomationRequest'Class     then
-         This.Handle_Impact_Automation_Request_Msg(Received_Message);
-         SPARK.Check_All_Task_Option_Received(This => This);
+         This.Handle_Impact_Automation_Request_Msg (Received_Message);
+         SPARK.Check_All_Task_Option_Received (This => This);
 
-         -- else if (uxas::messages::task::isTaskPlanOptions(receivedLmcpMessage->m_object.get()))
+         --  else if (uxas::messages::task::isTaskPlanOptions(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in TaskPlanOptions'Class             then
-         This.Handle_Task_Plan_Options_Msg(Received_Message);
-         SPARK.Check_All_Task_Option_Received(This => This);
+         This.Handle_Task_Plan_Options_Msg (Received_Message);
+         SPARK.Check_All_Task_Option_Received (This => This);
 
       end if;
       Result := False;
@@ -333,16 +303,12 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    is
 
       use  Uxas.Messages.Route.RouteRequest.SPARK_Boundary;
-      Route_Request : My_RouteRequest := Wrap( RouteRequest_Acc(RouteRequest_Any(Msg.Payload)).all);
+      Route_Request : My_RouteRequest := Wrap ( RouteRequest_Acc(RouteRequest_Any(Msg.Payload)).all);
 
    begin
-      Spark.Handle_Route_Request(This          => This,
+      SPARK.Handle_Route_Request (This          => This,
                                  Route_Request => Route_Request);
    end Handle_Route_Request_Msg;
-
-
-
-
 
    ------------------------------------
    -- Handle_Route_Plan_Response_Msg --
@@ -355,19 +321,17 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
      (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
    is
-      -- auto rplan = std::static_pointer_cast<uxas::messages::route::RoutePlanResponse>(receivedLmcpMessage->m_object);
-      Route_Plan : constant RoutePlanResponse_Any := RoutePlanResponse_Any(Msg.Payload);
+      Route_Plan : constant RoutePlanResponse_Any := RoutePlanResponse_Any (Msg.Payload);
       C : Int64_Route_Plan_Responses_Maps.Cursor;
       C2 : Int64_Pair_Int64_Route_Plan_Maps.Cursor;
       Inserted : Boolean;
-      use UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary;
-      Wrapped_RoutePlan : constant Route_Plan_Responses_Holder := Route_Plan_Responses_Holder'(Content => Wrap(RoutePlanResponse_Acc(Route_Plan).all));
+      Wrapped_RoutePlan : constant Route_Plan_Responses_Holder := Route_Plan_Responses_Holder'(Content => Wrap (RoutePlanResponse_Acc (Route_Plan).all));
       Pair  : Pair_Int64_Route_Plan;
    begin
       --  m_routePlanResponses[rplan->getResponseID()] = rplan;
       Int64_Route_Plan_Responses_Maps.Insert
         (This.Route_Plan_Responses,
-         Key => Route_Plan.GetResponseID,
+         Key => Route_Plan.getResponseID,
          New_Item  => Wrapped_RoutePlan,
          Position  => C,
          Inserted  => Inserted);
@@ -375,13 +339,12 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          Int64_Route_Plan_Responses_Maps.Replace_Element (This.Route_Plan_Responses, C, Wrapped_RoutePlan);
       end if;
 
-      -- for (auto p : rplan->getRouteResponses())
-      for P of Route_Plan.GetRouteResponses.all loop
+      for P of Route_Plan.getRouteResponses.all loop
          declare
             RoutePlan_Clone : My_RoutePlan :=  Wrap (P.all);
          begin
 
-            Pair := Pair_Int64_Route_Plan'(Reponse_ID          => Route_Plan.GetResponseID,
+            Pair := Pair_Int64_Route_Plan'(Reponse_ID          => Route_Plan.getResponseID,
                                            Returned_Route_Plan => RoutePlan_Clone);
 
             Int64_Pair_Int64_Route_Plan_Maps.Insert
@@ -397,24 +360,22 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       end loop;
    end Handle_Route_Plan_Response_Msg;
 
-
    -----------------------------------
    -- Handle_Air_Vehicule_State_Msg --
    -----------------------------------
 
    --  Describes the actual state of a vehicle in the system including position, speed, and fuel status. This message is
-   -- used to create routes and cost estimates from the associated vehicle position and heading to the task option start locations
-   -- as the vheclis is identify as a Air Vehicles store is id in the Air Vheicles Set
+   --  used to create routes and cost estimates from the associated vehicle position and heading to the task option start locations
+   --  as the vheclis is identify as a Air Vehicles store is id in the Air Vheicles Set
    procedure Handle_Air_Vehicule_State_Msg
      (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
    is
-      AirVehicle : constant EntityState_Any := EntityState_Any(Msg.Payload);
+      AirVehicle : constant EntityState_Any := EntityState_Any (Msg.Payload);
       --  int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
-      ID :constant Int64 :=  AirVehicle.GetID;
+      ID : constant Int64 :=  AirVehicle.getID;
       C : Int64_Entity_State_Maps.Cursor;
-      use  Afrl.Cmasi.EntityState.SPARK_Boundary;
-      Wrapped_AirVehicle : constant Entity_State_Holder := Entity_State_Holder'(Content => Wrap(EntityState(AirVehicle.all)));
+      Wrapped_AirVehicle : constant Entity_State_Holder := Entity_State_Holder'(Content => Wrap (EntityState (AirVehicle.all)));
       Inserted : Boolean;
       use Int64_Sets;
 
@@ -430,34 +391,27 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          Int64_Entity_State_Maps.Replace_Element (This.Entity_State, C, Wrapped_AirVehicle);
       end if;
 
-      -- m_airVehicles.insert(id);
       if not Contains (This.Air_Vehicules, ID) then
-         Insert(This.Air_Vehicules, ID);
+         Insert (This.Air_Vehicules, ID);
       end if;
    end Handle_Air_Vehicule_State_Msg;
-
-
-
 
    --------------------------------------
    -- Handle_Ground_Vehicles_State_Msg --
    --------------------------------------
 
    --  Describes the actual state of a vehicle in the system including position, speed, and fuel status. This message is
-   -- used to create routes and cost estimates from the associated vehicle position and heading to the task option start locations
-   -- as the vheclis is identify as a Ground Vehicles store is id in the Ground Vheicles Set
+   --  used to create routes and cost estimates from the associated vehicle position and heading to the task option start locations
+   --  as the vheclis is identify as a Ground Vehicles store is id in the Ground Vheicles Set
    procedure Handle_Ground_Vehicles_State_Msg
-     (This :in out Route_Aggregator_Service;
+     (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
    is
-      -- int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
-      GroundVehicles : constant EntityState_Any := EntityState_Any(Msg.Payload);
-      --  int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
-      ID :constant Int64 :=  GroundVehicles.GetID;
+      GroundVehicles : constant EntityState_Any := EntityState_Any (Msg.Payload);
+      ID : constant Int64 :=  GroundVehicles.getID;
 
       C : Int64_Entity_State_Maps.Cursor;
-      use  Afrl.Cmasi.EntityState.SPARK_Boundary;
-      Wrapped_GroundVehicles : constant Entity_State_Holder := Entity_State_Holder'(Content => Wrap(EntityState(GroundVehicles.all)));
+      Wrapped_GroundVehicles : constant Entity_State_Holder := Entity_State_Holder'(Content => Wrap (EntityState (GroundVehicles.all)));
       Inserted : Boolean;
       use Int64_Sets;
    begin
@@ -472,32 +426,27 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          Int64_Entity_State_Maps.Replace_Element (This.Entity_State, C, Wrapped_GroundVehicles);
       end if;
 
-      -- m_groundVehicles.insert(id);
       if not Contains (This.Ground_Vehicles, ID) then
-         Insert(This.Ground_Vehicles, ID);
+         Insert (This.Ground_Vehicles, ID);
       end if;
    end Handle_Ground_Vehicles_State_Msg;
-
 
    --------------------------------------
    -- Handle_Surface_Vehicle_State_Msg --
    --------------------------------------
 
    --  Describes the actual state of a vehicle in the system including position, speed, and fuel status. This message is
-   -- used to create routes and cost estimates from the associated vehicle position and heading to the task option start locations
-   -- as the vheclis is identify as a Surface Vehicles store is id in the Surface Vheicles Set
+   --  used to create routes and cost estimates from the associated vehicle position and heading to the task option start locations
+   --  as the vheclis is identify as a Surface Vehicles store is id in the Surface Vheicles Set
    procedure Handle_Surface_Vehicle_State_Msg
-     (This :in out Route_Aggregator_Service;
+     (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
    is
-      -- int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
-      SurfaceVehicles : constant EntityState_Any := EntityState_Any(Msg.Payload);
-      -- int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
-      ID :constant Int64 :=  SurfaceVehicles.GetID;
+      SurfaceVehicles : constant EntityState_Any := EntityState_Any (Msg.Payload);
+      ID : constant Int64 :=  SurfaceVehicles.getID;
 
       C : Int64_Entity_State_Maps.Cursor;
-      use  Afrl.Cmasi.EntityState.SPARK_Boundary;
-      Wrapped_SurfacesVehicles : constant Entity_State_Holder := Entity_State_Holder'(Content => Wrap(EntityState(SurfaceVehicles.all)));
+      Wrapped_SurfacesVehicles : constant Entity_State_Holder := Entity_State_Holder'(Content => Wrap (EntityState (SurfaceVehicles.all)));
       Inserted : Boolean;
       use Int64_Sets;
    begin
@@ -512,35 +461,28 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          Int64_Entity_State_Maps.Replace_Element (This.Entity_State, C, Wrapped_SurfacesVehicles);
       end if;
 
-      --   m_surfaceVehicles.insert(id);
-      if not Contains (This.Surface_Vehicles,ID) then
-         Insert(This.Surface_Vehicles,ID);
+      if not Contains (This.Surface_Vehicles, ID) then
+         Insert (This.Surface_Vehicles, ID);
       end if;
    end Handle_Surface_Vehicle_State_Msg;
-
-
-
 
    -------------------------------------------
    -- Handle_Air_Vehicule_Configuration_Msg --
    -------------------------------------------
 
-   -- Vehicle capabilities (e.g. allowable speeds) are described by entity configuration messages.
-   -- This service uses the *EntityConfiguration* to determine which type of vehicle
-   -- corresponds to a specific ID so that ground planners are used for ground vehicles and air planners are used for aircraft.
-   -- as the vheclis is identify as a Air Vehicles store is id in the Air Vheicles Set
+   --  Vehicle capabilities (e.g. allowable speeds) are described by entity configuration messages.
+   --  This service uses the *EntityConfiguration* to determine which type of vehicle
+   --  corresponds to a specific ID so that ground planners are used for ground vehicles and air planners are used for aircraft.
+   --  as the vheclis is identify as a Air Vehicles store is id in the Air Vheicles Set
 
    procedure Handle_Air_Vehicule_Configuration_Msg
-     (This :in out Route_Aggregator_Service;
+     (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
    is
-      --  int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
-      AirVehicle : constant EntityConfiguration_Any := EntityConfiguration_Any(Msg.Payload);
-      --   int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
-      ID :constant Int64 := AirVehicle.GetID;
+      AirVehicle : constant EntityConfiguration_Any := EntityConfiguration_Any (Msg.Payload);
+      ID : constant Int64 := AirVehicle.getID;
       C : Int64_Entity_Configuration_Maps.Cursor;
-      use  Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;
-      Wrapped_AirVehicle : constant Entity_Configuration_Holder := Entity_Configuration_Holder'(Content => Wrap(EntityConfiguration(AirVehicle.all)));
+      Wrapped_AirVehicle : constant Entity_Configuration_Holder := Entity_Configuration_Holder'(Content => Wrap (EntityConfiguration (AirVehicle.all)));
       Inserted : Boolean;
       use Int64_Sets;
    begin
@@ -555,9 +497,8 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          Int64_Entity_Configuration_Maps.Replace_Element (This.Entity_Configuration, C, Wrapped_AirVehicle);
       end if;
 
-      -- m_airVehicles.insert(id);
-      if not Contains (This.Air_Vehicules,ID) then
-         Insert(This.Air_Vehicules,ID);
+      if not Contains (This.Air_Vehicules, ID) then
+         Insert (This.Air_Vehicules, ID);
       end if;
    end Handle_Air_Vehicule_Configuration_Msg;
 
@@ -565,21 +506,18 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -- Handle_Ground_Vehicle_Configuration_Msg --
    ---------------------------------------------
 
-   -- Vehicle capabilities (e.g. allowable speeds) are described by entity configuration messages.
-   -- This service uses the *EntityConfiguration* to determine which type of vehicle
-   -- corresponds to a specific ID so that ground planners are used for ground vehicles and air planners are used for aircraft.
-   -- as the vheclis is identify as a Ground Vehicles store is id in the Ground Vheicles Set
+   --  Vehicle capabilities (e.g. allowable speeds) are described by entity configuration messages.
+   --  This service uses the *EntityConfiguration* to determine which type of vehicle
+   --  corresponds to a specific ID so that ground planners are used for ground vehicles and air planners are used for aircraft.
+   --  as the vheclis is identify as a Ground Vehicles store is id in the Ground Vheicles Set
    procedure Handle_Ground_Vehicle_Configuration_Msg
-     (This :in out Route_Aggregator_Service;
+     (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
    is
-      --  int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
-      GroundVehicle : constant EntityConfiguration_Any := EntityConfiguration_Any(Msg.Payload);
-      --    int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
-      ID : constant Int64 := GroundVehicle.GetID;
+      GroundVehicle : constant EntityConfiguration_Any := EntityConfiguration_Any (Msg.Payload);
+      ID : constant Int64 := GroundVehicle.getID;
       C : Int64_Entity_Configuration_Maps.Cursor;
-      use  Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;
-      Wrapped_GroundVehicles : constant Entity_Configuration_Holder := Entity_Configuration_Holder'(Content => Wrap(EntityConfiguration(GroundVehicle.all)));
+      Wrapped_GroundVehicles : constant Entity_Configuration_Holder := Entity_Configuration_Holder'(Content => Wrap (EntityConfiguration (GroundVehicle.all)));
       Inserted : Boolean;
       use Int64_Sets;
    begin
@@ -594,33 +532,28 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          Int64_Entity_Configuration_Maps.Replace_Element (This.Entity_Configuration, C, Wrapped_GroundVehicles);
       end if;
 
-      -- m_groundVehicles.insert(id);
-      if not Contains (This.Ground_Vehicles,ID) then
-         Insert(This.Ground_Vehicles,ID);
+      if not Contains (This.Ground_Vehicles, ID) then
+         Insert (This.Ground_Vehicles, ID);
       end if;
    end Handle_Ground_Vehicle_Configuration_Msg;
-
 
    ----------------------------------------------
    -- Handle_Surface_Vehicle_Configuration_Msg --
    ----------------------------------------------
 
-   -- Vehicle capabilities (e.g. allowable speeds) are described by entity configuration messages.
-   -- This service uses the *EntityConfiguration* to determine which type of vehicle
-   -- corresponds to a specific ID so that ground planners are used for ground vehicles and air planners are used for aircraft.
-   -- as the vheclis is identify as a Surface Vehicles store is id in the Surface Vheicles Set
+   --  Vehicle capabilities (e.g. allowable speeds) are described by entity configuration messages.
+   --  This service uses the *EntityConfiguration* to determine which type of vehicle
+   --  corresponds to a specific ID so that ground planners are used for ground vehicles and air planners are used for aircraft.
+   --  as the vheclis is identify as a Surface Vehicles store is id in the Surface Vheicles Set
    procedure Handle_Surface_Vehicle_Configuration_Msg
-     (This :in out Route_Aggregator_Service;
+     (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
 
    is
-      --  int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
-      SurfaceVehicle : constant EntityConfiguration_Any := EntityConfiguration_Any(Msg.Payload);
-      --    int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
-      ID :constant  Int64 := SurfaceVehicle.GetID;
+      SurfaceVehicle : constant EntityConfiguration_Any := EntityConfiguration_Any (Msg.Payload);
+      ID : constant  Int64 := SurfaceVehicle.getID;
       C : Int64_Entity_Configuration_Maps.Cursor;
-      use  Afrl.Cmasi.EntityConfiguration.SPARK_Boundary;
-      Wrapped_SurfaceVehicles : constant Entity_Configuration_Holder := Entity_Configuration_Holder'(Content => Wrap(EntityConfiguration(SurfaceVehicle.all)));
+      Wrapped_SurfaceVehicles : constant Entity_Configuration_Holder := Entity_Configuration_Holder'(Content => Wrap (EntityConfiguration (SurfaceVehicle.all)));
       Inserted : Boolean;
       use Int64_Sets;
    begin
@@ -635,28 +568,25 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          Int64_Entity_Configuration_Maps.Replace_Element (This.Entity_Configuration, C, Wrapped_SurfaceVehicles);
       end if;
 
-      -- m_surfaceVehicles.insert(id);
-      if not Contains (This.Surface_Vehicles,ID) then
-         Insert(This.Surface_Vehicles,ID);
+      if not Contains (This.Surface_Vehicles, ID) then
+         Insert (This.Surface_Vehicles, ID);
       end if;
    end Handle_Surface_Vehicle_Configuration_Msg;
-
 
    ------------------------------------------
    -- Handle_Unique_Automation_Request_Msg --
    ------------------------------------------
 
-   -- Primary message that initiates the collection of options sent from each *Task* via the *TaskPlanOptions* message.
-   -- A list of all *Tasks* included in the *UniqueAutomationRequest* is made upon reception of this message and later used to ensure that
-   -- all included *Tasks* have responded.
+   --  Primary message that initiates the collection of options sent from each *Task* via the *TaskPlanOptions* message.
+   --  A list of all *Tasks* included in the *UniqueAutomationRequest* is made upon reception of this message and later used to ensure that
+   --  all included *Tasks* have responded.
    procedure Handle_Unique_Automation_Request_Msg
-     (This :in out Route_Aggregator_Service;
+     (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
    is
-      --auto areq = std::static_pointer_cast<uxas::messages::task::UniqueAutomationRequest>(receivedLmcpMessage->m_object);
-      AutomationRequest : constant UniqueAutomationRequest_Any := UniqueAutomationRequest_Any(Msg.Payload);
+      AutomationRequest : constant UniqueAutomationRequest_Any := UniqueAutomationRequest_Any (Msg.Payload);
       C : Int64_Unique_Automation_Request_Maps.Cursor;
-      Wrapped_AutomationRequest :  constant UniqueAutomationRequest_Handler := UniqueAutomationRequest_Handler'(Content => Wrap(UniqueAutomationRequest(AutomationRequest.all)));
+      Wrapped_AutomationRequest :  constant UniqueAutomationRequest_Handler := UniqueAutomationRequest_Handler'(Content => Wrap (UniqueAutomationRequest (AutomationRequest.all)));
       Inserted : Boolean;
    begin
       Int64_Unique_Automation_Request_Maps.Insert
@@ -668,42 +598,32 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       This.Auto_Request_Id := This.Auto_Request_Id + 1;
    end Handle_Unique_Automation_Request_Msg;
 
-
-
-
    ------------------------------------------
    -- Handle_Impact_Automation_Request_Msg --
    ------------------------------------------
 
-   -- Primary message that initiates the collection of options sent from each *Task* via the *TaskPlanOptions* message.
-   -- A list of all *Tasks* included in the *UniqueAutomationRequest* is made upon reception of this message and later used to ensure that
-   -- all included *Tasks* have responded.
+   --  Primary message that initiates the collection of options sent from each *Task* via the *TaskPlanOptions* message.
+   --  A list of all *Tasks* included in the *UniqueAutomationRequest* is made upon reception of this message and later used to ensure that
+   --  all included *Tasks* have responded.
    procedure Handle_Impact_Automation_Request_Msg
-     (This :in out Route_Aggregator_Service;
+     (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
    is
-      --  auto sreq = std::static_pointer_cast<afrl::impact::ImpactAutomationRequest>(receivedLmcpMessage->m_object);
-      Impact_Automation_Request : constant ImpactAutomationRequest_Any := ImpactAutomationRequest_Any(Msg.Payload);
-
-      --  auto areq = std::shared_ptr<uxas::messages::task::UniqueAutomationRequest>();
+      Impact_Automation_Request : constant ImpactAutomationRequest_Any := ImpactAutomationRequest_Any (Msg.Payload);
       Unique_Automation_Request : UniqueAutomationRequest_Any;
 
       C : Int64_Unique_Automation_Request_Maps.Cursor;
       Wrapped_UniqueAutomationRequest : UniqueAutomationRequest_Handler;
       Inserted : Boolean;
    begin
-      --   areq->setOriginalRequest(sreq->getTrialRequest()->clone());
+      Unique_Automation_Request.setOriginalRequest (OriginalRequest => Impact_Automation_Request.getTrialRequest);
 
-      Unique_Automation_Request.SetOriginalRequest( OriginalRequest => Impact_Automation_Request.GetTrialRequest);
+      Unique_Automation_Request.setRequestID (This.Auto_Request_Id);
 
-      --   areq->setRequestID(m_autoRequestId);
-      Unique_Automation_Request.SetRequestID(This.Auto_Request_Id);
+      Wrapped_UniqueAutomationRequest := UniqueAutomationRequest_Handler'(Content => Wrap (UniqueAutomationRequest (Unique_Automation_Request.all)));
 
-      Wrapped_UniqueAutomationRequest := UniqueAutomationRequest_Handler'(Content => Wrap(UniqueAutomationRequest(Unique_Automation_Request.all)));
-
-      --  m_uniqueAutomationRequests[m_autoRequestId++] = areq;
       Int64_Unique_Automation_Request_Maps.Insert
-        ( This.Unique_Automation_Request,
+        (This.Unique_Automation_Request,
           Key       => This.Auto_Request_Id,
           New_Item  => Wrapped_UniqueAutomationRequest,
           Position  => C,
@@ -711,35 +631,31 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       This.Auto_Request_Id := This.Auto_Request_Id + 1;
    end Handle_Impact_Automation_Request_Msg;
 
-
    ----------------------------------
    -- Handle_Task_Plan_Options_Msg --
    ----------------------------------
 
-   --Store task options and check to see if this message completes
+   --  Store task options and check to see if this message completes
    procedure Handle_Task_Plan_Options_Msg
-     (This :in out Route_Aggregator_Service;
+     (This : in out Route_Aggregator_Service;
       Msg : Any_LMCP_Message)
    is
-      -- auto taskOptions = std::static_pointer_cast<uxas::messages::task::TaskPlanOptions>(receivedLmcpMessage->m_object);
-      Task_Option : constant TaskPlanOptions_Any := TaskPlanOptions_Any(Msg.Payload);
+      Task_Option : constant TaskPlanOptions_Any := TaskPlanOptions_Any (Msg.Payload);
 
       C : Int64_Task_Plan_Options_Maps.Cursor;
-      use  Uxas.Messages.Lmcptask.TaskPlanOptions.Spark_Boundary;
-      Wrapped_TaskOption : constant Task_Plan_Options_Holder := Task_Plan_Options_Holder'(Content => Wrap(TaskPlanOptions_Acc(Task_Option).all));
+      Wrapped_TaskOption : constant Task_Plan_Options_Holder := Task_Plan_Options_Holder'(Content => Wrap (TaskPlanOptions_Acc (Task_Option).all));
       Inserted : Boolean;
 
    begin
 
-      -- m_taskOptions[taskOptions->getTaskID()] = taskOptions;
+      --  m_taskOptions[taskOptions->getTaskID()] = taskOptions;
       Int64_Task_Plan_Options_Maps.Insert
-        ( This.Task_Plan_Options,
-          Key => Task_Option.GetTaskID,
+        (This.Task_Plan_Options,
+          Key => Task_Option.getTaskID,
           New_Item  => Wrapped_TaskOption,
           Position  => C,
           Inserted  => Inserted);
    end Handle_Task_Plan_Options_Msg;
-
 
    procedure XML_Write (This  : Route_Aggregator_Service;
                         S     : access Ada.Streams.Root_Stream_Type'Class;
@@ -752,7 +668,6 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       use Int64_Unique_Automation_Request_Maps;
       use Int64_Entity_Configuration_Maps;
       use Int64_Entity_State_Maps;
-      use Int64_Aggregator_Task_Option_Pair_Maps;
       use Int64_Pair_Int64_Route_Plan_Maps;
    begin
       String'Write (S, LeftPad ("<FastPlan>" & Boolean'Image (This.Fast_Plan) & "</FastPlan>" & ASCII.LF, Level));
@@ -760,32 +675,31 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       String'Write (S, LeftPad ("<EntityStates>" & ASCII.LF, Level));
       for Cursor in This.Entity_State loop
 
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
 
-         String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Entity_State_Maps.Key (THis.Entity_State, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
+         String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Entity_State_Maps.Key (This.Entity_State, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("<EntityState>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("<EntityState>" & ASCII.LF, Level + 2));
          XML_Output (Unwrap (Int64_Entity_State_Maps.Element (This.Entity_State, Cursor).Content), S, Level + 3);
-         String'Write (S, LeftPad ("</EntityState>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("</EntityState>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
 
       end loop;
       String'Write (S, LeftPad ("</EntityStates>" & ASCII.LF, Level));
 
-
       String'Write (S, LeftPad ("<EntityConfigurations>" & ASCII.LF, Level));
       for Cursor in This.Entity_Configuration loop
 
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
 
          String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Entity_Configuration_Maps.Key (THis.Entity_Configuration, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("<EntityConfiguration>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("<EntityConfiguration>" & ASCII.LF, Level + 2));
          XML_Output (Unwrap (Int64_Entity_Configuration_Maps.Element (This.Entity_Configuration, Cursor).Content), S, Level + 3);
-         String'Write (S, LeftPad ("</EntityConfiguration>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("</EntityConfiguration>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
 
       end loop;
       String'Write (S, LeftPad ("</EntityConfigurations>" & ASCII.LF, Level));
@@ -813,15 +727,15 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       String'Write (S, LeftPad ("<UniqueAutomationRequests>" & ASCII.LF, Level));
       for Cursor in This.Unique_Automation_Request loop
 
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
 
          String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Unique_Automation_Request_Maps.Key (THis.Unique_Automation_Request, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("<UniqueAutomationRequest>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("<UniqueAutomationRequest>" & ASCII.LF, Level + 2));
          XML_Output (Unwrap (Int64_Unique_Automation_Request_Maps.Element (This.Unique_Automation_Request, Cursor).Content), S, Level + 3);
-         String'Write (S, LeftPad ("</UniqueAutomationRequest>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("</UniqueAutomationRequest>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
 
       end loop;
       String'Write (S, LeftPad ("</UniqueAutomationRequests>" & ASCII.LF, Level));
@@ -829,36 +743,35 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       String'Write (S, LeftPad ("<TaskOptions>" & ASCII.LF, Level));
       for Cursor in This.Task_Plan_Options loop
 
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
 
          String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Task_Plan_Options_Maps.Key (THis.Task_Plan_Options, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("<UniqueAutomationRequest>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("<UniqueAutomationRequest>" & ASCII.LF, Level + 2));
          XML_Output (Unwrap (Int64_Task_Plan_Options_Maps.Element (This.Task_Plan_Options, Cursor).Content), S, Level + 3);
-         String'Write (S, LeftPad ("</UniqueAutomationRequest>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("</UniqueAutomationRequest>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
 
       end loop;
       String'Write (S, LeftPad ("</TaskOptions>" & ASCII.LF, Level));
 
       String'Write (S, LeftPad ("<RouteId>" & Int64'Image (This.Route_Id) & "</RouteId>" & ASCII.LF, Level));
 
-
       String'Write (S, LeftPad ("<RoutePlans>" & ASCII.LF, Level));
       for Cursor in This.Route_Plan loop
 
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
 
          String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Pair_Int64_Route_Plan_Maps.Key (THis.Route_Plan, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
 
          String'Write (S, LeftPad ("<ReponseID>" & Int64'Image (Int64_Pair_Int64_Route_Plan_Maps.Element (This.Route_Plan, Cursor).Reponse_ID) & "</ReponseID>" & ASCII.LF, Level));
 
-         String'Write (S, LeftPad ("<Returned_Route_Plan>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("<Returned_Route_Plan>" & ASCII.LF, Level + 2));
          XML_Output (Unwrap (Int64_Pair_Int64_Route_Plan_Maps.Element (This.Route_Plan, Cursor).Returned_Route_Plan), S, Level + 3);
-         String'Write (S, LeftPad ("</Returned_Route_Plan>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("</Returned_Route_Plan>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
 
       end loop;
       String'Write (S, LeftPad ("</RoutePlans>" & ASCII.LF, Level));
@@ -866,17 +779,17 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       String'Write (S, LeftPad ("<PendingAutoReq>" & ASCII.LF, Level));
       for Cursor in This.Pending_Auto_Req loop
 
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
 
          String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Pending_Auto_Req_Matrix.Key (THis.Pending_Auto_Req, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("<PendingReq>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("<PendingReq>" & ASCII.LF, Level + 2));
          for ID of Int64_Pending_Auto_Req_Matrix.Element (This.Pending_Auto_Req, Cursor) loop
             String'Write (S, LeftPad ("<RequestID>" & Int64'Image (ID) & "</RequestID>" & ASCII.LF, Level + 3));
          end loop;
-         String'Write (S, LeftPad ("</PendingReq>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("</PendingReq>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
 
       end loop;
       String'Write (S, LeftPad ("</PendingAutoReq>" & ASCII.LF, Level));
@@ -884,10 +797,10 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       String'Write (S, LeftPad ("<RouteTaskPairing>" & ASCII.LF, Level));
       for Cursor in This.Route_Task_Pairing loop
 
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
 
          String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Key (THis.Route_Task_Pairing, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
-         String'Write (S, LeftPad ("<AggregatorTaskOptionPair>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("<AggregatorTaskOptionPair>" & ASCII.LF, Level + 2));
 
          String'Write (S, LeftPad ("<VehicleId>"      & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).VehicleId)      & "</VehicleId>"      & ASCII.LF, Level + 3));
          String'Write (S, LeftPad ("<PrevTaskId>"     & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).PrevTaskId)     & "</PrevTaskId>"     & ASCII.LF, Level + 3));
@@ -895,27 +808,26 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
          String'Write (S, LeftPad ("<TaskId>"         & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).TaskId)         & "</TaskId>"         & ASCII.LF, Level + 3));
          String'Write (S, LeftPad ("<TaskOption>"     & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).TaskOption)     & "</TaskOption>"     & ASCII.LF, Level + 3));
 
-
-         String'Write (S, LeftPad ("</AggregatorTaskOptionPair>" & ASCII.LF, Level + 2 ));
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("</AggregatorTaskOptionPair>" & ASCII.LF, Level + 2));
+         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
 
       end loop;
       String'Write (S, LeftPad ("</RouteTaskPairing>" & ASCII.LF, Level));
 
-      String'Write (S, LeftPad ("<RouteRequestId>" & Int64'Image (THis.Route_Request_ID) & "</RouteRequestId>" & ASCII.LF, Level));
+      String'Write (S, LeftPad ("<RouteRequestId>" & Int64'Image (This.Route_Request_ID) & "</RouteRequestId>" & ASCII.LF, Level));
 
       String'Write (S, LeftPad ("<RoutePlanResponses>" & ASCII.LF, Level));
       for Cursor in This.Route_Plan_Responses loop
 
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
 
          String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Route_Plan_Responses_Maps.Key (This.Route_Plan_Responses, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("RoutePlanResponse>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("RoutePlanResponse>" & ASCII.LF, Level + 2));
          XML_Output (Unwrap (Int64_Route_Plan_Responses_Maps.Element (This.Route_Plan_Responses, Cursor).Content), S, Level + 3);
-         String'Write (S, LeftPad ("</RoutePlanResponse>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("</RoutePlanResponse>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
 
       end loop;
       String'Write (S, LeftPad ("</RoutePlanResponses>" & ASCII.LF, Level));
@@ -923,21 +835,21 @@ package body UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       String'Write (S, LeftPad ("<PendingRoute>" & ASCII.LF, Level));
       for Cursor in This.Pending_Route loop
 
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
 
          String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Pending_Route_Matrix.Key (This.Pending_Route, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("<PendingRoute>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("<PendingRoute>" & ASCII.LF, Level + 2));
          for ID of Int64_Pending_Route_Matrix.Element (This.Pending_Route, Cursor) loop
             String'Write (S, LeftPad ("<RouteID>" & Int64'Image (ID) & "</RouteID>" & ASCII.LF, Level + 3));
          end loop;
-         String'Write (S, LeftPad ("</PendingRoute>" & ASCII.LF, Level + 2 ));
+         String'Write (S, LeftPad ("</PendingRoute>" & ASCII.LF, Level + 2));
 
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1 ));
+         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
 
       end loop;
       String'Write (S, LeftPad ("</PendingRoute>" & ASCII.LF, Level));
 
    end XML_Write;
 
-end UxAS.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;
+end uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;
