@@ -7,7 +7,8 @@ package uxas.Messages.Route.RouteResponse.SPARK_Boundary with SPARK_Mode is
 
    package Vect_My_RoutePlanResponse_V is new Ada.Containers.Formal_Vectors
      (Index_Type   => Natural,
-      Element_Type => My_RoutePlanResponse);
+      Element_Type => My_RoutePlanResponse,
+      "="          => uxas.messages.route.RoutePlanResponse.SPARK_Boundary."=");
    use Vect_My_RoutePlanResponse_V;
 
    Vect_My_RoutePlanResponse_Commun_Max_Capacity : constant := 200; -- arbitrary

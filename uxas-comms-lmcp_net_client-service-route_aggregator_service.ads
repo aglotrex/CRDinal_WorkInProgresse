@@ -153,11 +153,12 @@ private
    subtype Pair_Int64_Route_Plan_Map is Int64_Pair_Int64_Route_Plan_Maps.Map
      (Pair_Int64_Route_Plan_Max_Capacity,
       Int64_Pair_Int64_Route_Plan_Maps.Default_Modulus (Pair_Int64_Route_Plan_Max_Capacity));
-
    package Int64_Pending_Auto_Req_Matrix is new Ada.Containers.Formal_Hashed_Maps
-     (Key_Type     => Int64,
-      Element_Type => Int64_Set,
-      Hash         => Int64_Hash);
+     (Key_Type        => Int64,
+      Element_Type    => Int64_Set,
+      Hash            => Int64_Hash,
+      Equivalent_Keys => "=",
+      "="             => Int64_Sets."=");
 
    Pending_Auto_Req_Max_Capacity : constant := 200; -- arbitrary
 
@@ -192,9 +193,11 @@ private
       Int64_Route_Plan_Responses_Maps.Default_Modulus (Route_Plan_Responses_Max_Capacity));
 
    package Int64_Pending_Route_Matrix is new Ada.Containers.Formal_Hashed_Maps
-     (Key_Type     => Int64,
-      Element_Type => Int64_Set,
-      Hash         => Int64_Hash);
+     (Key_Type        => Int64,
+      Element_Type    => Int64_Set,
+      Hash            => Int64_Hash,
+      Equivalent_Keys => "=",
+      "="             => Int64_Sets."=");
 
    Pending_Route_Max_Capacity : constant := 200; -- arbitrary
 

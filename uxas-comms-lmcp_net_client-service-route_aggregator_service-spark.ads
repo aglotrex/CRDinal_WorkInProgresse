@@ -1,10 +1,13 @@
 
 with Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service; use Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;
-with Uxas.Messages.Route.RoutePlan; use Uxas.Messages.Route.RoutePlan;
-with Uxas.Messages.Route.RouteRequest.SPARK_Boundary; use Uxas.Messages.Route.RouteRequest.SPARK_Boundary;
+with Uxas.Messages.Route.RoutePlan;                               use Uxas.Messages.Route.RoutePlan;
+with Uxas.Messages.Route.RouteRequest.SPARK_Boundary;             use Uxas.Messages.Route.RouteRequest.SPARK_Boundary;
+with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects;   use UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects;
+with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary;         use UxAS.Messages.Route.RouteConstraints.SPARK_Boundary;
 private
 package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with SPARK_Mode is
 
+   use all type Vect_My_RouteConstraints;
    use all type Aggregator_Task_Option_Pair_Map;
    use all type Pair_Int64_Route_Plan_Map;
    use all type Route_Plan_Responses_Map;
@@ -19,16 +22,26 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    -- Check of Route_Aggregator_Service Validity --
    ------------------------------------------------
 
-   function Check_Route_Plan_Sub (Route_Plan_Pair : Pair_Int64_Route_Plan;
+
+   function Check_Route_Plan_Sub (Route_Plan_Pair      : Pair_Int64_Route_Plan;
                                   Route_Plan_Responses : Route_Plan_Responses_Map;
-                                  Key : Int64) return Boolean is
+                                  Pending_Auto_Req     : Pending_Auto_Req_Matrix;
+                                  Pending_Route        : Pending_Route_Matrix;
+                                  Key                  : Int64) return Boolean is
      (Key = Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)
-      and then Contains (Route_Plan_Responses, Route_Plan_Pair.Reponse_ID))
-       with Ghost;
-   function Check_Route_Plan    (Route_Plan    : Pair_Int64_Route_Plan_Map;
-                                 Route_Plan_Responses : Route_Plan_Responses_Map) return Boolean is
+      and then Contains (Route_Plan_Responses, Route_Plan_Pair.Reponse_ID)
+      and then ((for Some Cursor in Pending_Auto_Req
+                 => Contains (Element (Pending_Auto_Req, Cursor), Key))
+                or
+                  (for Some Cursor in Pending_Route
+                   => Contains (Element (Pending_Route, Cursor),  Route_Plan_Pair.Reponse_ID))))
+     with Ghost;
+   function Check_Route_Plan    (Route_Plan           : Pair_Int64_Route_Plan_Map;
+                                 Route_Plan_Responses : Route_Plan_Responses_Map;
+                                 Pending_Auto_Req     : Pending_Auto_Req_Matrix;
+                                 Pending_Route        : Pending_Route_Matrix) return Boolean is
      (for all Cursor in Route_Plan
-      => Check_Route_Plan_Sub (Element (Route_Plan, Cursor), Route_Plan_Responses, Key (Route_Plan, Cursor)))
+      => Check_Route_Plan_Sub (Element (Route_Plan, Cursor), Route_Plan_Responses,Pending_Auto_Req, Pending_Route, Key (Route_Plan, Cursor)))
      with Ghost;
 
    use all type Task_Plan_Options_Map;
@@ -38,8 +51,9 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                                                                 Cursor).Content))
      with Ghost;
    function Check_Route_Plan_Response_Sub (Route_Plan_Response : My_RoutePlanResponse;
-                                           Key : Int64) return Boolean is
+                                           Key                 : Int64) return Boolean is
      (Key = Get_ResponseID (Route_Plan_Response)) with Ghost;
+
    function Check_Route_Plan_Response  (Route_Plan_Responses : Route_Plan_Responses_Map) return Boolean is
      (for all Cursor in Route_Plan_Responses
       => (Check_Route_Plan_Response_Sub (Route_Plan_Response => Element (Route_Plan_Responses, Cursor).Content,
@@ -123,6 +137,10 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                                      Element (Element (Pending_Route, Cursor_Request_ID_1), Cursor_Route_Plan_1)))))))
      with Ghost;
 
+
+
+
+
    function Check_List_Pending_Request (Pending_Auto_Req          : Pending_Auto_Req_Matrix;
                                         Unique_Automation_Request : Unique_Automation_Request_Map;
                                         Route_Task_Pairing        : Aggregator_Task_Option_Pair_Map;
@@ -165,16 +183,16 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
 
    function All_Requests_Valid
      (This : Route_Aggregator_Service) return Boolean is
-     (Check_Route_Plan (This.Route_Plan, This.Route_Plan_Responses)
-      and Check_Entity_State  (This.Entity_State, This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles)
-      and Check_Pending_Route (This.Pending_Route, This.Route_Id)
-      and Check_Type_Vehicles (This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles, This.Entity_State, This.Entity_Configuration)
-      and Check_Task_Plan_Options    (This.Task_Plan_Options)
-      and Check_Route_Task_Pairing   (This.Route_Task_Pairing, This.Entity_State, This.Pending_Auto_Req, This.Route_Request_ID)
-      and Check_Route_Plan_Response  (This.Route_Plan_Responses)
-      and Check_Entity_Configuration (This.Entity_Configuration, This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles)
-      and Check_List_Pending_Request (This.Pending_Auto_Req, This.Unique_Automation_Request, This.Route_Task_Pairing, This.Route_Id)
-      and Check_Unique_Automation_Request (This.Unique_Automation_Request, This.Auto_Request_Id)) with Ghost;
+     (Check_Route_Plan (This.Route_Plan, This.Route_Plan_Responses, This.Pending_Auto_Req, This.Pending_Route)
+      and then Check_Entity_State  (This.Entity_State, This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles)
+      and then Check_Pending_Route (This.Pending_Route, This.Route_Id)
+      and then Check_Type_Vehicles (This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles, This.Entity_State, This.Entity_Configuration)
+      and then Check_Task_Plan_Options    (This.Task_Plan_Options)
+      and then Check_Route_Task_Pairing   (This.Route_Task_Pairing, This.Entity_State, This.Pending_Auto_Req, This.Route_Request_ID)
+      and then Check_Route_Plan_Response  (This.Route_Plan_Responses)
+      and then Check_Entity_Configuration (This.Entity_Configuration, This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles)
+      and then Check_List_Pending_Request (This.Pending_Auto_Req, This.Unique_Automation_Request, This.Route_Task_Pairing, This.Route_Id)
+      and then Check_Unique_Automation_Request (This.Unique_Automation_Request, This.Auto_Request_Id)) with Ghost;
 
    -------------------------------------------------
    -- Check of Route_Aggregator_Service evolution --
@@ -328,7 +346,15 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                                    Route_Request : My_RouteRequest) with
      Pre => All_Requests_Valid (This)
      and then Contains (Container => This.Pending_Route,
-                        Key       => Get_RequestID (Route_Request)),
+                        Key       => Get_RequestID (Route_Request))
+     and then (for all Index in First_Index (Get_RouteRequests (Route_Request)) .. Last_Index (Get_RouteRequests (Route_Request))
+               => not Contains (Container => This.Route_Plan,
+                                Key       => UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Get_RouteID (Element (Container => Get_RouteRequests (Route_Request),
+                                                                                                                       Index     => Index))))
+
+     and then (if Is_Empty (Get_VehicleID (Route_Request))
+                 then This.Route_Request_ID + Int64 ( Length ( This.Entity_State))               < Int64'Last
+                   else This.Route_Request_ID + Int64 ( Length ( Get_VehicleID (Route_Request))) < Int64'Last),
      Post => All_Requests_Valid (This);
 
 end  Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK;

@@ -16,7 +16,8 @@ package UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary with SPARK_Mo
 
    package Vect_My_TaskOptionCost_V is new Ada.Containers.Formal_Vectors
      (Index_Type   => Natural,
-      Element_Type => My_TaskOptionCost);
+      Element_Type => My_TaskOptionCost,
+      "="          => Uxas.Messages.Lmcptask.TaskOptionCost.SPARK_Boundary."=");
    use Vect_My_TaskOptionCost_V;
 
    Vect_My_TaskOptionCost_Commun_Max_Capacity : constant := 200; -- arbitrary
@@ -170,6 +171,7 @@ private
    function Get_TaskLevelRelationship (This : My_AssignmentCostMatrix) return Unbounded_String is 
      (This.Content.GetTaskLevelRelationship);
       
+   overriding 
    function "=" (X, Y : My_AssignmentCostMatrix) return Boolean is
      (X.Content = Y.Content);
    

@@ -26,7 +26,12 @@ package UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary with SPARK_Mode is
    
    function Get_RouteRequests
      (This : My_RoutePlanRequest) return Vect_My_RouteConstraints with
-     Global => null;
+     Global => null,
+       Post =>  (for all Ind_1 in First_Index (Get_RouteRequests'Result) .. Last_Index (Get_RouteRequests'Result)
+                          => (for all Ind_2 in Ind_1 + 1 .. Last_Index (Get_RouteRequests'Result)
+                              => (Get_RouteID (Element (Get_RouteRequests'Result, Ind_1)) /=
+                                    Get_RouteID (Element (Get_RouteRequests'Result, Ind_2))))) 
+   ;
    
    function Get_RequestID
      (This : My_RoutePlanRequest) return Int64 with

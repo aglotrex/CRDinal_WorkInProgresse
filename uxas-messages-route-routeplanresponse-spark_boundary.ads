@@ -1,5 +1,4 @@
 with Common_Formal_Containers; use Common_Formal_Containers;
-with UxAS.Messages.Route.RoutePlan;
 
 package UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);

@@ -10,7 +10,8 @@ package body UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with 
    is
    begin
       for planningState of Source.getPlanningStates.all loop
-         Target.Content.getPlanningStates.Append (planningState); --  we need to do a clone here
+         Vect_PlanningState_Acc.Append (Container =>   Target.Content.GetPlanningStates.all,
+                                        New_Item  => PlanningState); --  we need to do a clone here
       end loop;
    end Copy_PlanningState_From_TaskAutomationRequest;
 
@@ -100,8 +101,6 @@ package body UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with 
       is
       L : constant uxas.messages.Lmcptask.UniqueAutomationRequest.Vect_PlanningState_Acc_Acc :=
         Request.Content.getPlanningStates;
-      use all type My_PlanningState;
-      use all type Vect_My_PlanningState;
    begin
       return R : Vect_My_PlanningState do
          for E of L.all loop

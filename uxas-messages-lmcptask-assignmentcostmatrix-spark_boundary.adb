@@ -33,7 +33,8 @@ package body UxAS.Messages.Lmcptask.ASsignmentCostMatrix.SPARK_Boundary with SPA
       Task_Option_Cost_Acc : constant TaskOptionCost_Acc := new TaskOptionCost.TaskOptionCost;
    begin
       Task_Option_Cost_Acc.all := Unwrap(Task_OptionCost); 
-      This.Content.GetCostMatrix.Append(New_Item => Task_Option_Cost_Acc);
+      Vect_TaskOptionCost_Acc.Append (Container => This.Content.GetCostMatrix.all,
+                                      New_Item  => Task_Option_Cost_Acc);
      
    end Add_TaskOptionCost_To_CostMatrix;
    
@@ -69,14 +70,15 @@ package body UxAS.Messages.Lmcptask.ASsignmentCostMatrix.SPARK_Boundary with SPA
      (This : in out My_AssignmentCostMatrix;
       TaskList : Int64_Vect) 
    is
-      Task_List : Constant Vect_Int64_Acc := new Vect_Int64.Vector;  
-   begin
-      
+     
+      Task_List : constant Vect_Int64_Acc := new Vect_Int64.Vector'(Vect_Int64.Empty_Vector);
+   begin 
       for E in First_Index(TaskList) .. Last_Index(TaskList) loop
          declare 
             TaskID : constant Int64 := Element ( TaskList , E);
          begin
-            Task_List.Append (TaskID);
+            Vect_Int64.Append (Container => Task_List.all,
+                               New_Item  => TaskID);
          end;
       end loop;
       This.Content.TaskList := Task_List;

@@ -81,11 +81,11 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
      (This : in out My_RouteRequest;
       Route_Constraints : in My_RouteConstraints)
    is 
-      Pointer : RouteConstraints_Acc := new RouteConstraints.RouteConstraints;
+      Pointer : constant RouteConstraints_Acc := new RouteConstraints.RouteConstraints;
    begin
       Pointer.all := Unwrap(Route_Constraints);
-      This.Content.RouteRequests.Append
-        (New_Item => Pointer);
+      Vect_RouteConstraints_Acc.Append (Container => This.Content.RouteRequests.all,
+                                        New_Item  => Pointer);
    end Add_RouteConstraints;
    
    -----------------------------
@@ -111,7 +111,8 @@ package body UxAS.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode => 
       VehiclesID : Int64) 
    is
    begin
-      This.Content.GetVehicleID.Append(New_Item => VehiclesID);
+      Vect_Int64.Append (Container => This.Content.GetVehicleID.all,
+                         New_Item  => VehiclesID);
    end Add_VehiclesID;
    
    

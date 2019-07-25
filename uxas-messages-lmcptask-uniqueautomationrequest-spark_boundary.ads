@@ -23,7 +23,8 @@ package UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with SPARK
 
    package Vect_My_PlanningState_P is new Ada.Containers.Formal_Vectors
      (Index_Type   => Natural,
-      Element_Type => My_PlanningState);
+      Element_Type => My_PlanningState,
+      "="          => UxAS.Messages.Lmcptask.PlanningState.SPARK_Boundary."=");
    use Vect_My_PlanningState_P;
 
    Vect_My_PlanningState_Commun_Max_Capacity : constant := 200; -- arbitrary

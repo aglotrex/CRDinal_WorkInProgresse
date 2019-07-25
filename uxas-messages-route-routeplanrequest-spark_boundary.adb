@@ -92,7 +92,8 @@ package body UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary with SPARK_Mode
       
    begin
       RouteRequests_Acc.all := UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Unwrap (RouteRequests);
-      This.Content.GetRouteRequests.Append( RouteRequests_Acc );
+      Vect_RouteConstraints_Acc.Append (This.Content.GetRouteRequests.all,
+                                        RouteRequests_Acc);
    end Append_RouteRequests;
    
       

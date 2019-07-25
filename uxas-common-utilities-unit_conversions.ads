@@ -42,9 +42,7 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       Latitude_RAD  : out RAD_Latitude;
       Longitude_RAD : out RAD_Angle) with
      Global => (Radius_Meridional_M, Latitude_Initial_RAD,
-                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
-     Pre => (Radius_Meridional_M > 0.0)
-     and    (Radius_Small_Circle_Latitude_M > 0.0);
+                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD);
 
    procedure Convert_North_East_M_To_Lat_Long_DEG
      (North_M       : Earth_Coordonate_M;
@@ -52,9 +50,7 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       Latitude_DEG  : out DEG_Latitude;
       Longitude_DEG : out DEG_Angle) with
      Global => (Radius_Meridional_M, Latitude_Initial_RAD,
-                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
-     Pre => Radius_Meridional_M > 0.0
-     and  Radius_Small_Circle_Latitude_M > 0.0;
+                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD);
 
    procedure Convert_North_East_FT_To_Lat_Long_DEG
      (North_FT      : Earth_Coordonate_FT;
@@ -62,9 +58,7 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       Latitude_DEG  : out DEG_Latitude;
       Longitude_DEG : out DEG_Angle) with
      Global => (Radius_Meridional_M, Latitude_Initial_RAD,
-                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
-     Pre => Radius_Meridional_M > 0.0
-     and  Radius_Small_Circle_Latitude_M > 0.0;
+                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD);
 
    --  void ConvertNorthEast_ftToLatLong_deg(const Long_float& dNorth_ft, const Long_float& dEast_ft,
    --                                        Long_float& dLatitude_deg, Long_float& dLongitude_deg);
@@ -74,15 +68,12 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       Latitude_RAD  : out RAD_Latitude;
       Longitude_RAD : out RAD_Angle) with
      Global => (Radius_Meridional_M, Latitude_Initial_RAD,
-                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD),
-     Pre => Radius_Meridional_M > 0.0
-     and  Radius_Small_Circle_Latitude_M > 0.0;
+                Radius_Small_Circle_Latitude_M, Longitude_Initial_RAD);
 
    --  ////////////////////////////////////////////////////////////////////////////
    --  ///////     LINEAR DISTANCES
 
-   --  Long_float dGetLinearDistance_m_Lat1Long1_RAD_To_Lat2Long2_rad(const Long_float& dLatitude1_rad, const Long_float& dLongitude1_rad,
-   --                                                                 Const Long_float& dLatitude2_rad, const Long_float& dLongitude2_rad);
+
    procedure Get_Linear_Distance_M_Lat1_Long1_RAD_To_Lat2_Long2_RAD
      (Latitude_1_RAD  : RAD_Latitude;
       Longitude_1_RAD : RAD_Angle;
@@ -90,8 +81,7 @@ package Uxas.Common.Utilities.Unit_Conversions  with SPARK_Mode is
       Longitude_2_RAD : RAD_Angle;
       Linear_Distance : out Linear_Distance_M);
 
-   --  Long_float dGetLinearDistance_m_Lat1Long1_deg_To_Lat2Long2_deg(const Long_float& dLatitude1_deg, const Long_float& dLongitude1_deg,
-   --                                                                 const Long_float& dLatitude2_deg, const Long_float& dLongitude2_deg);
+
    procedure Get_Linear_Distance_M_Lat1_Long1_DEG_To_Lat2_Long2_DEG
      (Latitude_1_DEG  : DEG_Latitude;
       Longitude_1_DEG : DEG_Angle;

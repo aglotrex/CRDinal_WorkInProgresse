@@ -1,3 +1,4 @@
+with UxAS.Messages.Route.RoutePlan;
 package body UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary with SPARK_Mode => Off is
    
    ----------------------------------

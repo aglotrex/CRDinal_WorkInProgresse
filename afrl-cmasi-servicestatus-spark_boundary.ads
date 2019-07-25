@@ -1,6 +1,8 @@
-with Afrl.Cmasi.Enumerations; use Afrl.Cmasi.Enumerations;
+with Afrl.Cmasi.Enumerations;  use Afrl.Cmasi.Enumerations;
+with Afrl.Cmasi.KeyValuePair;  use Afrl.Cmasi.KeyValuePair;
+with afrl.cmasi.ServiceStatus; use afrl.cmasi.ServiceStatus;
+
 with Ada.Containers.Formal_Vectors;
-with Afrl.Cmasi.KeyValuePair; use Afrl.Cmasi.KeyValuePair;
 
 package Afrl.Cmasi.ServiceStatus.SPARK_Boundary with SPARK_Mode is
     pragma Annotate (GNATprove, Terminating, SPARK_Boundary);

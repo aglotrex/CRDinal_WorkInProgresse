@@ -46,7 +46,8 @@ package body Afrl.Cmasi.ServiceStatus.SPARK_Boundary with SPARK_Mode => Off is
    begin
       Key_Pair.SetKey(KeyPair_Key);
       Key_Pair.SetValue(KeyPair_Value);
-      This.Content.GetInfo.Append(Key_Pair);
+      Vect_KeyValuePair_Acc.Append (Container => This.Content.GetInfo.all,
+                                    New_Item  => Key_Pair);
    end Add_KeyPair;
    
    -------------------
@@ -60,7 +61,8 @@ package body Afrl.Cmasi.ServiceStatus.SPARK_Boundary with SPARK_Mode => Off is
       Key_Pair : constant KeyValuePair_Acc := new KeyValuePair.KeyValuePair;
    begin
       Key_Pair.SetKey(KeyPair_Key);
-      This.Content.GetInfo.Append(Key_Pair);
+      Vect_KeyValuePair_Acc.Append (Container => This.Content.GetInfo.all,
+                                    New_Item  => Key_Pair);
    end Add_KeyPair;
    
 end Afrl.Cmasi.ServiceStatus.SPARK_Boundary;

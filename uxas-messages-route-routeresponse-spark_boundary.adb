@@ -41,7 +41,8 @@ package body uxas.Messages.Route.RouteResponse.SPARK_Boundary with SPARK_Mode =>
       RoutePlan_Acc : constant  RoutePlanResponse_Acc := new RoutePlanResponse.RoutePlanResponse;
    begin
       RoutePlan_Acc.all := Unwrap (Route);
-      This.Content.getRoutes.Append (RoutePlan_Acc);
+      Vect_RoutePlanResponse_Acc.Append (Container => This.Content.GetRoutes.all,
+                                         New_Item  => RoutePlan_Acc);
    end Add_Route;
 
 end uxas.messages.route.RouteResponse.SPARK_Boundary;

@@ -4,10 +4,7 @@ with Afrl.Cmasi.Location3D; use Afrl.Cmasi.Location3D;
 package Afrl.Cmasi.Location3D.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, Spark_Boundary);
 
-   --  This package introduces a wrapper around UniqueAutomationRequest.
-   --  UniqueAutomationRequest is a private type, so it can be used in SPARK.
-   --  This wrapper is only used to introduce contracts on the type and
-   --  its accessors.
+
    Dividend_Max : constant := 10_000_000_000.0;
    
    type My_Location3D_Any is private with 

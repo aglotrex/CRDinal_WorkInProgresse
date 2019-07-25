@@ -153,8 +153,8 @@ package body uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       UInt32_Lmcp_Message_Size_Max : UInt32 := 1000000;
       --   Sstr_Errors : Dynamic_String;
 
-      Str_Component_Type      : String :=   Get_Attribute (XML_Node, Name => "STRING_XML_TYPE");
-      Str_Component_Fast_Plan : String :=   Get_Attribute (XML_Node, Name => "STRING_XML_FAST_PLAN");
+      Str_Component_Type      : constant String :=   Get_Attribute (XML_Node, Name => "STRING_XML_TYPE");
+      Str_Component_Fast_Plan : constant String :=   Get_Attribute (XML_Node, Name => "STRING_XML_FAST_PLAN");
       Unused : Boolean;
       use afrl.cmasi.EntityConfiguration.String_Vectors;
       EntityConfiguration_Descendants : Afrl.Cmasi.EntityConfiguration.String_Vectors.Vector := Afrl.Cmasi.EntityConfiguration.EntityConfiguration_Descendants;
@@ -237,18 +237,20 @@ package body uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    -----------------------------------
    overriding
    procedure Process_Received_LMCP_Message
-     (This : in out Route_Aggregator_Service;
+     (This             : in out Route_Aggregator_Service;
       Received_Message : not null Any_LMCP_Message;
       Result           : out Boolean)
    is
    begin
-      --  if (uxas::messages::route::isRoutePlanResponse(receivedLmcpMessage->m_object.get()))
+
       if    Received_Message.Payload.all in RoutePlanResponse'Class           then
+         -- it is a Route Plan response o store it
          This.Handle_Route_Plan_Response_Msg (Received_Message);
+         -- and Then check if it fullfly a requequet :
          SPARK.Check_All_Route_Plans (This);
 
-         --  else if (uxas::messages::route::isRouteRequest(receivedLmcpMessage->m_object.get()))
       elsif Received_Message.Payload.all in RouteRequest'Class                then
+
          This.Handle_Route_Request_Msg (Received_Message);
 
          --  else if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleState>(receivedLmcpMessage->m_object))
@@ -303,7 +305,7 @@ package body uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
    is
 
       use  Uxas.Messages.Route.RouteRequest.SPARK_Boundary;
-      Route_Request : My_RouteRequest := Wrap ( RouteRequest_Acc(RouteRequest_Any(Msg.Payload)).all);
+      Route_Request : constant My_RouteRequest := Wrap ( RouteRequest_Acc(RouteRequest_Any(Msg.Payload)).all);
 
    begin
       SPARK.Handle_Route_Request (This          => This,
@@ -341,7 +343,7 @@ package body uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
 
       for P of Route_Plan.getRouteResponses.all loop
          declare
-            RoutePlan_Clone : My_RoutePlan :=  Wrap (P.all);
+            RoutePlan_Clone : constant My_RoutePlan :=  Wrap (P.all);
          begin
 
             Pair := Pair_Int64_Route_Plan'(Reponse_ID          => Route_Plan.getResponseID,
@@ -610,17 +612,17 @@ package body uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
       Msg : Any_LMCP_Message)
    is
       Impact_Automation_Request : constant ImpactAutomationRequest_Any := ImpactAutomationRequest_Any (Msg.Payload);
-      Unique_Automation_Request : UniqueAutomationRequest_Any;
+      AutomationRequest : UniqueAutomationRequest_Any;
 
       C : Int64_Unique_Automation_Request_Maps.Cursor;
       Wrapped_UniqueAutomationRequest : UniqueAutomationRequest_Handler;
       Inserted : Boolean;
    begin
-      Unique_Automation_Request.setOriginalRequest (OriginalRequest => Impact_Automation_Request.getTrialRequest);
+      AutomationRequest.setOriginalRequest (OriginalRequest => Impact_Automation_Request.getTrialRequest);
 
-      Unique_Automation_Request.setRequestID (This.Auto_Request_Id);
+      AutomationRequest.setRequestID (This.Auto_Request_Id);
 
-      Wrapped_UniqueAutomationRequest := UniqueAutomationRequest_Handler'(Content => Wrap (UniqueAutomationRequest (Unique_Automation_Request.all)));
+      Wrapped_UniqueAutomationRequest := UniqueAutomationRequest_Handler'(Content => Wrap (UniqueAutomationRequest (AutomationRequest.all)));
 
       Int64_Unique_Automation_Request_Maps.Insert
         (This.Unique_Automation_Request,
@@ -657,199 +659,199 @@ package body uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service is
           Inserted  => Inserted);
    end Handle_Task_Plan_Options_Msg;
 
-   procedure XML_Write (This  : Route_Aggregator_Service;
-                        S     : access Ada.Streams.Root_Stream_Type'Class;
-                        Level : Natural) is
-      use Int64_Pending_Route_Matrix;
-      use Int64_Route_Plan_Responses_Maps;
-      use Int64_Aggregator_Task_Option_Pair_Maps;
-      use Int64_Pending_Auto_Req_Matrix;
-      use Int64_Task_Plan_Options_Maps;
-      use Int64_Unique_Automation_Request_Maps;
-      use Int64_Entity_Configuration_Maps;
-      use Int64_Entity_State_Maps;
-      use Int64_Pair_Int64_Route_Plan_Maps;
-   begin
-      String'Write (S, LeftPad ("<FastPlan>" & Boolean'Image (This.Fast_Plan) & "</FastPlan>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<EntityStates>" & ASCII.LF, Level));
-      for Cursor in This.Entity_State loop
-
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
-
-         String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Entity_State_Maps.Key (This.Entity_State, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("<EntityState>" & ASCII.LF, Level + 2));
-         XML_Output (Unwrap (Int64_Entity_State_Maps.Element (This.Entity_State, Cursor).Content), S, Level + 3);
-         String'Write (S, LeftPad ("</EntityState>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
-
-      end loop;
-      String'Write (S, LeftPad ("</EntityStates>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<EntityConfigurations>" & ASCII.LF, Level));
-      for Cursor in This.Entity_Configuration loop
-
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
-
-         String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Entity_Configuration_Maps.Key (THis.Entity_Configuration, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("<EntityConfiguration>" & ASCII.LF, Level + 2));
-         XML_Output (Unwrap (Int64_Entity_Configuration_Maps.Element (This.Entity_Configuration, Cursor).Content), S, Level + 3);
-         String'Write (S, LeftPad ("</EntityConfiguration>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
-
-      end loop;
-      String'Write (S, LeftPad ("</EntityConfigurations>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<AirVehicles>" & ASCII.LF, Level));
-      for ID of This.Air_Vehicules loop
-         String'Write (S, LeftPad ("<VehicleID>" & Int64'Image (ID) & "</VehicleID>" & ASCII.LF, Level + 1));
-      end loop;
-      String'Write (S, LeftPad ("</AirVehicles>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<GroundVehicles>" & ASCII.LF, Level));
-      for ID of This.Ground_Vehicles loop
-         String'Write (S, LeftPad ("<VehicleID>" & Int64'Image (ID) & "</VehicleID>" & ASCII.LF, Level + 1));
-      end loop;
-      String'Write (S, LeftPad ("</GroundVehicles>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<SurfaceVehicles>" & ASCII.LF, Level));
-      for ID of This.Surface_Vehicles loop
-         String'Write (S, LeftPad ("<VehicleID>" & Int64'Image (ID) & "</VehicleID>" & ASCII.LF, Level + 1));
-      end loop;
-      String'Write (S, LeftPad ("</SurfaceVehicles>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<AutoRequestId>" & Int64'Image (This.Auto_Request_Id) & "</AutoRequestId>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<UniqueAutomationRequests>" & ASCII.LF, Level));
-      for Cursor in This.Unique_Automation_Request loop
-
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
-
-         String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Unique_Automation_Request_Maps.Key (THis.Unique_Automation_Request, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("<UniqueAutomationRequest>" & ASCII.LF, Level + 2));
-         XML_Output (Unwrap (Int64_Unique_Automation_Request_Maps.Element (This.Unique_Automation_Request, Cursor).Content), S, Level + 3);
-         String'Write (S, LeftPad ("</UniqueAutomationRequest>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
-
-      end loop;
-      String'Write (S, LeftPad ("</UniqueAutomationRequests>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<TaskOptions>" & ASCII.LF, Level));
-      for Cursor in This.Task_Plan_Options loop
-
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
-
-         String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Task_Plan_Options_Maps.Key (THis.Task_Plan_Options, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("<UniqueAutomationRequest>" & ASCII.LF, Level + 2));
-         XML_Output (Unwrap (Int64_Task_Plan_Options_Maps.Element (This.Task_Plan_Options, Cursor).Content), S, Level + 3);
-         String'Write (S, LeftPad ("</UniqueAutomationRequest>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
-
-      end loop;
-      String'Write (S, LeftPad ("</TaskOptions>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<RouteId>" & Int64'Image (This.Route_Id) & "</RouteId>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<RoutePlans>" & ASCII.LF, Level));
-      for Cursor in This.Route_Plan loop
-
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
-
-         String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Pair_Int64_Route_Plan_Maps.Key (THis.Route_Plan, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("<ReponseID>" & Int64'Image (Int64_Pair_Int64_Route_Plan_Maps.Element (This.Route_Plan, Cursor).Reponse_ID) & "</ReponseID>" & ASCII.LF, Level));
-
-         String'Write (S, LeftPad ("<Returned_Route_Plan>" & ASCII.LF, Level + 2));
-         XML_Output (Unwrap (Int64_Pair_Int64_Route_Plan_Maps.Element (This.Route_Plan, Cursor).Returned_Route_Plan), S, Level + 3);
-         String'Write (S, LeftPad ("</Returned_Route_Plan>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
-
-      end loop;
-      String'Write (S, LeftPad ("</RoutePlans>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<PendingAutoReq>" & ASCII.LF, Level));
-      for Cursor in This.Pending_Auto_Req loop
-
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
-
-         String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Pending_Auto_Req_Matrix.Key (THis.Pending_Auto_Req, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("<PendingReq>" & ASCII.LF, Level + 2));
-         for ID of Int64_Pending_Auto_Req_Matrix.Element (This.Pending_Auto_Req, Cursor) loop
-            String'Write (S, LeftPad ("<RequestID>" & Int64'Image (ID) & "</RequestID>" & ASCII.LF, Level + 3));
-         end loop;
-         String'Write (S, LeftPad ("</PendingReq>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
-
-      end loop;
-      String'Write (S, LeftPad ("</PendingAutoReq>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<RouteTaskPairing>" & ASCII.LF, Level));
-      for Cursor in This.Route_Task_Pairing loop
-
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
-
-         String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Key (THis.Route_Task_Pairing, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
-         String'Write (S, LeftPad ("<AggregatorTaskOptionPair>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("<VehicleId>"      & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).VehicleId)      & "</VehicleId>"      & ASCII.LF, Level + 3));
-         String'Write (S, LeftPad ("<PrevTaskId>"     & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).PrevTaskId)     & "</PrevTaskId>"     & ASCII.LF, Level + 3));
-         String'Write (S, LeftPad ("<PrevTaskOption>" & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).PrevTaskOption) & "</PrevTaskOption>" & ASCII.LF, Level + 3));
-         String'Write (S, LeftPad ("<TaskId>"         & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).TaskId)         & "</TaskId>"         & ASCII.LF, Level + 3));
-         String'Write (S, LeftPad ("<TaskOption>"     & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).TaskOption)     & "</TaskOption>"     & ASCII.LF, Level + 3));
-
-         String'Write (S, LeftPad ("</AggregatorTaskOptionPair>" & ASCII.LF, Level + 2));
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
-
-      end loop;
-      String'Write (S, LeftPad ("</RouteTaskPairing>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<RouteRequestId>" & Int64'Image (This.Route_Request_ID) & "</RouteRequestId>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<RoutePlanResponses>" & ASCII.LF, Level));
-      for Cursor in This.Route_Plan_Responses loop
-
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
-
-         String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Route_Plan_Responses_Maps.Key (This.Route_Plan_Responses, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("RoutePlanResponse>" & ASCII.LF, Level + 2));
-         XML_Output (Unwrap (Int64_Route_Plan_Responses_Maps.Element (This.Route_Plan_Responses, Cursor).Content), S, Level + 3);
-         String'Write (S, LeftPad ("</RoutePlanResponse>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
-
-      end loop;
-      String'Write (S, LeftPad ("</RoutePlanResponses>" & ASCII.LF, Level));
-
-      String'Write (S, LeftPad ("<PendingRoute>" & ASCII.LF, Level));
-      for Cursor in This.Pending_Route loop
-
-         String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
-
-         String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Pending_Route_Matrix.Key (This.Pending_Route, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("<PendingRoute>" & ASCII.LF, Level + 2));
-         for ID of Int64_Pending_Route_Matrix.Element (This.Pending_Route, Cursor) loop
-            String'Write (S, LeftPad ("<RouteID>" & Int64'Image (ID) & "</RouteID>" & ASCII.LF, Level + 3));
-         end loop;
-         String'Write (S, LeftPad ("</PendingRoute>" & ASCII.LF, Level + 2));
-
-         String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
-
-      end loop;
-      String'Write (S, LeftPad ("</PendingRoute>" & ASCII.LF, Level));
-
-   end XML_Write;
+--     procedure XML_Write (This  : Route_Aggregator_Service;
+--                          S     : access Ada.Streams.Root_Stream_Type'Class;
+--                          Level : Natural) is
+--        use Int64_Pending_Route_Matrix;
+--        use Int64_Route_Plan_Responses_Maps;
+--        use Int64_Aggregator_Task_Option_Pair_Maps;
+--        use Int64_Pending_Auto_Req_Matrix;
+--        use Int64_Task_Plan_Options_Maps;
+--        use Int64_Unique_Automation_Request_Maps;
+--        use Int64_Entity_Configuration_Maps;
+--        use Int64_Entity_State_Maps;
+--        use Int64_Pair_Int64_Route_Plan_Maps;
+--     begin
+--        String'Write (S, LeftPad ("<FastPlan>" & Boolean'Image (This.Fast_Plan) & "</FastPlan>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<EntityStates>" & ASCII.LF, Level));
+--        for Cursor in This.Entity_State loop
+--
+--           String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
+--
+--           String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Entity_State_Maps.Key (This.Entity_State, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("<EntityState>" & ASCII.LF, Level + 2));
+--           XML_Output (Unwrap (Int64_Entity_State_Maps.Element (This.Entity_State, Cursor).Content), S, Level + 3);
+--           String'Write (S, LeftPad ("</EntityState>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
+--
+--        end loop;
+--        String'Write (S, LeftPad ("</EntityStates>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<EntityConfigurations>" & ASCII.LF, Level));
+--        for Cursor in This.Entity_Configuration loop
+--
+--           String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
+--
+--           String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Entity_Configuration_Maps.Key (THis.Entity_Configuration, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("<EntityConfiguration>" & ASCII.LF, Level + 2));
+--           XML_Output (Unwrap (Int64_Entity_Configuration_Maps.Element (This.Entity_Configuration, Cursor).Content), S, Level + 3);
+--           String'Write (S, LeftPad ("</EntityConfiguration>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
+--
+--        end loop;
+--        String'Write (S, LeftPad ("</EntityConfigurations>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<AirVehicles>" & ASCII.LF, Level));
+--        for ID of This.Air_Vehicules loop
+--           String'Write (S, LeftPad ("<VehicleID>" & Int64'Image (ID) & "</VehicleID>" & ASCII.LF, Level + 1));
+--        end loop;
+--        String'Write (S, LeftPad ("</AirVehicles>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<GroundVehicles>" & ASCII.LF, Level));
+--        for ID of This.Ground_Vehicles loop
+--           String'Write (S, LeftPad ("<VehicleID>" & Int64'Image (ID) & "</VehicleID>" & ASCII.LF, Level + 1));
+--        end loop;
+--        String'Write (S, LeftPad ("</GroundVehicles>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<SurfaceVehicles>" & ASCII.LF, Level));
+--        for ID of This.Surface_Vehicles loop
+--           String'Write (S, LeftPad ("<VehicleID>" & Int64'Image (ID) & "</VehicleID>" & ASCII.LF, Level + 1));
+--        end loop;
+--        String'Write (S, LeftPad ("</SurfaceVehicles>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<AutoRequestId>" & Int64'Image (This.Auto_Request_Id) & "</AutoRequestId>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<UniqueAutomationRequests>" & ASCII.LF, Level));
+--        for Cursor in This.Unique_Automation_Request loop
+--
+--           String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
+--
+--           String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Unique_Automation_Request_Maps.Key (THis.Unique_Automation_Request, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("<UniqueAutomationRequest>" & ASCII.LF, Level + 2));
+--           XML_Output (Unwrap (Int64_Unique_Automation_Request_Maps.Element (This.Unique_Automation_Request, Cursor).Content), S, Level + 3);
+--           String'Write (S, LeftPad ("</UniqueAutomationRequest>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
+--
+--        end loop;
+--        String'Write (S, LeftPad ("</UniqueAutomationRequests>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<TaskOptions>" & ASCII.LF, Level));
+--        for Cursor in This.Task_Plan_Options loop
+--
+--           String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
+--
+--           String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Task_Plan_Options_Maps.Key (THis.Task_Plan_Options, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("<UniqueAutomationRequest>" & ASCII.LF, Level + 2));
+--           XML_Output (Unwrap (Int64_Task_Plan_Options_Maps.Element (This.Task_Plan_Options, Cursor).Content), S, Level + 3);
+--           String'Write (S, LeftPad ("</UniqueAutomationRequest>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
+--
+--        end loop;
+--        String'Write (S, LeftPad ("</TaskOptions>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<RouteId>" & Int64'Image (This.Route_Id) & "</RouteId>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<RoutePlans>" & ASCII.LF, Level));
+--        for Cursor in This.Route_Plan loop
+--
+--           String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
+--
+--           String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Pair_Int64_Route_Plan_Maps.Key (THis.Route_Plan, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("<ReponseID>" & Int64'Image (Int64_Pair_Int64_Route_Plan_Maps.Element (This.Route_Plan, Cursor).Reponse_ID) & "</ReponseID>" & ASCII.LF, Level));
+--
+--           String'Write (S, LeftPad ("<Returned_Route_Plan>" & ASCII.LF, Level + 2));
+--           XML_Output (Unwrap (Int64_Pair_Int64_Route_Plan_Maps.Element (This.Route_Plan, Cursor).Returned_Route_Plan), S, Level + 3);
+--           String'Write (S, LeftPad ("</Returned_Route_Plan>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
+--
+--        end loop;
+--        String'Write (S, LeftPad ("</RoutePlans>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<PendingAutoReq>" & ASCII.LF, Level));
+--        for Cursor in This.Pending_Auto_Req loop
+--
+--           String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
+--
+--           String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Pending_Auto_Req_Matrix.Key (THis.Pending_Auto_Req, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("<PendingReq>" & ASCII.LF, Level + 2));
+--           for ID of Int64_Pending_Auto_Req_Matrix.Element (This.Pending_Auto_Req, Cursor) loop
+--              String'Write (S, LeftPad ("<RequestID>" & Int64'Image (ID) & "</RequestID>" & ASCII.LF, Level + 3));
+--           end loop;
+--           String'Write (S, LeftPad ("</PendingReq>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
+--
+--        end loop;
+--        String'Write (S, LeftPad ("</PendingAutoReq>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<RouteTaskPairing>" & ASCII.LF, Level));
+--        for Cursor in This.Route_Task_Pairing loop
+--
+--           String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
+--
+--           String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Key (THis.Route_Task_Pairing, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
+--           String'Write (S, LeftPad ("<AggregatorTaskOptionPair>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("<VehicleId>"      & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).VehicleId)      & "</VehicleId>"      & ASCII.LF, Level + 3));
+--           String'Write (S, LeftPad ("<PrevTaskId>"     & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).PrevTaskId)     & "</PrevTaskId>"     & ASCII.LF, Level + 3));
+--           String'Write (S, LeftPad ("<PrevTaskOption>" & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).PrevTaskOption) & "</PrevTaskOption>" & ASCII.LF, Level + 3));
+--           String'Write (S, LeftPad ("<TaskId>"         & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).TaskId)         & "</TaskId>"         & ASCII.LF, Level + 3));
+--           String'Write (S, LeftPad ("<TaskOption>"     & Int64'Image (Int64_Aggregator_Task_Option_Pair_Maps.Element (THis.Route_Task_Pairing, Cursor).TaskOption)     & "</TaskOption>"     & ASCII.LF, Level + 3));
+--
+--           String'Write (S, LeftPad ("</AggregatorTaskOptionPair>" & ASCII.LF, Level + 2));
+--           String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
+--
+--        end loop;
+--        String'Write (S, LeftPad ("</RouteTaskPairing>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<RouteRequestId>" & Int64'Image (This.Route_Request_ID) & "</RouteRequestId>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<RoutePlanResponses>" & ASCII.LF, Level));
+--        for Cursor in This.Route_Plan_Responses loop
+--
+--           String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
+--
+--           String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Route_Plan_Responses_Maps.Key (This.Route_Plan_Responses, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("RoutePlanResponse>" & ASCII.LF, Level + 2));
+--           XML_Output (Unwrap (Int64_Route_Plan_Responses_Maps.Element (This.Route_Plan_Responses, Cursor).Content), S, Level + 3);
+--           String'Write (S, LeftPad ("</RoutePlanResponse>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
+--
+--        end loop;
+--        String'Write (S, LeftPad ("</RoutePlanResponses>" & ASCII.LF, Level));
+--
+--        String'Write (S, LeftPad ("<PendingRoute>" & ASCII.LF, Level));
+--        for Cursor in This.Pending_Route loop
+--
+--           String'Write (S, LeftPad ("<Element>" & ASCII.LF, Level + 1));
+--
+--           String'Write (S, LeftPad ("<Key>" & Int64'Image (Int64_Pending_Route_Matrix.Key (This.Pending_Route, Cursor)) & "</Key>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("<PendingRoute>" & ASCII.LF, Level + 2));
+--           for ID of Int64_Pending_Route_Matrix.Element (This.Pending_Route, Cursor) loop
+--              String'Write (S, LeftPad ("<RouteID>" & Int64'Image (ID) & "</RouteID>" & ASCII.LF, Level + 3));
+--           end loop;
+--           String'Write (S, LeftPad ("</PendingRoute>" & ASCII.LF, Level + 2));
+--
+--           String'Write (S, LeftPad ("</Element>" & ASCII.LF, Level + 1));
+--
+--        end loop;
+--        String'Write (S, LeftPad ("</PendingRoute>" & ASCII.LF, Level));
+--
+--     end XML_Write;
 
 end uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service;
