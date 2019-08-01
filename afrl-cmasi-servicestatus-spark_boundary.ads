@@ -1,20 +1,21 @@
 with Afrl.Cmasi.Enumerations;  use Afrl.Cmasi.Enumerations;
 with Afrl.Cmasi.KeyValuePair;  use Afrl.Cmasi.KeyValuePair;
-with afrl.cmasi.ServiceStatus; use afrl.cmasi.ServiceStatus;
+with Afrl.Cmasi.ServiceStatus; use Afrl.Cmasi.ServiceStatus;
 
 with Ada.Containers.Formal_Vectors;
 
 package Afrl.Cmasi.ServiceStatus.SPARK_Boundary with SPARK_Mode is
-    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
+   pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
 
    type My_ServiceStatus is private with
-   Default_Initial_Condition => True;
+     Default_Initial_Condition => True;
    
    
    package Vect_KeyValuePair_P is new Ada.Containers.Formal_Vectors
      (Index_Type   => Natural,
-      Element_Type => KeyValuePair.KeyValuePair);
+      Element_Type => Afrl.Cmasi.KeyValuePair.KeyValuePair);
+   
    use Vect_KeyValuePair_P;
    Vect_KeyValuePair_Commun_Max_Capacity : constant := 200; -- arbitrary
    
@@ -38,7 +39,7 @@ package Afrl.Cmasi.ServiceStatus.SPARK_Boundary with SPARK_Mode is
            and then Last_Index( Get_KeyPairs (X)) = Last_Index (Get_KeyPairs (Y))
            and then (for all I in First_Index( Get_KeyPairs (X)) .. Last_Index( Get_KeyPairs (X))
                      => Element ( Get_KeyPairs (X), I) = Element ( Get_KeyPairs (Y) , I))));
-   --  pragma Annotate (GNATprove, Inline_For_Proof, Same_Requests);
+    pragma Annotate (GNATprove, Inline_For_Proof, Same_Requests);
        
    
      
@@ -84,9 +85,15 @@ package Afrl.Cmasi.ServiceStatus.SPARK_Boundary with SPARK_Mode is
      Global => null,
      Post => (if "="'Result then Same_Requests (X, Y));
    
-   function Unwrap (This : My_ServiceStatus) return ServiceStatus;
+   function Unwrap (This : My_ServiceStatus) return ServiceStatus with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off;
 
-   function Wrap (This : ServiceStatus) return My_ServiceStatus;
+   function Wrap (This : ServiceStatus) return My_ServiceStatus with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off;
    
 private
    

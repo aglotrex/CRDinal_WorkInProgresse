@@ -7,8 +7,8 @@ package uxas.Messages.Route.RouteResponse.SPARK_Boundary with SPARK_Mode is
 
    package Vect_My_RoutePlanResponse_V is new Ada.Containers.Formal_Vectors
      (Index_Type   => Natural,
-      Element_Type => My_RoutePlanResponse,
-      "="          => uxas.messages.route.RoutePlanResponse.SPARK_Boundary."=");
+      Element_Type => My_RoutePlanResponse);
+
    use Vect_My_RoutePlanResponse_V;
 
    Vect_My_RoutePlanResponse_Commun_Max_Capacity : constant := 200; -- arbitrary
@@ -62,9 +62,15 @@ package uxas.Messages.Route.RouteResponse.SPARK_Boundary with SPARK_Mode is
                      => Element (Get_Routes (This), I) = Element (Get_Routes (This'Old), I)))
      and Get_ResponseID (This) = Get_ResponseID (This'Old);
 
-   function Unwrap (This : My_RouteResponse) return RouteResponse;
+   function Unwrap (This : My_RouteResponse) return RouteResponse with
+     Global => null,
+     Inline,
+     SPARK_Mode => Off;
 
-   function Wrap (This : RouteResponse) return My_RouteResponse;
+   function Wrap (This : RouteResponse) return My_RouteResponse with
+     Global => null,
+     Inline,
+     SPARK_Mode => Off;
 
 private
    pragma SPARK_Mode (Off);

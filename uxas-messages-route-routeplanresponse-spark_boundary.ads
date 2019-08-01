@@ -95,9 +95,15 @@ package UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary with SPARK_Mode is
      Global => null,
      Post => (if "="'Result then Same_Requests (X, Y));
 
-   function Unwrap (This : My_RoutePlanResponse) return RoutePlanResponse;
+   function Unwrap (This : My_RoutePlanResponse) return RoutePlanResponse with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
 
-   function Wrap (This : RoutePlanResponse) return My_RoutePlanResponse;
+   function Wrap (This : RoutePlanResponse) return My_RoutePlanResponse with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
 
 private
    pragma SPARK_Mode (Off);

@@ -4,8 +4,6 @@ with Afrl.Cmasi.Location3D.SPARK_Boundary; use Afrl.Cmasi.Location3D.SPARK_Bound
 
 package Afrl.Cmasi.EntityState.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
-
-   use all type Int64_Vect;
    
    type My_EntityState is private with
    Default_Initial_Condition => True;
@@ -34,9 +32,15 @@ package Afrl.Cmasi.EntityState.SPARK_Boundary with SPARK_Mode is
      Global => null,
      Post => (if "="'Result then Same_Requests (X, Y));
    
-   function Unwrap (This : My_EntityState) return EntityState;
+   function Unwrap (This : My_EntityState) return EntityState with
+     Global => null,
+     Inline,
+     SPARK_Mode => Off;
 
-   function Wrap (This : EntityState) return My_EntityState;
+   function Wrap (This : EntityState) return My_EntityState with
+     Global => null,
+     Inline,
+     SPARK_Mode => Off;
    
  
 

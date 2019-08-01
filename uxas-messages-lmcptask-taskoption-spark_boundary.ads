@@ -54,9 +54,15 @@ package UxAS.Messages.Lmcptask.TaskOption.SPARK_Boundary with SPARK_Mode is
      Global => null,
      Post => (if "="'Result then Same_Requests (X, Y));
    
-    function Unwrap (this : My_TaskOption) return TaskOption;
+    function Unwrap (this : My_TaskOption) return TaskOption with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
 
-   function Wrap (this : TaskOption) return My_TaskOption;
+   function Wrap (this : TaskOption) return My_TaskOption with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
    
 private
    pragma SPARK_Mode (Off);

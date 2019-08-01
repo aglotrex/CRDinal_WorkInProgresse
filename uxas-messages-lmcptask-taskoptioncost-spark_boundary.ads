@@ -114,9 +114,15 @@ package UxAS.Messages.Lmcptask.TaskOptionCost.SPARK_Boundary with SPARK_Mode is
      and Get_IntialTaskID (This) = Get_IntialTaskID (This'Old) 
      and Get_TimeToGo  (This) = Get_TimeToGo  (This'Old);
    
-   function Unwrap (This : My_TaskOptionCost) return TaskOptionCost;
-
-   function Wrap (This : TaskOptionCost) return My_TaskOptionCost;
+   function Unwrap (This : My_TaskOptionCost) return TaskOptionCost with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
+   
+   function Wrap (This : TaskOptionCost) return My_TaskOptionCost with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
    
    
 private 

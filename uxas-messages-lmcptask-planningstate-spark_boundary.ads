@@ -2,6 +2,8 @@ with Afrl.Cmasi.Location3D.SPARK_Boundary; use Afrl.Cmasi.Location3D.SPARK_Bound
 
 package UxAS.Messages.Lmcptask.PlanningState.SPARK_Boundary with SPARK_Mode is
    
+   pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
+   
    type My_PlanningState is private with
      Default_Initial_Condition => True;
 
@@ -17,20 +19,26 @@ package UxAS.Messages.Lmcptask.PlanningState.SPARK_Boundary with SPARK_Mode is
      (This : My_PlanningState) return Real32
      with Global => null;
    
-   function Same_Requests (X,Y : My_PlanningState) return Boolean is
+   function Same_Requests (X, Y : My_PlanningState) return Boolean is
      (Get_EntityId (X) = Get_EntityId (Y)
       and Get_PlanningPosition (X) = Get_PlanningPosition (Y)
       and Get_PlanningHeading (X) = Get_PlanningHeading (Y))
        with Global => null;
    
    overriding
-   function "=" (X,Y : My_PlanningState) return Boolean with
+   function "=" (X, Y : My_PlanningState) return Boolean with
      Global => null,
      Post   => (if "="'Result then Same_Requests (X, Y));
    
-   function Unwrap (This : My_PlanningState) return PlanningState;
+   function Unwrap (This : My_PlanningState) return PlanningState with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
 
-   function Wrap (This : PlanningState) return My_PlanningState;
+   function Wrap (This : PlanningState) return My_PlanningState with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
    
 private
    pragma SPARK_Mode (Off);
@@ -42,10 +50,12 @@ private
      (X.Content = Y.Content);
    
    function Unwrap (This : My_PlanningState) return PlanningState is
-     (This.Content);
+     (This.Content) with 
+     SPARK_Mode => Off; 
 
    function Wrap (This : PlanningState) return My_PlanningState is 
-     (Content => This);
+     (Content => This) with 
+     SPARK_Mode => Off; 
    
    function Get_EntityId (This : My_PlanningState) return Int64 is
      (This.Content.GetEntityID);

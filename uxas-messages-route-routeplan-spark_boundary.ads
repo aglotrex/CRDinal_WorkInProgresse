@@ -48,9 +48,15 @@ package UxAS.Messages.Route.RoutePlan.SPARK_Boundary with SPARK_Mode is
    
    
  
-   function Unwrap (This : My_RoutePlan) return RoutePlan;
+   function Unwrap (This : My_RoutePlan) return RoutePlan with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
 
-   function Wrap (This : RoutePlan) return My_RoutePlan;
+   function Wrap (This : RoutePlan) return My_RoutePlan with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
    
 private 
    

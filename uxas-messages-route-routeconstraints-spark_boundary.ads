@@ -183,9 +183,15 @@ package UxAS.Messages.Route.RouteConstraints.SPARK_Boundary with SPARK_Mode is
      and Get_EndHeading (This) =
      Get_EndHeading (This)'Old;
 
-   function Unwrap (This : My_RouteConstraints) return RouteConstraints;
+   function Unwrap (This : My_RouteConstraints) return RouteConstraints with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
 
-   function Wrap (This : RouteConstraints) return My_RouteConstraints;
+   function Wrap (This : RouteConstraints) return My_RouteConstraints with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
 private
    pragma SPARK_Mode (Off);
    type My_RouteConstraints is record

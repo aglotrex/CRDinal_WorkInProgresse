@@ -7,10 +7,9 @@ with Uxas.Messages.Lmcptask.TaskOptionCost;
 with Common_Formal_Containers; use Common_Formal_Containers;
 
 package UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary with SPARK_Mode is
-   pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
    type My_AssignmentCostMatrix is private with
-   Default_Initial_Condition => True;
+     Default_Initial_Condition => True;
    
    use all type Int64_Vect;
 
@@ -44,26 +43,9 @@ package UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary with SPARK_Mo
      Global => null;
    
    function Get_CostMatrix 
-     (This : My_AssignmentCostMatrix) return Vect_My_TaskOptionCost;
+     (This : My_AssignmentCostMatrix) return Vect_My_TaskOptionCost with
+     Global => null;
    
-   procedure Add_TaskOptionCost_To_CostMatrix
-     (This : in out My_AssignmentCostMatrix;
-      Task_OptionCost : My_TaskOptionCost)
-     with --  Global => null,
-       Post => Last_Element(Get_CostMatrix(This)) = Task_OptionCost
-       and (First_Index(Get_CostMatrix (This)) = First_Index(Get_CostMatrix (This'Old) )+ 1
-            and then Last_Index(Get_CostMatrix (This)) = Last_Index(Get_CostMatrix (This'Old) )
-            and then (for all I in First_Index(Get_CostMatrix (This'Old)) ..  Last_Index(Get_CostMatrix (This'Old) )
-                      => (Element(Get_CostMatrix (This), I) = Element(Get_CostMatrix (This'Old), I) )))
-     and Get_CorrespondingAutomationRequestID (This) = Get_CorrespondingAutomationRequestID (This'Old)
-     and Get_OperatingRegion (This) = Get_OperatingRegion (This'Old)
-     and Get_TaskLevelRelationship (This) = Get_TaskLevelRelationship (This'Old)
-     and (First_Index(Get_TaskList (This)) = First_Index(Get_TaskList (This'Old) )
-          and then Last_Index(Get_TaskList (This)) = Last_Index(Get_TaskList (This'Old) )
-          and then (for all I in First_Index(Get_TaskList (This'Old)) ..  Last_Index(Get_TaskList (This'Old) )
-                    => (Element(Get_TaskList (This), I) = Element(Get_TaskList (This'Old), I) )));
-     
-  
    
    function Same_Requests (X, Y : My_AssignmentCostMatrix) return Boolean is
      (Get_CorrespondingAutomationRequestID (X) = Get_CorrespondingAutomationRequestID (Y)
@@ -80,14 +62,14 @@ package UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary with SPARK_Mo
    pragma Annotate (GNATprove, Inline_For_Proof, Same_Requests);
    
    overriding function "=" (X, Y : My_AssignmentCostMatrix) return Boolean with
-   -- Global => null,
-     Post => (if "="'Result then Same_Requests (X, Y));
+     Global => null,
+     Post   => (if "="'Result then Same_Requests (X, Y));
    
    procedure Set_CorrespondingAutomationRequestID
-     (This : in out My_AssignmentCostMatrix;
+     (This                             : in out My_AssignmentCostMatrix;
       CorrespondingAutomationRequestID : Int64) with
-     --  Global => null,
-     Post => Get_CorrespondingAutomationRequestID (This) = CorrespondingAutomationRequestID
+     Global => null,
+     Post   => Get_CorrespondingAutomationRequestID (This) = CorrespondingAutomationRequestID
      and Get_OperatingRegion (This) = Get_OperatingRegion (This'Old)
      and Get_TaskLevelRelationship (This) = Get_TaskLevelRelationship (This'Old)
      and (First_Index(Get_TaskList (This)) = First_Index(Get_TaskList (This'Old) )
@@ -100,10 +82,10 @@ package UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary with SPARK_Mo
                     => (Element(Get_CostMatrix (This), I) = Element(Get_CostMatrix (This'Old), I) )));
    
    procedure Set_OperatingRegion
-     (This : in out My_AssignmentCostMatrix;
+     (This            : in out My_AssignmentCostMatrix;
       OperatingRegion : Int64) with
-   --  Global => null,
-     Post => Get_OperatingRegion (This) = OperatingRegion
+     Global => null,
+     Post   => Get_OperatingRegion (This) = OperatingRegion
      and Get_CorrespondingAutomationRequestID (This) = Get_CorrespondingAutomationRequestID (This'Old)
      and Get_TaskLevelRelationship (This) = Get_TaskLevelRelationship (This'Old)
      and (First_Index(Get_TaskList (This)) = First_Index(Get_TaskList (This'Old) )
@@ -117,10 +99,10 @@ package UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary with SPARK_Mo
    
       
    procedure Set_TaskLevelRelationship
-     (This : in out My_AssignmentCostMatrix;
+     (This                  : in out My_AssignmentCostMatrix;
       TaskLevelRelationship : Unbounded_String) with
-   --   Global => null,
-     Post =>  Get_TaskLevelRelationship (This) = TaskLevelRelationship
+     Global => null,
+     Post   => Get_TaskLevelRelationship (This) = TaskLevelRelationship
      and Get_CorrespondingAutomationRequestID (This) = Get_CorrespondingAutomationRequestID (This'Old)
      and Get_OperatingRegion (This) = Get_OperatingRegion (This'Old)
      and (First_Index(Get_TaskList (This)) = First_Index(Get_TaskList (This'Old) )
@@ -134,10 +116,10 @@ package UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary with SPARK_Mo
    
       
    procedure Set_TaskList
-     (This : in out My_AssignmentCostMatrix;
+     (This     : in out My_AssignmentCostMatrix;
       TaskList : Int64_Vect) with
-   -- GLobal => null,
-     Post => (First_Index(Get_TaskList (This)) = First_Index(TaskList)
+     Global => null,
+     Post   => (First_Index(Get_TaskList (This)) = First_Index(TaskList)
               and then Last_Index(Get_TaskList (This)) = Last_Index(TaskList)
               and then (for all I in First_Index(TaskList) ..  Last_Index(TaskList )
                 => (Element(Get_TaskList (This), I) = Element(TaskList, I) )))
@@ -149,11 +131,34 @@ package UxAS.Messages.Lmcptask.AssignmentCostMatrix.SPARK_Boundary with SPARK_Mo
           and then (for all I in First_Index(Get_CostMatrix (This'Old)) ..  Last_Index(Get_CostMatrix (This'Old) )
                     => (Element(Get_CostMatrix (This), I) = Element(Get_CostMatrix (This'Old), I) )));
    
+   procedure Add_TaskOptionCost_To_CostMatrix
+     (This            : in out My_AssignmentCostMatrix;
+      Task_OptionCost : My_TaskOptionCost) with 
+     Global => null,
+     Post   => Last_Element(Get_CostMatrix(This)) = Task_OptionCost
+     and (First_Index(Get_CostMatrix (This)) = First_Index(Get_CostMatrix (This'Old) )+ 1
+          and then Last_Index(Get_CostMatrix (This)) = Last_Index(Get_CostMatrix (This'Old) )
+          and then (for all I in First_Index(Get_CostMatrix (This'Old)) ..  Last_Index(Get_CostMatrix (This'Old) )
+                    => (Element(Get_CostMatrix (This), I) = Element(Get_CostMatrix (This'Old), I) )))
+     and Get_CorrespondingAutomationRequestID (This) = Get_CorrespondingAutomationRequestID (This'Old)
+     and Get_OperatingRegion (This) = Get_OperatingRegion (This'Old)
+     and Get_TaskLevelRelationship (This) = Get_TaskLevelRelationship (This'Old)
+     and (First_Index(Get_TaskList (This)) = First_Index(Get_TaskList (This'Old) )
+          and then Last_Index(Get_TaskList (This)) = Last_Index(Get_TaskList (This'Old) )
+          and then (for all I in First_Index(Get_TaskList (This'Old)) ..  Last_Index(Get_TaskList (This'Old) )
+                    => (Element(Get_TaskList (This), I) = Element(Get_TaskList (This'Old), I) )));
    
    
-   function Unwrap (This : My_AssignmentCostMatrix) return AssignmentCostMatrix;
+   
+   function Unwrap (This : My_AssignmentCostMatrix) return AssignmentCostMatrix with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
 
-   function Wrap (This : AssignmentCostMatrix) return My_AssignmentCostMatrix;
+   function Wrap (This : AssignmentCostMatrix) return My_AssignmentCostMatrix with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
      
 private
    pragma SPARK_Mode (Off);

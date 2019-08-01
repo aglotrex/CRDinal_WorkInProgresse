@@ -17,7 +17,9 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    use all type Entity_State_Map;
    use all type Int64_Set;
    use all type Int64_Vect;
+   use all type Unique_Automation_Request_Map;
 
+   use all type Task_Plan_Options_Map;
    ------------------------------------------------
    -- Check of Route_Aggregator_Service Validity --
    ------------------------------------------------
@@ -44,7 +46,6 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
       => Check_Route_Plan_Sub (Element (Route_Plan, Cursor), Route_Plan_Responses,Pending_Auto_Req, Pending_Route, Key (Route_Plan, Cursor)))
      with Ghost;
 
-   use all type Task_Plan_Options_Map;
    function Check_Task_Plan_Options    (Task_Plan_Options : Task_Plan_Options_Map) return Boolean is
      (for all Cursor in Task_Plan_Options
       => Key (Task_Plan_Options, Cursor) = Get_TaskID (Element (Task_Plan_Options,
@@ -60,7 +61,7 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                                          Key                 => Key     (Route_Plan_Responses, Cursor))))
        with Ghost;
 
-   use all type Unique_Automation_Request_Map;
+
    function Check_Unique_Automation_Request (Unique_Automation_Request : Unique_Automation_Request_Map;
                                              Auto_Request_Id : Int64) return Boolean is
      (for all Cursor in Unique_Automation_Request
@@ -150,19 +151,19 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
           Contains (Unique_Automation_Request,
                     Key (Pending_Auto_Req, Cursor_Request_ID_1))
           and
-            (for all Cursor_Response_ID_1 in Element (Pending_Auto_Req, Cursor_Request_ID_1)
+            (for all Response_ID_1 Of Element (Pending_Auto_Req, Cursor_Request_ID_1)
              => ( -- check valide ID
-                 Route_ID > Element (Element (Pending_Auto_Req, Cursor_Request_ID_1), Cursor_Response_ID_1)
+                 Route_ID > Response_ID_1
                  and
                  -- check it reference well a Route task pairing
                    Contains (Route_Task_Pairing,
-                             Element (Element (Pending_Auto_Req, Cursor_Request_ID_1), Cursor_Response_ID_1))
+                             Response_ID_1)
                  and
                  -- check ID unicity over other set
                    (for all Cursor_Request_ID_2 in Pending_Auto_Req
                     => (if Key (Pending_Auto_Req, Cursor_Request_ID_1) /= Key (Pending_Auto_Req, Cursor_Request_ID_2) then
                           not Contains (Element (Pending_Auto_Req, Cursor_Request_ID_2),
-                                        Element (Element (Pending_Auto_Req, Cursor_Request_ID_1), Cursor_Response_ID_1))))))))
+                                        Response_ID_1)))))))
      with Ghost;
 
    function Check_Route_Task_Pairing (Route_Task_Pairing : Aggregator_Task_Option_Pair_Map;

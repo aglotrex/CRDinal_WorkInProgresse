@@ -21,9 +21,15 @@ package Afrl.Cmasi.EntityConfiguration.SPARK_Boundary is
     Global => null,
      Post => (if "="'Result then Same_Requests (X, Y));
    
-   function Unwrap (This : My_EntityConfiguration) return EntityConfiguration;
+   function Unwrap (This : My_EntityConfiguration) return EntityConfiguration with
+     Global => null,
+     Inline,
+     SPARK_Mode => Off;
 
-   function Wrap (This : EntityConfiguration) return My_EntityConfiguration;
+   function Wrap (This : EntityConfiguration) return My_EntityConfiguration with
+     Global => null,
+     Inline,
+     SPARK_Mode => Off;
    
 private
    type My_EntityConfiguration is record

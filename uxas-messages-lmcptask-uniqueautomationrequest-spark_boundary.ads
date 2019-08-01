@@ -153,9 +153,16 @@ package UxAS.Messages.LmcpTask.UniqueAutomationRequest.SPARK_Boundary with SPARK
      Get_TaskList_From_OriginalRequest (This)'Old;
    --  Simple renaming to add a contract
 
-   function Unwrap (This : My_UniqueAutomationRequest) return UniqueAutomationRequest;
+   function Unwrap (This : My_UniqueAutomationRequest) return UniqueAutomationRequest with
+     Global => null,
+     Inline,
+     SPARK_Mode => Off;
 
-   function Wrap (This : UniqueAutomationRequest) return My_UniqueAutomationRequest;
+   function Wrap (This : UniqueAutomationRequest) return My_UniqueAutomationRequest with
+     Global => null,
+     Inline,
+     SPARK_Mode => Off;
+
 private
    pragma SPARK_Mode (Off);
    type My_UniqueAutomationRequest is record

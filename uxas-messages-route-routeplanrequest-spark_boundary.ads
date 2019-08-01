@@ -4,6 +4,8 @@ with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary; use  UxAS.Messages.Rou
 
 
 package UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary with SPARK_Mode is
+   
+   pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
    type My_RoutePlanRequest is private with
    Default_Initial_Condition => True;
@@ -56,9 +58,15 @@ package UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary with SPARK_Mode is
    overriding
    function "=" (X, Y : My_RoutePlanRequest) return Boolean;
    
-   function Unwrap (This : My_RoutePlanRequest) return RoutePlanRequest;
+   function Unwrap (This : My_RoutePlanRequest) return RoutePlanRequest with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
 
-   function Wrap (This : RoutePlanRequest) return My_RoutePlanRequest;
+   function Wrap (This : RoutePlanRequest) return My_RoutePlanRequest with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
    
    procedure Set_AssociatedTaskID
      (This : in out My_RoutePlanRequest;
@@ -185,10 +193,12 @@ private
      (X.Content = Y.Content); 
    
    function Unwrap (This : My_RoutePlanRequest) return RoutePlanRequest is 
-     (This.Content);
+     (This.Content) with 
+     SPARK_Mode => Off;
 
    function Wrap (This : RoutePlanRequest) return My_RoutePlanRequest is
-     (Content => This);
+     (Content => This) with 
+     SPARK_Mode => Off;
    
 
 end UxAS.Messages.Route.RoutePlanRequest.SPARK_Boundary ;

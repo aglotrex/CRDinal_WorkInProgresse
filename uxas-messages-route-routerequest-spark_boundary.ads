@@ -217,9 +217,15 @@ package  uxas.Messages.Route.RouteRequest.SPARK_Boundary with SPARK_Mode is
 
 
 
-   function Unwrap (This : My_RouteRequest) return RouteRequest;
+   function Unwrap (This : My_RouteRequest) return RouteRequest with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
 
-   function Wrap (This : RouteRequest) return My_RouteRequest;
+   function Wrap (This : RouteRequest) return My_RouteRequest with 
+     Global => null,
+     Inline,
+     SPARK_Mode => Off; 
 
 private
    pragma SPARK_Mode (Off);
