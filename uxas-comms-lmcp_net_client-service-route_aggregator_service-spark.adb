@@ -47,7 +47,16 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
 
    use My_Plan_Request_Vects;
    use Int64_Route_Plan_Responses_Maps.Formal_Model;
-
+   
+   procedure Lemmma_Check_Route_Plan_Construction (This : in Route_Aggregator_Service)
+     with Ghost,
+     Global => null,
+     Pre    => (for all Cursor in This.Route_Plan
+                => Check_Route_Plan_Sub (Element (THis.Route_Plan, Cursor), This.Route_Plan_Responses, This.Pending_Auto_Req, This.Pending_Route, Key (This.Route_Plan, Cursor))),
+     Post   => Check_Route_Plan (This.Route_Plan, This.Route_Plan_Responses, This.Pending_Auto_Req, This.Pending_Route);
+   procedure Lemmma_Check_Route_Plan_Construction (This : in Route_Aggregator_Service) is null;
+   
+   
    procedure Lemma_Check_Route_Plan_Reference_Insert (Route_Plan         : Pair_Int64_Route_Plan_Map;
                                                       Old_Route_Plan_Rep : Route_Plan_Responses_Map;
                                                       New_Route_Plan_Rep : Route_Plan_Responses_Map;
@@ -82,6 +91,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                      and Check_Route_Plan_Sub (Element (Route_Plan, Cursor), New_Route_Plan_Rep, Pending_Auto_Req, Pending_Route, Key (Route_Plan, Cursor)));
    end Lemma_Check_Route_Plan_Reference_Insert;
 
+  
    ---------------------------
    -- Build_Matrix_Requests --
    ---------------------------
@@ -444,7 +454,8 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       
       Set_ResponseID (Response, RouteKey);
       
-      -- 
+     
+                       
       pragma Assert (for all Id_Request of Element (This.Pending_Route, RouteKey)
                      => Contains (Container => This.Route_Plan_Responses,
                                   Key       => Id_Request)
@@ -454,6 +465,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
               
       --  add Each plan concerne by responce
       --  remove these plan and all the route constrain of it
+      
       for Plan_Reponse_Id of Element (This.Pending_Route,  RouteKey) loop
          pragma Loop_Invariant (All_Requests_Valid (This)
                                 and then Contains (This.Route_Plan_Responses, Plan_Reponse_Id)
@@ -474,7 +486,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
             --  delete all individual routes from storage
             for Route_ID of Get_ID_From_RouteResponses (Plan) loop
                pragma Loop_Invariant (Contains (This.Route_Plan, Route_ID)
-                                     and then Check_Route_Plan (THis.Route_Plan, This.Route_Plan_Responses, This.Pending_Auto_Req, This.Pending_Route));
+                                      and then Check_Route_Plan (THis.Route_Plan, This.Route_Plan_Responses, This.Pending_Auto_Req, This.Pending_Route));
                --  M_RoutePlans.Erase (I->GetRouteID ());
                Int64_Pair_Int64_Route_Plan_Maps.Delete (This.Route_Plan, Route_ID);
             end loop;
@@ -568,6 +580,8 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                      and then Check_Pending_Route (This.Pending_Route, This.Route_Id));
 
    end Send_Route_Reponse;
+   
+   
 
    -----------------
    -- Send_Matrix --
@@ -800,7 +814,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                  Key       => AutoKey);
          
        
-         
+        
     
          pragma Assert (for all Cursor_RP in This.Route_Plan
                         => Check_Route_Plan_Sub (Route_Plan_Pair      => Element (This.Route_Plan, Cursor_RP),
@@ -812,7 +826,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                           This.Route_Plan_Responses, This_Pending_Auto_Req_Old,  This.Pending_Route, Key (This.Route_Plan, Cursor_RP))
                           then ((for Some Cursor in This_Pending_Auto_Req_Old
                             => Contains (Element (This_Pending_Auto_Req_Old, Cursor), Key (This.Route_Plan, Cursor_RP)))
-                            xor
+                            or
                               (for Some Cursor in This.Pending_Route
                                => Contains (Element (This.Pending_Route, Cursor),  Element (This.Route_Plan, Cursor_RP).Reponse_ID))))
                                                  
@@ -832,7 +846,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                         and then 
                           (if (((for Some Cursor in This_Pending_Auto_Req_Old
                            => Contains (Element (This_Pending_Auto_Req_Old, Cursor), Key (This.Route_Plan, Cursor_RP)))
-                           xor
+                           or
                              (for Some Cursor in This.Pending_Route
                               => Contains (Element (THis.Pending_Route, Cursor),  Element (This.Route_Plan, Cursor_RP).Reponse_ID)))
                            and ((for Some Cursor in This.Pending_Auto_Req
@@ -844,13 +858,13 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                            -- remplacement
                              ((for Some Cursor in This.Pending_Auto_Req
                               => Contains (Element (This.Pending_Auto_Req, Cursor),  Key (This.Route_Plan, Cursor_RP)))
-                              xor
+                              or
                                 (for Some Cursor in This.Pending_Route
                                  => Contains (Element (This.Pending_Route, Cursor),  Element (This.Route_Plan, Cursor_RP).Reponse_ID))))
                         and then ( if
                             ((for Some Cursor in This.Pending_Auto_Req
                              => Contains (Element (This.Pending_Auto_Req, Cursor),  Key (This.Route_Plan, Cursor_RP)))
-                             xor
+                             or
                                (for Some Cursor in This.Pending_Route
                                 => Contains (Element (This.Pending_Route, Cursor),  Element (This.Route_Plan, Cursor_RP).Reponse_ID)))
                           and then Key (This.Route_Plan, Cursor_RP) = Get_RouteID (Element (This.Route_Plan, Cursor_RP).Returned_Route_Plan)
@@ -862,14 +876,14 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                                                      Pending_Auto_Req     => This.Pending_Auto_Req,
                                                      Pending_Route        => This.Pending_Route,
                                                      Key                  => Key (This.Route_Plan, Cursor_RP))));
-         pragma Assert (if (for all Cursor in This.Route_Plan
+    
+         pragma Assert (for all Cursor in This.Route_Plan
                         => Check_Route_Plan_Sub (Route_Plan_Pair      => Element (This.Route_Plan, Cursor),
                                                  Route_Plan_Responses => This.Route_Plan_Responses,
                                                  Pending_Auto_Req     => This.Pending_Auto_Req,
                                                  Pending_Route        => This.Pending_Route,
-                                                 Key                  => Key (This.Route_Plan, Cursor)))
-                        then Check_Route_Plan (This.Route_Plan, This.Route_Plan_Responses, This.Pending_Auto_Req, This.Pending_Route));
-                      
+                                                 Key                  => Key (This.Route_Plan, Cursor)));
+         Lemmma_Check_Route_Plan_Construction (This);
          pragma Assert (Check_Route_Plan (This.Route_Plan, This.Route_Plan_Responses, This.Pending_Auto_Req, This.Pending_Route));
                
          
@@ -1084,7 +1098,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       Vehicles_ID : constant Int64 := Get_VehicleID        (Route_Plan_Request);
       Task_ID     : constant Int64 := Get_AssociatedTaskID (Route_Plan_Request);
       Request_ID  : constant Int64 := Get_RequestID        (Route_Plan_Request);
-
+      
       Speed  : Long_Float := 1.0; -- default if no speed available
 
       --  auto response = std::shared_ptr<uxas::messages::route::RoutePlanResponse>(new uxas::messages::route::RoutePlanResponse);
@@ -1105,11 +1119,19 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       end if;
       pragma Assert (Speed > 0.02);
 
-      Set_AssociatedTaskID (Response, Task_ID);
-      Set_OperatingRegion  (Response, Region_ID);
-      Set_ResponseID       (Response, Request_ID);
-      Set_VehicleID        (Response, Vehicles_ID);
-
+      Set_AssociatedTaskID       (Response, Task_ID);
+      Set_OperatingRegion        (Response, Region_ID);
+      Set_ResponseID             (Response, Request_ID);
+      Set_VehicleID              (Response, Vehicles_ID);
+      Set_ID_From_RouteResponses (Response, Get_RouteRequests (Route_Plan_Request));
+      
+--        pragma Assert (if (First_Index (Get_RouteRequests (Route_Plan_Request)) = First_Index (Get_ID_From_RouteResponses (Response))
+--                       and then Last_Index (Get_RouteRequests (Route_Plan_Request)) = Last_Index (Get_ID_From_RouteResponses (Response))
+--                       and then  (for all I in First_Index (Get_RouteRequests (Route_Plan_Request)) .. Last_Index (Get_RouteRequests (Route_Plan_Request))
+--                         => Element (Get_ID_From_RouteResponses (Response), I) = Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request), I))))
+--                       then 
+--                         (for all Route_Constain of Get_RouteRequests (Route_Plan_Request)
+--                          => Int64_Vects.Contains (Get_ID_From_RouteResponses (Response), Get_RouteID (Route_Constain))));
       pragma Assert (Get_ResponseID (Response) = Request_ID);
       pragma Assert (for Some Cursor in This.Pending_Route
                      => Contains (Element (This.Pending_Route, Cursor), Request_ID));
@@ -1249,7 +1271,9 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                                    and Contains (This.Route_Plan_Responses,  Request_ID)
                                    and Length_This_Route_Plan_Old + Acc = Length (This.Route_Plan)
                                    and Acc <=  Length (Get_RouteRequests (Route_Plan_Request))
-                                   and Integer (Acc) = K - First_Index (Get_RouteRequests (Route_Plan_Request)));
+                                   and Integer (Acc) = K - First_Index (Get_RouteRequests (Route_Plan_Request))
+                                   and Int64_Vects.Contains (Container => Get_ID_From_RouteResponses (Response), 
+                                                             Item      => Get_RouteID (Element (Get_RouteRequests (Route_Plan_Request),  K))));
             declare
 
                Route_Request : constant My_RouteConstraints := Element (Container => Get_RouteRequests (Route_Plan_Request),
@@ -1258,6 +1282,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                Route_ID : constant Int64 := Get_RouteID (Route_Request);
                pragma Assert (Route_ID =  Get_RouteID (Element (Container => Get_RouteRequests (Route_Plan_Request),
                                                                 Index     => K)));
+               pragma Assert (Int64_Vects.Contains (Get_ID_From_RouteResponses (Element (This.Route_Plan_Responses, Request_ID).Content), Route_ID));
 
                Plan : My_RoutePlan;
             begin
@@ -1346,6 +1371,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
                     (Container => This.Route_Plan,
                      Key       => Get_RouteID (Route_Plan_Pair.Returned_Route_Plan),
                      New_Item  => Route_Plan_Pair);
+                  
 
                   Position_Route_Plan := Find (Container => This.Route_Plan,
                                                Key       => Get_RouteID (Route_Plan_Pair.Returned_Route_Plan));

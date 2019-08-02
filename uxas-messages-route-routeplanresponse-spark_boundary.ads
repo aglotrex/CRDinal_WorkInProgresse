@@ -1,12 +1,15 @@
-with Common_Formal_Containers; use Common_Formal_Containers;
+with Common_Formal_Containers;                                  use Common_Formal_Containers;
+with Uxas.Messages.Route.RoutePlanRequest.SPARK_Boundary;       use Uxas.Messages.Route.RoutePlanRequest.SPARK_Boundary;
+with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects; use UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Vects;
+with UxAS.Messages.Route.RouteConstraints.SPARK_Boundary;       use UxAS.Messages.Route.RouteConstraints.SPARK_Boundary;
 
 package UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary with SPARK_Mode is
    pragma Annotate (GNATprove, Terminating, SPARK_Boundary);
 
    type My_RoutePlanResponse is private with
-   Default_Initial_Condition => True;
+     Default_Initial_Condition => True;
    
-    use all type Int64_Vect;
+   use all type Int64_Vect;
    
    function Get_ResponseID
      (This : My_RoutePlanResponse) return Int64 with 
@@ -35,7 +38,7 @@ package UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary with SPARK_Mode is
       and Get_OperatingRegion (X) = Get_OperatingRegion (Y)
       and (First_Index (Get_ID_From_RouteResponses (X)) = First_Index (Get_ID_From_RouteResponses (Y)) 
            and then Last_Index (Get_ID_From_RouteResponses (X)) = Last_Index (Get_ID_From_RouteResponses (Y))
-           and then (for All I in First_Index (Get_ID_From_RouteResponses (X)) .. Last_Index (Get_ID_From_RouteResponses (X))
+           and then (for all I in First_Index (Get_ID_From_RouteResponses (X)) .. Last_Index (Get_ID_From_RouteResponses (X))
                      => Element (Get_ID_From_RouteResponses (X), I) = Element (Get_ID_From_RouteResponses (Y) , I))));
    pragma Annotate (GNATprove, Inline_For_Proof, Same_Requests);
 
@@ -89,6 +92,22 @@ package UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary with SPARK_Mode is
           and then (for all I in First_Index (Get_ID_From_RouteResponses (This)) .. Last_Index (Get_ID_From_RouteResponses (This))
                     => Element (Get_ID_From_RouteResponses (This), I) = Element (Get_ID_From_RouteResponses (This'Old) , I)));
    
+   use all type Vect_My_RouteConstraints;
+   -- this function only set the ID
+   procedure Set_ID_From_RouteResponses
+     (This             : in out  My_RoutePlanResponse;
+      RoutePlanRequest : in Vect_My_RouteConstraints) with 
+     Post =>
+       (First_Index (RoutePlanRequest) = First_Index (Get_ID_From_RouteResponses (This))
+        and then Last_Index (RoutePlanRequest) = Last_Index (Get_ID_From_RouteResponses (This))
+        and then  (for all I in First_Index (RoutePlanRequest) .. Last_Index (RoutePlanRequest)
+          => Element (Get_ID_From_RouteResponses (This), I) = Get_RouteID (Element (RoutePlanRequest, I))))
+       
+     and Get_OperatingRegion (This) = Get_OperatingRegion (This'Old) 
+     and Get_AssociatedTaskID (This) = Get_AssociatedTaskID (This'Old)
+     and Get_ResponseID (This) = Get_ResponseID (This'Old)
+     and Get_VehicleID (This) = Get_VehicleID (This'Old);
+   
    
    overriding
    function "=" (X, Y : My_RoutePlanResponse) return Boolean with
@@ -113,7 +132,7 @@ private
 
    function Get_ResponseID
      (This : My_RoutePlanResponse) return Int64 is 
-     (This.Content.getResponseID);
+     (This.Content.GetResponseID);
 
    function Get_AssociatedTaskID
      (This : My_RoutePlanResponse) return Int64 is

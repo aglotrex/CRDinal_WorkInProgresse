@@ -31,19 +31,20 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                                   Pending_Route        : Pending_Route_Matrix;
                                   Key                  : Int64) return Boolean is
      (Key = Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)
-      and then Contains (Route_Plan_Responses, Route_Plan_Pair.Reponse_ID)
-      and then ((for Some Cursor in Pending_Auto_Req
-                 => Contains (Element (Pending_Auto_Req, Cursor), Key))
-                or
-                  (for Some Cursor in Pending_Route
-                   => Contains (Element (Pending_Route, Cursor),  Route_Plan_Pair.Reponse_ID))))
+      and ( Contains (Route_Plan_Responses, Route_Plan_Pair.Reponse_ID)
+           and then Contains (Get_ID_From_RouteResponses (Element (Route_Plan_Responses, Route_Plan_Pair.Reponse_ID).Content), Key))
+      and ((for Some Cursor in Pending_Auto_Req
+            => Contains (Element (Pending_Auto_Req, Cursor), Key))
+           or
+             (for Some Cursor in Pending_Route
+              => Contains (Element (Pending_Route, Cursor),  Route_Plan_Pair.Reponse_ID))))
      with Ghost;
    function Check_Route_Plan    (Route_Plan           : Pair_Int64_Route_Plan_Map;
                                  Route_Plan_Responses : Route_Plan_Responses_Map;
                                  Pending_Auto_Req     : Pending_Auto_Req_Matrix;
                                  Pending_Route        : Pending_Route_Matrix) return Boolean is
      (for all Cursor in Route_Plan
-      => Check_Route_Plan_Sub (Element (Route_Plan, Cursor), Route_Plan_Responses,Pending_Auto_Req, Pending_Route, Key (Route_Plan, Cursor)))
+      => Check_Route_Plan_Sub (Element (Route_Plan, Cursor), Route_Plan_Responses, Pending_Auto_Req, Pending_Route, Key (Route_Plan, Cursor)))
      with Ghost;
 
    function Check_Task_Plan_Options    (Task_Plan_Options : Task_Plan_Options_Map) return Boolean is
@@ -151,7 +152,7 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
           Contains (Unique_Automation_Request,
                     Key (Pending_Auto_Req, Cursor_Request_ID_1))
           and
-            (for all Response_ID_1 Of Element (Pending_Auto_Req, Cursor_Request_ID_1)
+            (for all Response_ID_1 of Element (Pending_Auto_Req, Cursor_Request_ID_1)
              => ( -- check valide ID
                  Route_ID > Response_ID_1
                  and
