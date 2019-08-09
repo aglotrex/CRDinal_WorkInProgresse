@@ -480,6 +480,9 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
 
       Entity_List : Int64_Vect := Get_EntityList_From_OriginalRequest (Request => Areq);
    begin
+      
+      Int64_Pending_Auto_Req_Matrix.Insert (This.Pending_Auto_Req,  ReqID, Int64_Sets.Empty_Set);
+      
 
       --  if the list of eligible vehicles is empty that mean they are all eligible
       if Is_Empty (Entity_List) then
@@ -982,6 +985,7 @@ package body Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK w
       => Contains (Container => This.Route_Plan,
                    Key       => Id_Request)) with Global => null,
      Pre => Contains (This.Pending_Auto_Req, Req_ID);
+   
 
    procedure Send_Matrix (This    : in out Route_Aggregator_Service;
                           AutoKey : Int64) with
