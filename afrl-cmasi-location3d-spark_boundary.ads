@@ -13,7 +13,7 @@ package Afrl.Cmasi.Location3D.SPARK_Boundary with SPARK_Mode is
    function Get_Latitude
      (This : My_Location3D_Any) return Real64 with
      Global => null,
-     Post => Get_Latitude'Result in -Dividend_Max .. Dividend_Max;
+     Post => Get_Latitude'Result  in -Dividend_Max .. Dividend_Max;
 
    function Get_Longitude
      (This : My_Location3D_Any) return Real64 with

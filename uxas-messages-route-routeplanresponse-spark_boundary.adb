@@ -68,25 +68,33 @@ package body UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary with SPARK_Mod
       This.Content.SetOperatingRegion(OperatingRegion);
    end Set_OperatingRegion;
    
-   --------------------------
-   --  Set_RouteResponses  --
-   --------------------------
+   ------------------------------------
+   --  Clear_ID_From_RouteResponses  --
+   ------------------------------------
    
-   procedure Set_ID_From_RouteResponses
-     (This             : in out  My_RoutePlanResponse;
-      RoutePlanRequest : in Vect_My_RouteConstraints)
+
+   procedure Clear_ID_From_RouteResponses
+     (This : in out My_RoutePlanResponse) 
    is
    begin
       Vect_RoutePlan_Acc.Clear (This.Content.RouteResponses.all);
-      for E of RoutePlanRequest loop
-         declare 
-            New_Route_Plan : constant RoutePlan_Acc := new RoutePlan.RoutePlan;
-         begin
-            SetRouteID (New_Route_Plan.all, (Get_RouteID (E)));
-            Vect_RoutePlan_Acc.Append (This.Content.RouteResponses.all, New_Route_Plan);
-         end;
-      end loop;
-   end Set_ID_From_RouteResponses;
+   end Clear_ID_From_RouteResponses;
+   
+   -------------------------------------
+   --  Append_ID_From_RouteResponses  --
+   -------------------------------------
+   
+   procedure Append_ID_From_RouteResponses
+     (This             : in out My_RoutePlanResponse;
+      RouteResponse_ID : in     Int64)
+   is 
+      New_Route_Plan : constant RoutePlan_Acc := new RoutePlan.RoutePlan;
+   begin
+      SetRouteID (New_Route_Plan.all, RouteResponse_ID);
+      Vect_RoutePlan_Acc.Append (This.Content.RouteResponses.all, New_Route_Plan);
+   end Append_ID_From_RouteResponses;
+      
+   
  
 
 end UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary;

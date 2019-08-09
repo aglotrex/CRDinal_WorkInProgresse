@@ -94,14 +94,23 @@ package UxAS.Messages.Route.RoutePlanResponse.SPARK_Boundary with SPARK_Mode is
    
    use all type Vect_My_RouteConstraints;
    -- this function only set the ID
-   procedure Set_ID_From_RouteResponses
-     (This             : in out  My_RoutePlanResponse;
-      RoutePlanRequest : in Vect_My_RouteConstraints) with 
-     Post =>
-       (First_Index (RoutePlanRequest) = First_Index (Get_ID_From_RouteResponses (This))
-        and then Last_Index (RoutePlanRequest) = Last_Index (Get_ID_From_RouteResponses (This))
-        and then  (for all I in First_Index (RoutePlanRequest) .. Last_Index (RoutePlanRequest)
-          => Element (Get_ID_From_RouteResponses (This), I) = Get_RouteID (Element (RoutePlanRequest, I))))
+   
+   procedure Clear_ID_From_RouteResponses
+     (This : in out My_RoutePlanResponse) with 
+     Post => Get_ID_From_RouteResponses (This) = Int64_Vects.Empty_Vector       
+     and Get_OperatingRegion (This) = Get_OperatingRegion (This'Old) 
+     and Get_AssociatedTaskID (This) = Get_AssociatedTaskID (This'Old)
+     and Get_ResponseID (This) = Get_ResponseID (This'Old)
+     and Get_VehicleID (This) = Get_VehicleID (This'Old);
+   
+   procedure Append_ID_From_RouteResponses
+     (This             : in out My_RoutePlanResponse;
+      RouteResponse_ID : in     Int64) with 
+     Post => Last_Element (Get_ID_From_RouteResponses (This)) = RouteResponse_ID
+     and (First_Index (Get_ID_From_RouteResponses (This)'Old) = First_Index (Get_ID_From_RouteResponses (This))
+          and then Last_Index (Get_ID_From_RouteResponses (This'Old)) + 1 = Last_Index (Get_ID_From_RouteResponses (This))
+          and then  (for all I in First_Index (Get_ID_From_RouteResponses (This)'Old) .. Last_Index (Get_ID_From_RouteResponses (This)'Old)
+                     => Element (Get_ID_From_RouteResponses (This), I) = Element (Get_ID_From_RouteResponses (This'Old), I)))
        
      and Get_OperatingRegion (This) = Get_OperatingRegion (This'Old) 
      and Get_AssociatedTaskID (This) = Get_AssociatedTaskID (This'Old)

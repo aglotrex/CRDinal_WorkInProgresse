@@ -24,21 +24,30 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    -- Check of Route_Aggregator_Service Validity --
    ------------------------------------------------
 
-
+   -- For one element check that the key is the Route_ID
+   -- that the route issue from a route_plan_reponse
+   -- the Route_plan is reponding to a demande
    function Check_Route_Plan_Sub (Route_Plan_Pair      : Pair_Int64_Route_Plan;
                                   Route_Plan_Responses : Route_Plan_Responses_Map;
                                   Pending_Auto_Req     : Pending_Auto_Req_Matrix;
                                   Pending_Route        : Pending_Route_Matrix;
                                   Key                  : Int64) return Boolean is
      (Key = Get_RouteID (Route_Plan_Pair.Returned_Route_Plan)
+
+      -- check it reference a route_plan_reponse and it reference by it
       and ( Contains (Route_Plan_Responses, Route_Plan_Pair.Reponse_ID)
            and then Contains (Get_ID_From_RouteResponses (Element (Route_Plan_Responses, Route_Plan_Pair.Reponse_ID).Content), Key))
-      and ((for Some Cursor in Pending_Auto_Req
+      -- check it is reponding to a demande
+      and (-- Matrix Demande
+           (for Some Cursor in Pending_Auto_Req
             => Contains (Element (Pending_Auto_Req, Cursor), Key))
            or
+             -- ROute_Plan demande
              (for Some Cursor in Pending_Route
               => Contains (Element (Pending_Route, Cursor),  Route_Plan_Pair.Reponse_ID))))
      with Ghost;
+
+   -- check all the propertie on Route_Plan for each of is element
    function Check_Route_Plan    (Route_Plan           : Pair_Int64_Route_Plan_Map;
                                  Route_Plan_Responses : Route_Plan_Responses_Map;
                                  Pending_Auto_Req     : Pending_Auto_Req_Matrix;
@@ -47,28 +56,42 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
       => Check_Route_Plan_Sub (Element (Route_Plan, Cursor), Route_Plan_Responses, Pending_Auto_Req, Pending_Route, Key (Route_Plan, Cursor)))
      with Ghost;
 
+
+   -- Check The Map Task Option
+   -- the check verify that the Id of each element is THe Task_ID
    function Check_Task_Plan_Options    (Task_Plan_Options : Task_Plan_Options_Map) return Boolean is
      (for all Cursor in Task_Plan_Options
-      => Key (Task_Plan_Options, Cursor) = Get_TaskID (Element (Task_Plan_Options,
-                                                                Cursor).Content))
-     with Ghost;
-   function Check_Route_Plan_Response_Sub (Route_Plan_Response : My_RoutePlanResponse;
-                                           Key                 : Int64) return Boolean is
-     (Key = Get_ResponseID (Route_Plan_Response)) with Ghost;
-
-   function Check_Route_Plan_Response  (Route_Plan_Responses : Route_Plan_Responses_Map) return Boolean is
-     (for all Cursor in Route_Plan_Responses
-      => (Check_Route_Plan_Response_Sub (Route_Plan_Response => Element (Route_Plan_Responses, Cursor).Content,
-                                         Key                 => Key     (Route_Plan_Responses, Cursor))))
+      => Key (Task_Plan_Options, Cursor) = Get_TaskID (Element (Task_Plan_Options, Cursor).Content) )
        with Ghost;
 
+   -- verifie that the key is the Response_ID
+   -- and Check all the route response contains the Route_Plan_Response are also in Route_Plan
+   function Check_Route_Plan_Response_Sub (Route_Plan_Response : My_RoutePlanResponse;
+                                           Key                 : Int64;
+                                           Route_Plan          : Pair_Int64_Route_Plan_Map) return Boolean is
+     (Key = Get_ResponseID (Route_Plan_Response)
+      and (for all Route of Get_ID_From_RouteResponses (Route_Plan_Response)
+           => Contains (Route_Plan, Route))) with Ghost;
 
+   -- Check for each element the propertie on The Key and Link with Route_Plan
+   function Check_Route_Plan_Response  (Route_Plan_Responses : Route_Plan_Responses_Map;
+                                        Route_Plan           : Pair_Int64_Route_Plan_Map) return Boolean is
+     (for all Cursor in Route_Plan_Responses
+      => (Check_Route_Plan_Response_Sub (Route_Plan_Response => Element (Route_Plan_Responses, Cursor).Content,
+                                         Key                 => Key     (Route_Plan_Responses, Cursor),
+                                         Route_Plan          => Route_Plan)))
+     with Ghost;
+
+   -- check map key of Unique_Automation_Request
+   -- as key of this map are unique and genereate from iterator Auto_Request_Id they should all be stricly inferior to him
    function Check_Unique_Automation_Request (Unique_Automation_Request : Unique_Automation_Request_Map;
-                                             Auto_Request_Id : Int64) return Boolean is
+                                             Auto_Request_Id           : Int64) return Boolean is
      (for all Cursor in Unique_Automation_Request
       => Key (Unique_Automation_Request, Cursor) < Auto_Request_Id)
        with Ghost;
 
+   -- verify the Entity_State map
+   -- check the id and the fact that each vehicles referenced should be identify in only one vehicle type
    function Check_Entity_State  (Entity_State     : Entity_State_Map;
                                  Air_Vehicules    : Int64_Set;
                                  Ground_Vehicles  : Int64_Set;
@@ -86,6 +109,7 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                Contains (Surface_Vehicles, Key (Entity_State, Cursor)))))
        with Ghost;
 
+   -- check for all the all the vehicles type vect that it reference well a vehicles and a vehicles can't have mutliple type
    function Check_Type_Vehicles (Air_Vehicules        : Int64_Set;
                                  Ground_Vehicles      : Int64_Set;
                                  Surface_Vehicles     : Int64_Set;
@@ -103,10 +127,12 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
              or Contains (Entity_State,         Vehicle_ID))
             -- check the fact a vehicles can't be refernce in two categorie
           and then
-            (Contains     (Air_Vehicules,    Vehicle_ID)
+            (    Contains (Air_Vehicules,    Vehicle_ID)
              xor Contains (Ground_Vehicles,  Vehicle_ID)
              xor Contains (Surface_Vehicles, Vehicle_ID)))) with Ghost;
 
+   -- verify the Entity_Configuration map
+   -- check the id and the fact that each vehicles referenced should be identify in only one vehicle type
    function Check_Entity_Configuration (Entity_Configuration : Entity_Configuration_Map;
                                         Air_Vehicules        : Int64_Set;
                                         Ground_Vehicles      : Int64_Set;
@@ -124,6 +150,9 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                Contains (Surface_Vehicles, Key (Entity_Configuration, Cursor)))))
        with Ghost;
 
+   -- verifiy the proportie related to Pending_Route matrix
+   -- as key of the element of he map are unique and genereate from iterator Route_ID they should all be stricly inferior to him
+   -- and unque between all the element
    function Check_Pending_Route (Pending_Route : Pending_Route_Matrix;
                                  Route_ID      : Int64) return Boolean is
      (for all Cursor_Request_ID_1 in Pending_Route
@@ -142,7 +171,10 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
 
 
 
-
+   -- Check the mat of set Pending_Request
+   -- ckeck the key corespond to a Unique_Automation_Request
+   -- check the as ID of the mutiple set are unique and genereate from iterator Route_ID they should all be stricly inferior to him
+   -- and that all the ID re well link to a Route_Task_Pairing
    function Check_List_Pending_Request (Pending_Auto_Req          : Pending_Auto_Req_Matrix;
                                         Unique_Automation_Request : Unique_Automation_Request_Map;
                                         Route_Task_Pairing        : Aggregator_Task_Option_Pair_Map;
@@ -167,6 +199,11 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                                         Response_ID_1)))))))
      with Ghost;
 
+
+   -- Check for Route_Task_Pairing map
+   -- that the key is inferor iterator Route_ID (as thay are generate from him) they should all be stricly inferior to him
+   -- check that the element is well reference by Pending_Auto_Req
+   -- and that the Vehicle_ID is from a vehicle referece in  Entity_State
    function Check_Route_Task_Pairing (Route_Task_Pairing : Aggregator_Task_Option_Pair_Map;
                                       Entity_State       : Entity_State_Map;
                                       Pending_Auto_Req   : Pending_Auto_Req_Matrix;
@@ -183,6 +220,7 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
                => Contains (Element (Pending_Auto_Req, Cursor_Pending), Key (Route_Task_Pairing, Cursor)))))
      with Ghost;
 
+  -- Veriffy for the  Route_Aggregator_Service that all is elemetn respect all the propertie
    function All_Requests_Valid
      (This : Route_Aggregator_Service) return Boolean is
      (Check_Route_Plan (This.Route_Plan, This.Route_Plan_Responses, This.Pending_Auto_Req, This.Pending_Route)
@@ -191,10 +229,11 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
       and then Check_Type_Vehicles (This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles, This.Entity_State, This.Entity_Configuration)
       and then Check_Task_Plan_Options    (This.Task_Plan_Options)
       and then Check_Route_Task_Pairing   (This.Route_Task_Pairing, This.Entity_State, This.Pending_Auto_Req, This.Route_Request_ID)
-      and then Check_Route_Plan_Response  (This.Route_Plan_Responses)
+      and then Check_Route_Plan_Response  (This.Route_Plan_Responses, This.Route_Plan)
       and then Check_Entity_Configuration (This.Entity_Configuration, This.Air_Vehicules, This.Ground_Vehicles, This.Surface_Vehicles)
       and then Check_List_Pending_Request (This.Pending_Auto_Req, This.Unique_Automation_Request, This.Route_Task_Pairing, This.Route_Id)
       and then Check_Unique_Automation_Request (This.Unique_Automation_Request, This.Auto_Request_Id)) with Ghost;
+
 
    -------------------------------------------------
    -- Check of Route_Aggregator_Service evolution --
@@ -347,8 +386,7 @@ package Uxas.Comms.LMCP_Net_Client.Service.Route_Aggregator_Service.SPARK with S
    procedure Handle_Route_Request (This          : in out Route_Aggregator_Service;
                                    Route_Request : My_RouteRequest) with
      Pre => All_Requests_Valid (This)
-     and then Contains (Container => This.Pending_Route,
-                        Key       => Get_RequestID (Route_Request))
+
      and then (for all Index in First_Index (Get_RouteRequests (Route_Request)) .. Last_Index (Get_RouteRequests (Route_Request))
                => not Contains (Container => This.Route_Plan,
                                 Key       => UxAS.Messages.Route.RouteConstraints.SPARK_Boundary.Get_RouteID (Element (Container => Get_RouteRequests (Route_Request),
